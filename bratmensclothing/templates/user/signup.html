@@ -1,0 +1,202 @@
+{% extends "user/base.html" %}
+
+{% block content %}
+
+{% load socialaccount %}
+
+
+<!--====== Section 1 ======-->
+<div class="">
+
+<!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="container">
+                    <div class="breadcrumb">
+                        <div class="breadcrumb__wrap">
+                            <ul class="breadcrumb__list">
+                                <li class="has-separator">
+                                    <a href="{% url 'accounts:home_user' %}">Home</a></li>
+                                <li class="is-marked">
+                                    <a href="">Signup</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+<!--====== End - Section 1 ======-->
+   
+
+
+
+<!--====== Section 2 ======-->
+<div class="">
+
+<!--====== Section Intro ======-->
+        <div class="section__intro u-s-p-b-40">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="section__text-wrap">
+                            <h2 class="section__heading u-c-secondary">CREATE AN ACCOUNT</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+<!--====== End - Section Intro ======-->
+
+
+<!--====== Section Content ======-->
+
+        <div class="section__content">
+            <div class="container">
+                <div class="row row--center">
+                    <div class="col-lg-6 col-md-8 u-s-m-b-30">
+                        <div class="l-f-o">
+                            <div class="l-f-o__pad-box">
+                                <h1 class="gl-h1">PERSONAL INFORMATION</h1>
+                                <form class="l-f-o__form" method="post" action="{% url 'accounts:signup_user' %}" id="signupForm">
+                                    {% csrf_token %}
+                                    <div class="gl-s-api">
+                                        <!-- <div class="u-s-m-b-30">
+                                            <a href="" class="gl-s-api__btn gl-s-api__btn--gplus">
+                                                <i class="fab fa-google"></i>
+                                                <span>Signup with Google</span>
+                                            </a>
+                                        </div> -->
+                                        <div class="gl-s-api">
+                                            <div class="u-s-m-b-15">
+                                                <a class="gl-s-api__btn gl-s-api__btn--gplus" href="{% provider_login_url 'google' %}">
+                                                    <i class="fab fa-google"></i>
+                                                    <span>Sign in with Google</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div id="responseMessage"></div>
+
+                                    <div class="u-s-m-b-30">
+
+                                        <label class="gl-label" for="reg-fname">NAME *</label>
+
+                                        <input class="input-text input-text--primary-style" type="text" required name="username" id="reg-fname" placeholder="First Name"></div>
+                                    <div class="u-s-m-b-30">
+
+                                        <label class="gl-label" for="reg-phone">PHONE </label>
+
+                                        <input class="input-text input-text--primary-style" type="" required name="phone" id="reg-phone" placeholder="Enter phone Number"></div>
+                                
+                                    <div class="u-s-m-b-30">
+
+                                        <label class="gl-label" for="reg-email">E-MAIL *</label>
+
+                                        <input class="input-text input-text--primary-style" type="email" required name="email" id="reg-email" placeholder="Enter E-mail"></div>
+                                    <div class="u-s-m-b-30">
+
+                                        <label class="gl-label" for="reg-password">PASSWORD *</label>
+
+                                        <input class="input-text input-text--primary-style" type="password" required name="password1"placeholder="Enter Password"></div>
+    
+                                    <div class="u-s-m-b-30">
+
+                                        <label class="gl-label" for="reg-password">RE-ENTER PASSWORD *</label>
+
+                                        <input class="input-text input-text--primary-style" type="password" required name="password2" placeholder="Re-Enter Password"></div>
+                                
+                                    <div class="u-s-m-b-15">
+                                        
+                                    <!-- <a href="{% url 'accounts:otp_verify' %}" class="btn btn--e-transparent-brand-b-2">CREATE</a> -->
+
+                                    <button class="btn btn--e-transparent-brand-b-2" type="submit">CREATE</button></div>
+
+                                    <a class="gl-link" href="#">Return to Store</a>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+ 
+    <!--====== End - Section Content ======-->
+    </div>
+<!--====== End - Section 2 ======-->   
+
+<script>
+    $(document).ready(function() {
+        // Set up CSRF token
+        $.ajaxSetup({
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'  // Ensure csrf_token is set properly
+            }
+        });
+    
+        $('#signupForm').on('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+    
+            $.ajax({
+                type: 'POST',
+                url: '{% url "accounts:signup_user" %}',  // Use correct URL
+                data: $(this).serialize(),  // Serialize form data
+                dataType: 'json',  // Expect JSON response
+                success: function(response) {
+                    if (response.status === 'success') {
+                        // Redirect to the OTP verification page
+                        window.location.href = response.redirect_url; 
+                    } else if (response.status === 'error') {
+                        // Handle errors (if any) - Example for displaying password mismatch
+                        const errors = response.errors;
+                        let errorMessages = '';
+                        for (let key in errors) {
+                            errorMessages += errors[key] + '<br>';
+                        }
+    
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            html: errorMessages,  // Display error messages from the server
+                            confirmButtonColor: '#000',
+                            customClass: {
+                                icon: 'black-icon'
+                            }
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    if (xhr.status === 403) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Access Denied',
+                            text: 'Your account is blocked.',
+                            confirmButtonColor: '#000',
+                            customClass: {
+                                icon: 'black-icon'
+                            }
+                        });
+                    } else if (xhr.status === 400) {
+                        const errors = xhr.responseJSON.errors;
+                        let errorMessages = '';
+                        for (let key in errors) {
+                            errorMessages += errors[key] + '<br>';
+                        }
+    
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            html: errorMessages,
+                            confirmButtonColor: '#000',
+                            customClass: {
+                                icon: 'black-icon'
+                            }
+                        });
+                    }
+                }
+            });
+        });
+    });
+    
+</script>
+    
+{% endblock %}

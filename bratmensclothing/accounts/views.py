@@ -1,0 +1,261 @@
+from django.shortcuts import render,redirect
+from . models import Users
+from products.models import Variant,Product,Brand,Category
+from django.contrib.auth.models import User
+from django.contrib import messages
+from django.contrib.auth.hashers import make_password
+import re
+from django.http import JsonResponse
+from django.contrib.auth import authenticate,login,logout
+from django.contrib.auth.hashers import check_password
+from django.urls import reverse
+import random
+from django.core.mail import send_mail
+from django.utils import timezone
+from datetime import timedelta
+from django.conf import settings
+import datetime
+import time
+from django.views.decorators.cache import never_cache
+
+        
+#         # errors = {}
+        
+#         # if any(char.isdigit() or char.isspace() for char in username):
+#         #     errors['username_error'] = 'Username should not contain numbers or spaces'
+
+#         # if Users.objects.filter(username=username).exists():
+#         #     errors['username_error'] = 'Username already exists'
+
+#         # if Users.objects.filter(email=email).exists():
+#         #     errors['email_error'] = 'Email is already exists'
+
+#         # if pass1 != pass2:
+#         #     errors['password_error'] = 'Passwords do not match'
+
+#         # if len(pass1) < 8:
+#         #     errors['password_error'] = 'Password must be at least 8 characters long'
+#         # if not re.search(r'[A-Z]', pass1):
+#         #     errors['password_error'] = 'Password must contain at least one uppercase letter'
+#         # if not re.search(r'[a-z]', pass1):
+#         #     errors['password_error'] = 'Password must contain at least one lowercase letter'
+#         # if not re.search(r'[0-9]', pass1):
+#         #     errors['password_error'] = 'Password must contain at least one number'
+#         # if not re.search(r'[!@#$%^&*(),.?":{}|<>]', pass1):
+#         #     errors['password_error'] = 'Password must contain at least one special character'
+        
+#         # if errors:
+#         #     # Return JSON response with errors
+#         #     return JsonResponse({'status': 'error', 'errors': errors}, status=400)
+        
+#         # else:
+#         #     hashed_password = make_password(pass1)
+#         #     new_user=Users.objects.create(username=username,phone_number=phone,email=email,password=hashed_password)
+#         #     new_user.save()
+#         #     return JsonResponse({'status': 'success', 'message': 'User created successfully'}, status=200)
+
+#         return redirect('accounts:otp_verify')
+    
+#     return render(request, 'user/signup.html')
+
+
+def generate_otp():
+    return random.randint(100000, 999999)
+
+
+@never_cache
+def signup_user(request):
+    if request.user.is_authenticated:
+        return redirect('accounts:home_user')
+    
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        phone = request.POST.get('phone')
+        email = request.POST.get('email')
+        pass1 = request.POST.get('password1')
+        pass2 = request.POST.get('password2')
+        
+        if pass1 == pass2:
+            otp = generate_otp()
+            print(f"Generated OTP: {otp}")  # Print the OTP to console
+            otp_expiry = datetime.datetime.now() + datetime.timedelta(seconds=30)
+
+            request.session['otp'] = otp
+            request.session['otp_expiry'] = otp_expiry.timestamp()  # Store as timestamp
+            request.session['email'] = email
+            request.session['username'] = username
+            request.session['phone'] = phone
+            request.session['password'] = pass1  
+
+            try:
+                send_mail(
+                    'Your OTP Code',
+                    f'Your OTP code is {otp}',
+                    settings.EMAIL_HOST_USER,
+                    [email],
+                    fail_silently=False,
+                )
+                return JsonResponse({'status': 'success', 'redirect_url': reverse('accounts:otp_verify')})
+            except Exception as e:
+                print(f"Email send error: {e}")  # Log the error
+                return JsonResponse({'status': 'error', 'errors': {'email': 'Failed to send OTP. Please try again.'}}, status=500)
+        else:
+            return JsonResponse({'status': 'error', 'errors': {'password': 'Passwords do not match.'}}, status=400)
+
+    return render(request, 'user/signup.html')
+
+
+def otp_verify(request):
+    if request.user.is_authenticated:
+        return redirect('accounts:home_user')
+
+    if request.method == 'POST':
+        entered_otp = request.POST.get('otp')
+        stored_otp = request.session.get('otp')
+        otp_expiry = request.session.get('otp_expiry')
+
+        # Check if OTP matches and not expired
+        if entered_otp == str(stored_otp):
+            # Check for expiry
+            if datetime.datetime.now().timestamp() > otp_expiry:  
+                request.session.pop('otp', None)  # Remove expired OTP
+                request.session.pop('otp_expiry', None)  # Remove expiry time
+                return JsonResponse({'status': 'error', 'errors': {'otp': 'OTP has expired. Please request a new one.'}}, status=400)
+
+            # Create user with hashed password
+            user = Users(
+                email=request.session['email'],
+                username=request.session['username'],
+                phone_number=request.session['phone'],
+                password=make_password(request.session['password'])  # Hash the password
+            )
+            user.save()  
+
+            authenticated_user = authenticate(request, username=request.session['username'], password=request.session['password'])
+            if authenticated_user is not None:
+                login(request, authenticated_user) 
+                request.session.flush()  
+                return JsonResponse({'status': 'success', 'redirect_url': reverse('accounts:login_user')})
+
+            return JsonResponse({'status': 'error', 'errors': {'authentication': 'User authentication failed. Please try again.'}}, status=400)
+        else:
+            return JsonResponse({'status': 'error', 'errors': {'otp': 'Invalid OTP.'}}, status=400)
+
+    return render(request, 'user/otp.html')
+
+
+
+
+def resend_otp(request):
+    # Initialize resend_otp in session if it doesn't exist
+    if 'resend_otp' not in request.session:
+        request.session['resend_otp'] = 0  # Set a default value to prevent KeyError
+    
+    # Check if the user can resend the OTP
+
+    # if 'otp' in request.session and time.time() < request.session['resend_otp']:
+    #     remaining_time = request.session['resend_otp'] - time.time()
+    #     minutes = int(remaining_time // 60)
+    #     seconds = int(remaining_time % 60)
+    #     return JsonResponse({'status': 'error', 'message': f"You can resend the OTP in {minutes}m {seconds}s."})
+
+    email = request.session.get('email')
+
+    if email:
+        otp = generate_otp()
+        print(f"Generated OTP: {otp}")
+        otp_expiry = datetime.datetime.now() + datetime.timedelta(seconds=60)  # Expire in 60 seconds
+
+        # Update session with new OTP and expiry
+        request.session['otp'] = otp
+        request.session['otp_expiry'] = otp_expiry.timestamp()
+        # request.session['resend_otp'] = time.time() + 60  # Allow resend after 60 seconds
+
+        # Attempt to send the new OTP email
+        try:
+            send_mail(
+                'Your New OTP Code',
+                f'Your new OTP code is {otp}',
+                settings.EMAIL_HOST_USER,
+                [email],
+                fail_silently=False,
+            )
+            return JsonResponse({'status': 'success', 'message': 'A new OTP has been sent to your email.'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': 'Failed to resend OTP. Please try again.'})
+        
+    return JsonResponse({'status': 'error', 'message': 'An error occurred. Please try signing up again.'})
+
+
+
+@never_cache
+def login_user(request):
+    if request.user.is_authenticated:
+        return redirect('accounts:home_user')
+
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+        try:
+            user = Users.objects.get(email=email)
+
+            if not user.is_active:
+                return JsonResponse({'status': 'error', 'errors': {'account': 'Your account is blocked.'}}, status=403)
+            # Authenticate the user using username (or email) and password
+            authenticated_user = authenticate(request, username=user.username, password=password)  # Use username for authentication
+            if authenticated_user is not None:
+                login(request, authenticated_user)  # Log the user in
+                redirect_url = reverse('accounts:home_user')
+                return JsonResponse({'status': 'success', 'redirect_url': redirect_url}, status=200)
+            else:
+                return JsonResponse({'status': 'error', 'errors': {'password': 'Invalid password'}}, status=400)
+
+        except Users.DoesNotExist:
+            return JsonResponse({'status': 'error', 'errors': {'email': 'User does not exist'}}, status=400)
+
+    return render(request, 'user/login.html')
+
+
+
+def home_user(request):
+
+    variants = Variant.objects.select_related('product__brand').prefetch_related('product__category').all()
+    return render(request,'user/home.html',{'variants':variants})
+
+@never_cache
+def logout_user(request):
+    logout(request)
+    return redirect('accounts:login_user')
+
+
+def admin_login(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        try:
+            admin = Users.objects.get(email=email)
+        except Users.DoesNotExist:
+            admin = None
+            print('User not found')  
+        
+        if admin is not None:
+            admin = authenticate(request, username=admin.username, password=password)
+
+            if admin is not None and admin.is_superuser:
+                login(request, admin)
+                print('logged in')
+                return redirect('admin_dashboard')
+        
+        error_message = "Invalid credentials or not a superuser."
+        print('Authentication failed')  
+        return render(request, 'admin/admin_login.html', {'error_message': error_message})
+
+    return render(request, 'admin/admin_login.html')
+
+
+def admin_logout(request):
+    logout(request)
+    return redirect('accounts:admin_login')
+
+

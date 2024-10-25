@@ -1,0 +1,379 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
+    <link href="{% static 'admin/css/styles.css' %}" rel="stylesheet" />
+    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.15/cropper.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/cropperjs/dist/cropper.css">
+
+
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body class="sb-nav-fixed">
+    <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+        <a class="navbar-brand " href="" style="padding-left: 5%;">B.R.A.T</a>
+
+        <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!">
+            <i class="fas fa-bars"></i>
+        </button>
+        
+        <ul class="navbar-nav ms-auto me-3 me-lg-4">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-user fa-fw"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                    <li><a class="dropdown-item" href="#!">Settings</a></li>
+                    <li><a class="dropdown-item" href="#!">Profile</a></li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li><a class="dropdown-item" href="{% url 'accounts:admin_logout' %}">Logout</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+
+
+
+    <div id="layoutSidenav">
+        <div id="layoutSidenav_nav">
+            <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+                <div class="sb-sidenav-menu p-5" >
+                    <div class="nav">
+                        <a class="nav-link " href="{% url 'admin_dashboard' %}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                            Dashboard
+                        </a>
+                        <a class="nav-link " href="{% url 'userss:view_user' %}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
+                            Users
+                        </a>
+                        <a class="nav-link" href="{% url 'products:view_brands' %}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-flag"></i></div>
+                            Brands
+                        </a>
+                        <a class="nav-link" href="{% url 'products:view_category' %}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-list"></i></div>
+                            Category
+                        </a>
+                        <a class="nav-link active" href="{% url 'products:view_products' %}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-box-open"></i></div>
+                            Products
+                        </a>
+                        <a class="nav-link" href="">
+                            <div class="sb-nav-link-icon"><i class="fas fa-shopping-cart"></i></div>
+                            Orders
+                        </a>
+                        <a class="nav-link" href="">
+                            <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
+                            Coupons
+                        </a>
+                        <a class="nav-link" href="">
+                            <div class="sb-nav-link-icon"><i class="fas fa-gift"></i></div>
+                            Offers
+                        </a>
+                        <a class="nav-link" href="">
+                            <div class="sb-nav-link-icon"><i class="fas fa-chart-line"></i></div>
+                            Sales Report
+                        </a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>
+
+
+        <div id="layoutSidenav_content">
+            <main class="container px-5 pb-4">
+
+                <h1 class="mt-4">Edit Variants</h1>
+                    <ol class="breadcrumb mb-4">
+                        <li class="breadcrumb-item"><a href="">Products</a></li>
+                        <li class="breadcrumb-item active">Edit Variants</li>
+                    </ol>
+
+                
+                    <form method="post" action="{% url 'products:edit_variants' product.product_id %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <h3>Edit Variants for {{ product.product_name }}</h3> 
+                        
+                        <div class="mb-3">
+                            <label class="form-label ">Product Images</label>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <input type="file" name="image1" class="form-control" id="image1" accept="image/*" onchange="previewSelectedImage(this, 'preview1', event)">
+                                    {% if variant.image1 %}
+                                        <img id="preview1" src="{{ variant.image1.url }}" class="img-thumbnail mt-2" style="max-width: 100px; max-height: 100px;">
+                                    {% else %}
+                                        <img id="preview1" class="img-thumbnail mt-2" style="display: none; max-width: 100px; max-height: 100px;">
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="file" name="image2" class="form-control" id="image2" accept="image/*" onchange="previewSelectedImage(this, 'preview2', event)">
+                                    {% if variant.image2 %}
+                                        <img id="preview2" src="{{ variant.image2.url }}" class="img-thumbnail mt-2" style="max-width: 100px; max-height: 100px;">
+                                    {% else %}
+                                        <img id="preview2" class="img-thumbnail mt-2" style="display: none; max-width: 100px; max-height: 100px;">
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="file" name="image3" class="form-control" id="image3" accept="image/*" onchange="previewSelectedImage(this, 'preview3', event)">
+                                    {% if variant.image3 %}
+                                        <img id="preview3" src="{{ variant.image3.url }}" class="img-thumbnail mt-2" style="max-width: 100px; max-height: 100px;">
+                                    {% else %}
+                                        <img id="preview3" class="img-thumbnail mt-2" style="display: none; max-width: 100px; max-height: 100px;">
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="file" name="image4" class="form-control" id="image4" accept="image/*" onchange="previewSelectedImage(this, 'preview4', event)">
+                                    {% if variant.image4 %}
+                                        <img id="preview4" src="{{ variant.image4.url }}" class="img-thumbnail mt-2" style="max-width: 100px; max-height: 100px;">
+                                    {% else %}
+                                        <img id="preview4" class="img-thumbnail mt-2" style="display: none; max-width: 100px; max-height: 100px;">
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                    
+
+                            <!-- Full-Screen Overlay for Cropping -->
+                            <div id="imageOverlay" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 1000; justify-content: center; align-items: center;">
+                                <div class="text-center" style="position: relative; width: 80vw; height: 80vh; max-width: 800px; max-height: 800px;">
+                                    <img id="cropImage" style="max-width: 100%; max-height: 100vh; display: none;">
+                                    <button id="cropButton" type="button" class="btn btn-primary mt-3">Crop Image</button> <!-- Change type to button -->
+                                    <button id="closeOverlayButton" class="btn btn-secondary mt-3" style="position: absolute; top: 10px; right: 10px;">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+ 
+
+                        <div class="mb-3">
+                            <label class="form-label">Sizes</label>
+                            <div id="sizesContainer" class="pb-1">
+                                {% for size in variant.size %}
+                                    <div class="input-group mb-2">
+                                        <input type="text" name="sizes[]" class="form-control" value="{{ size }}" placeholder="Enter size">
+                                        <button type="button" class="btn btn-danger" onclick="removeSizeInput(this)">Remove</button>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <button type="button" onclick="addSizeInput()" class="btn btn-secondary">Add Size</button>
+                        </div>
+                        
+                        <!-- <div class="mb-3">
+                            <label class="form-label">Colors</label>
+                            <div id="colorsContainer" class="pb-1">
+                                {% for color in variant.color %}
+                                    <div class="input-group mb-2">
+                                        <input type="text" name="colors[]" class="form-control" value="{{ color }}" placeholder="Enter color">
+                                        <button type="button" class="btn btn-danger" onclick="removeColorInput(this)">Remove</button>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <button type="button" onclick="addColorInput()" class="btn btn-secondary">Add Color</button>
+                        </div> -->
+
+                        <div class="mb-3">
+                            <label class="form-label">Colors</label>
+                            <input type="text" name="colors" class="form-control" value="{{ variant.color }}" placeholder="Enter color" required>
+                        </div> 
+
+
+                        <div class="mb-3">
+                            <label class="form-label">Occasions</label>
+                            <input type="text" name="occasions" class="form-control" value="{{ variant.occation }}" placeholder="Enter occasion" required>
+                        </div> 
+                        <div class="mb-3">
+                            <label class="form-label">Fit</label>
+                            <input type="text" name="fit" class="form-control" value="{{ variant.fit }}" placeholder="Enter fit type" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Price</label>
+                            <input type="number" name="price" class="form-control" value="{{ variant.price }}" placeholder="Enter price" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Quantity</label>
+                            <input type="number" name="quantity" class="form-control" value="{{ variant.qty }}" placeholder="Enter quantity" required>
+                        </div>
+                        <button type="button" class="btn btn-secondary">Close</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                    
+            </main>  
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="{% static 'admin/js/scripts.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    
+
+    <script src="https://unpkg.com/cropperjs/dist/cropper.js"></script>
+
+    
+    <script>
+
+        function addSizeInput() {
+            const sizeDiv = document.createElement('div');
+            sizeDiv.className = 'input-group mb-2';
+        
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.name = 'sizes[]';
+            input.className = 'form-control';
+            input.placeholder = 'Enter size';
+        
+            const removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.className = 'btn btn-danger';
+            removeButton.innerText = 'Remove';
+            removeButton.onclick = function() {
+                sizeDiv.remove();
+            };
+        
+            sizeDiv.appendChild(input);
+            sizeDiv.appendChild(removeButton);
+            document.getElementById('sizesContainer').appendChild(sizeDiv);
+        }
+        
+        function addColorInput() {
+            const colorDiv = document.createElement('div');
+            colorDiv.className = 'input-group mb-2';
+        
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.name = 'colors[]';
+            input.className = 'form-control';
+            input.placeholder = 'Enter color';
+        
+            const removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.className = 'btn btn-danger';
+            removeButton.innerText = 'Remove';
+            removeButton.onclick = function() {
+                colorDiv.remove();
+            };
+        
+            colorDiv.appendChild(input);
+            colorDiv.appendChild(removeButton);
+            document.getElementById('colorsContainer').appendChild(colorDiv);
+        }
+        
+        function removeSizeInput(button) {
+            button.parentElement.remove();
+        }
+        
+        function removeColorInput(button) {
+            button.parentElement.remove();
+        }
+        
+
+
+        let cropperInstance = null;
+        let currentImageInput = null;
+        
+        function previewSelectedImage(input, imageId) {
+            currentImageInput = input;
+            const file = input.files[0];
+        
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+        
+                reader.onload = function (e) {
+                    openCropperOverlay(e.target.result);
+                };
+        
+                reader.readAsDataURL(file);
+            } else {
+                alert('Please upload a valid image file.');
+            }
+        }
+        
+        function openCropperOverlay(imageSrc) {
+            const cropImage = document.getElementById('cropImage');
+            const imageOverlay = document.getElementById('imageOverlay');
+        
+            if (cropperInstance) {
+                cropperInstance.destroy();
+                cropperInstance = null;
+            }
+        
+            cropImage.src = imageSrc; 
+            cropImage.style.display = "block"; 
+            imageOverlay.style.display = "flex"; 
+        
+            cropImage.onload = function() {
+                cropperInstance = new Cropper(cropImage, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    autoCropArea: 1,
+                });
+            };
+        }
+        
+        document.getElementById('cropButton').addEventListener('click', function () {
+            if (cropperInstance) {
+                const canvas = cropperInstance.getCroppedCanvas({ width: 300, height: 300 });
+        
+                if (canvas) {
+                    canvas.toBlob(function (blob) {
+                        const croppedImage = new File([blob], currentImageInput.files[0].name, { type: 'image/png' });
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(croppedImage);
+                        currentImageInput.files = dataTransfer.files;
+        
+                        const imgPreviewId = 'preview' + currentImageInput.id.slice(-1);
+                        document.getElementById(imgPreviewId).src = URL.createObjectURL(croppedImage);
+                        document.getElementById(imgPreviewId).style.display = "block"; 
+                        document.getElementById('imageOverlay').style.display = "none";
+                    }, 'image/png');
+                }
+            }
+        });
+        
+        document.getElementById('closeOverlayButton').addEventListener('click', function () {
+            document.getElementById('imageOverlay').style.display = "none";
+            if (cropperInstance) {
+                cropperInstance.destroy();
+                cropperInstance = null;
+            }
+        });
+        
+        
+
+    </script>
+</body>
+</html>

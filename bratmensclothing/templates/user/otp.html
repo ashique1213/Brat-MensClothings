@@ -1,0 +1,253 @@
+{% extends "user/base.html" %}
+
+{% block content %}
+
+<!--====== Section Content ======-->
+<div class="section__content">
+    <div class="container">
+        <div class="breadcrumb">
+            <div class="breadcrumb__wrap">
+                <ul class="breadcrumb__list">
+                    <li class="has-separator">
+
+                        <a href="">Home</a></li>
+                    <li class="is-marked">
+
+                        <a href="">Otp</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<!--====== End - Section 1 ======-->
+    
+<!--====== Section Intro ======-->
+<div class="section__intro u-s-p-b-40">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="section__text-wrap">
+                    <h6 class="section__heading u-c-secondary">VERIFY YOUR EMAIL ADDRESS</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--====== End - Section Intro ======-->
+
+
+<!--====== Section Content ======-->
+<div class="section__content">
+    <div class="container">
+        <div class="row row--center">
+            <div class="col-lg-6 col-md-8 ">
+                <div class="l-f-o">
+                    <div class="l-f-o__pad-box">
+
+                        <span class="gl-text u-s-m-b-30 " style="color: black !important ;">We have sent otp to email, just use it here</span>
+                        <div class="u-s-m-b-15">
+
+                        <h1 class="gl-h1">Otp</h1>
+                        <form class="l-f-o__form" method="post" id="otpForm" action="{% url 'accounts:otp_verify' %}">
+                            {% csrf_token %}
+                            
+                            <div class="u-s-m-b-30">
+                                <label class="gl-label" for="login-Otp">OTP *</label>
+                                <input class="input-text input-text--primary-style" name="otp" type="text" id="login-Otp" placeholder="Enter OTP" required>
+                            </div>
+                        
+                            <!-- {% if messages %}
+                            <ul>
+                                {% for message in messages %}
+                                    <li style="color: red;">{{ message }}</li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %} -->
+                            
+                            <div class="gl-inline">
+                                <div class="u-s-m-b-30">
+                                    <button class="btn btn--e-transparent-brand-b-2" type="submit">VERIFY</button>
+                                </div>
+                                <div class="u-s-m-b-30">
+                                    <p>OTP will expire in: <span id="timer"></span></p>
+                                    <a class="gl-link active resend-otp-link" href="#" data-url="{% url 'accounts:resend_otp' %}">Resend OTP</a>
+                                </div>
+                            </div>
+                        </form>               
+                    </div> 
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        // Set up CSRF token
+        $.ajaxSetup({
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        });
+    
+        // Start the OTP timer
+        let otpExpiryTime = 60; // Change to 60 seconds for the OTP to expire
+        const timerElement = $('#timer');
+    
+        const countdownTimer = setInterval(() => {
+            if (otpExpiryTime <= 0) {
+                clearInterval(countdownTimer);
+                timerElement.text('OTP has expired.');
+                // Optionally, disable the resend link or display a message
+                $('a.resend-otp-link').addClass('disabled').text('Resend OTP disabled'); // Disable link
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Time Expired',
+                    text: 'Signup Again!',
+                    confirmButtonColor: '#000',
+                    timer: 3000, // Auto-close after 3 seconds
+                    willClose: () => {
+                        // Redirect to the signup page after the alert is closed
+                        window.location.href = '{% url "accounts:signup_user" %}'; // Replace with your signup URL
+                    }
+                });
+            } else {
+                let minutes = Math.floor(otpExpiryTime / 60);
+                let seconds = otpExpiryTime % 60;
+                timerElement.text(`${minutes}m ${seconds < 10 ? '0' : ''}${seconds}s`);
+                otpExpiryTime--;
+            }
+        }, 1000);
+    
+        // OTP verification form submission
+        $('#otpForm').on('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+    
+            $.ajax({
+                type: 'POST',
+                url: '{% url "accounts:otp_verify" %}',
+                data: $(this).serialize(),
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        // Display success message with SweetAlert
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Verified',
+                            text: response.message,
+                            confirmButtonColor: '#000',
+                            customClass: {
+                                icon: 'black-icon'
+                            },
+                            timer: 1500, // Auto-close after 1.5 seconds
+                            willClose: () => {
+                                // Redirect to login page after alert is closed
+                                window.location.href = response.redirect_url; 
+                            }
+                        });
+                    } else {
+                        // Display error messages from the server
+                        const errorMessage = response.errors.otp || 'An error occurred. Please try again.'; // Fallback message
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            html: errorMessage, // Display the specific error message for the OTP
+                            confirmButtonColor: '#000',
+                            customClass: {
+                                icon: 'black-icon'
+                            }
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    if (xhr.status === 400) {
+                        // Handle specific errors from the server
+                        const errors = xhr.responseJSON.errors || ['An unknown error occurred.'];
+                        const errorMessage = errors.otp || errors.join('<br>'); // Accessing the specific error if exists
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            html: errorMessage,
+                            confirmButtonColor: '#000',
+                            customClass: {
+                                icon: 'black-icon'
+                            }
+                        });
+                    } else {
+                        // Handle unexpected errors
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'An unexpected error occurred. Please try again later.',
+                            confirmButtonColor: '#000',
+                            customClass: {
+                                icon: 'black-icon'
+                            }
+                        });
+                    }
+                }
+            });
+        });
+    
+        // Handle Resend OTP Link
+        $('.resend-otp-link').on('click', function(event) {
+            event.preventDefault(); // Prevent default link behavior
+    
+            $.ajax({
+                type: 'POST',
+                url: $(this).data('url'),  // Use the URL from the data attribute
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}', // Include CSRF token
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        // Display success message and reset the timer
+                        Swal.fire({
+                            icon: 'info',
+                            text: response.message,
+                            confirmButtonColor: '#000',
+                            customClass: {
+                                icon: 'black-icon'
+                            }
+                        });
+                        // Reset the timer to 60 seconds
+                        //otpExpiryTime = 60; 
+                        // Reset the countdown display
+                        //$('#timer').text('1m 00s'); // Display reset timer
+                    } else {
+                        // Display error message
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: response.message,
+                            confirmButtonColor: '#000',
+                            customClass: {
+                                icon: 'black-icon'
+                            }
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    const errorMessage = xhr.responseJSON.message || 'An unexpected error occurred. Please try again.';
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: errorMessage,
+                        confirmButtonColor: '#000',
+                        customClass: {
+                            icon: 'black-icon'
+                        }
+                    });
+                }
+            });
+        });
+    });
+    
+    
+    
+    
+    
+</script>
+{% endblock %}

@@ -1,0 +1,169 @@
+{% extends "user/base.html" %}
+
+{% block content %}
+
+{% load socialaccount %}
+ 
+        
+<!--====== Section 1 ======-->
+<div class="">
+
+<!--====== Section Content ======-->
+            <div class="section__content">
+                <div class="container">
+                    <div class="breadcrumb">
+                        <div class="breadcrumb__wrap">
+                            <ul class="breadcrumb__list">
+                                <li class="has-separator">
+
+                                    <a href="{% url 'accounts:home_user' %}">Home</a></li>
+                                <li class="is-marked">
+
+                                    <a href="">login</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+<!--====== End - Section 1 ======-->
+   
+<!--====== Section 2 ======-->
+<div class="">
+<!--====== Section Intro ======-->
+    <div class="section__intro u-s-p-b-40">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="section__text-wrap">
+                        <h2 class="section__heading u-c-secondary">ALREADY REGISTERED?</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<!--====== End - Section Intro ======-->
+
+<!--====== Section Content ======-->
+    <div class="section__content">
+        <div class="container">
+            <div class="row row--center">
+                <div class="col-lg-6 col-md-8 u-s-m-b-30">
+                    <div class="l-f-o">
+                        <div class="l-f-o__pad-box">
+                            <h1 class="gl-h1">I'M NEW CUSTOMER</h1>
+
+                            <span class="gl-text u-s-m-b-30">By creating an account with our store, you will be able to move through the checkout process faster, store shipping addresses, view and track your orders in your account and more.</span>
+                            <div class="u-s-m-b-15">
+
+                                <a class="l-f-o__create-link btn--e-transparent-brand-b-2" href="{% url 'accounts:signup_user' %}">CREATE AN ACCOUNT</a></div>
+                            <h1 class="gl-h1">SIGNIN</h1>
+
+                            <span class="gl-text u-s-m-b-30">If you have an account with us, please log in.</span>
+                            <form class="l-f-o__form" method="post" id="loginForm" action="{% url 'accounts:login_user' %}">
+                                {% csrf_token %}
+                                <div class="gl-s-api">
+                                    <div class="u-s-m-b-15">
+                                        <a href="{% provider_login_url 'google' %}" class="gl-s-api__btn gl-s-api__btn--gplus">
+                                            <i class="fab fa-google"></i>
+                                            <span>Sign in with Google</span>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="u-s-m-b-30">
+
+                                    <label class="gl-label" for="login-email">E-MAIL *</label>
+
+                                    <input class="input-text input-text--primary-style" name="email" type="email" id="login-email" placeholder="Enter E-mail"></div>
+                                <div class="u-s-m-b-30">
+
+                                    <label class="gl-label" for="login-password">PASSWORD *</label>
+
+                                    <input class="input-text input-text--primary-style" name="password" type="password" id="login-password" placeholder="Enter Password"></div>
+                                <div class="gl-inline">
+                                    <div class="u-s-m-b-30">
+
+                                        <button class="btn btn--e-transparent-brand-b-2" type="submit">LOGIN</button></div>
+                                    <div class="u-s-m-b-30">
+
+                                        <a class="gl-link" href="">Lost Your Password?</a></div>
+                                </div>
+                                <div class="u-s-m-b-30">
+
+                                    <!--====== Check Box ======-->
+                                    <!-- <div class="check-box">
+
+                                        <input type="checkbox" id="remember-me">
+                                        <div class="check-box__state check-box__state--primary">
+
+                                            <label class="check-box__label" for="remember-me">Remember Me</label></div>
+                                    </div> -->
+                                    <!--====== End - Check Box ======-->
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<!--====== End - Section Content ======-->
+</div>
+<!--====== End - Section 2 ======-->
+<script>
+        $(document).ready(function() {
+            // Set up CSRF token
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            });
+        
+            $('#loginForm').on('submit', function(event) {
+                event.preventDefault(); // Prevent the default form submission
+        
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "accounts:login_user" %}',  // Use the correct URL name for your signup view
+                    data: $(this).serialize(),  // Serialize form data
+                    dataType: 'json',  // Expect JSON response
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            // Redirect to the homepage directly
+                            window.location.href = response.redirect_url; // Redirect to the URL returned from Django
+                        }
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 403) {
+                            // Handle the blocked user error
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Access Denied',
+                                text: 'Your account is blocked.',
+                                confirmButtonColor: '#000'
+                            });
+                        }
+                        else if (xhr.status === 400) {
+                            const errors = xhr.responseJSON.errors;
+        
+                            // Loop through errors and display them in SweetAlert
+                            let errorMessages = '';
+                            for (let key in errors) {
+                                errorMessages += errors[key] + '<br>';
+                            }
+        
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                html: errorMessages,  // Display error messages from the server
+                                confirmButtonColor: '#000'
+                            });
+                        } 
+                    }
+                });
+            });
+        });
+        
+</script>
+
+{% endblock %}
