@@ -111,59 +111,58 @@
 </div>
 <!--====== End - Section 2 ======-->
 <script>
-        $(document).ready(function() {
-            // Set up CSRF token
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}'
+    $(document).ready(function() {
+        // Set up CSRF token
+        $.ajaxSetup({
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        });
+    
+        $('#loginForm').on('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+    
+            $.ajax({
+                type: 'POST',
+                url: '{% url "accounts:login_user" %}',  // Correct URL for your login view
+                data: $(this).serialize(),  // Serialize form data
+                dataType: 'json',  // Expect JSON response
+                success: function(response) {
+                    if (response.status === 'success') {
+                        // Redirect to the homepage directly
+                        window.location.href = response.redirect_url; // Redirect to the URL returned from Django
+                    }
+                },
+                error: function(xhr) {
+                    if (xhr.status === 403) {
+                        // Handle the blocked user error
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Access Denied',
+                            text: 'Your account is blocked.',
+                            confirmButtonColor: '#000'
+                        });
+                    } else if (xhr.status === 400) {
+                        const errors = xhr.responseJSON.errors;
+    
+                        // Loop through errors and display them in SweetAlert
+                        let errorMessages = '';
+                        for (let key in errors) {
+                            errorMessages += errors[key] + '<br>';
+                        }
+    
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            html: errorMessages,  // Display error messages from the server
+                            confirmButtonColor: '#000'
+                        });
+                    }
                 }
             });
-        
-            $('#loginForm').on('submit', function(event) {
-                event.preventDefault(); // Prevent the default form submission
-        
-                $.ajax({
-                    type: 'POST',
-                    url: '{% url "accounts:login_user" %}',  // Use the correct URL name for your signup view
-                    data: $(this).serialize(),  // Serialize form data
-                    dataType: 'json',  // Expect JSON response
-                    success: function(response) {
-                        if (response.status === 'success') {
-                            // Redirect to the homepage directly
-                            window.location.href = response.redirect_url; // Redirect to the URL returned from Django
-                        }
-                    },
-                    error: function(xhr) {
-                        if (xhr.status === 403) {
-                            // Handle the blocked user error
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Access Denied',
-                                text: 'Your account is blocked.',
-                                confirmButtonColor: '#000'
-                            });
-                        }
-                        else if (xhr.status === 400) {
-                            const errors = xhr.responseJSON.errors;
-        
-                            // Loop through errors and display them in SweetAlert
-                            let errorMessages = '';
-                            for (let key in errors) {
-                                errorMessages += errors[key] + '<br>';
-                            }
-        
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Oops...',
-                                html: errorMessages,  // Display error messages from the server
-                                confirmButtonColor: '#000'
-                            });
-                        } 
-                    }
-                });
-            });
         });
-        
+    });
+    
 </script>
 
 {% endblock %}

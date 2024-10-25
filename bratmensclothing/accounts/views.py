@@ -19,49 +19,8 @@ import time
 from django.views.decorators.cache import never_cache
 
         
-#         # errors = {}
-        
-#         # if any(char.isdigit() or char.isspace() for char in username):
-#         #     errors['username_error'] = 'Username should not contain numbers or spaces'
-
-#         # if Users.objects.filter(username=username).exists():
-#         #     errors['username_error'] = 'Username already exists'
-
-#         # if Users.objects.filter(email=email).exists():
-#         #     errors['email_error'] = 'Email is already exists'
-
-#         # if pass1 != pass2:
-#         #     errors['password_error'] = 'Passwords do not match'
-
-#         # if len(pass1) < 8:
-#         #     errors['password_error'] = 'Password must be at least 8 characters long'
-#         # if not re.search(r'[A-Z]', pass1):
-#         #     errors['password_error'] = 'Password must contain at least one uppercase letter'
-#         # if not re.search(r'[a-z]', pass1):
-#         #     errors['password_error'] = 'Password must contain at least one lowercase letter'
-#         # if not re.search(r'[0-9]', pass1):
-#         #     errors['password_error'] = 'Password must contain at least one number'
-#         # if not re.search(r'[!@#$%^&*(),.?":{}|<>]', pass1):
-#         #     errors['password_error'] = 'Password must contain at least one special character'
-        
-#         # if errors:
-#         #     # Return JSON response with errors
-#         #     return JsonResponse({'status': 'error', 'errors': errors}, status=400)
-        
-#         # else:
-#         #     hashed_password = make_password(pass1)
-#         #     new_user=Users.objects.create(username=username,phone_number=phone,email=email,password=hashed_password)
-#         #     new_user.save()
-#         #     return JsonResponse({'status': 'success', 'message': 'User created successfully'}, status=200)
-
-#         return redirect('accounts:otp_verify')
-    
-#     return render(request, 'user/signup.html')
-
-
 def generate_otp():
     return random.randint(100000, 999999)
-
 
 @never_cache
 def signup_user(request):
@@ -69,11 +28,47 @@ def signup_user(request):
         return redirect('accounts:home_user')
     
     if request.method == 'POST':
-        username = request.POST.get('username')
-        phone = request.POST.get('phone')
-        email = request.POST.get('email')
-        pass1 = request.POST.get('password1')
-        pass2 = request.POST.get('password2')
+        username = request.POST.get('username').strip()
+        phone = request.POST.get('phone').strip()
+        email = request.POST.get('email').strip()
+        pass1 = request.POST.get('password1').strip()
+        pass2 = request.POST.get('password2').strip()
+
+        errors = {}
+
+        if len(username) < 4 or len(username) > 20:
+            errors['username_error'] = 'Username must be between 3 and 20 characters long'
+        if any(char.isdigit() or char.isspace() for char in username):
+            errors['username_error'] = 'Username should not contain numbers or spaces'
+        if Users.objects.filter(username=username).exists():
+            errors['username_error'] = 'Username already exists'
+
+        if phone:  
+            phone_pattern = r'^\+?[0-9]{10}$'  
+            if not re.match(phone_pattern, phone):
+                errors['phone_error'] = 'Phone number must be exactly 10 digits'
+
+        email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+        if not re.match(email_pattern, email):
+            errors['email_error'] = 'Invalid email format'
+        elif Users.objects.filter(email=email).exists():
+            errors['email_error'] = 'Email already exists'
+
+        if pass1 != pass2:
+            errors.setdefault('password_error', []).append('Passwords do not match')
+        if len(pass1) < 6:
+            errors.setdefault('password_error', []).append('Password must be at least 6 characters long')
+        if not re.search(r'[A-Z]', pass1):
+            errors.setdefault('password_error', []).append('Password must contain at least one uppercase letter')
+        if not re.search(r'[a-z]', pass1):
+            errors.setdefault('password_error', []).append('Password must contain at least one lowercase letter')
+        if not re.search(r'[0-9]', pass1):
+            errors.setdefault('password_error', []).append('Password must contain at least one number')
+        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', pass1):
+            errors.setdefault('password_error', []).append('Password must contain at least one special character')
+
+        if errors:
+            return JsonResponse({'status': 'error', 'errors': errors}, status=400)
         
         if pass1 == pass2:
             otp = generate_otp()
@@ -97,7 +92,7 @@ def signup_user(request):
                 )
                 return JsonResponse({'status': 'success', 'redirect_url': reverse('accounts:otp_verify')})
             except Exception as e:
-                print(f"Email send error: {e}")  # Log the error
+                print(f"Email send error: {e}") 
                 return JsonResponse({'status': 'error', 'errors': {'email': 'Failed to send OTP. Please try again.'}}, status=500)
         else:
             return JsonResponse({'status': 'error', 'errors': {'password': 'Passwords do not match.'}}, status=400)
@@ -108,6 +103,10 @@ def signup_user(request):
 def otp_verify(request):
     if request.user.is_authenticated:
         return redirect('accounts:home_user')
+    
+    if 'otp' not in request.session or 'otp_expiry' not in request.session:
+        # messages.error(request, "You must sign up and request an OTP first!")
+        return redirect('signup_user')
 
     if request.method == 'POST':
         entered_otp = request.POST.get('otp')
@@ -194,18 +193,33 @@ def login_user(request):
         return redirect('accounts:home_user')
 
     if request.method == 'POST':
-        email = request.POST.get('email')
-        password = request.POST.get('password')
+        email = request.POST.get('email').strip()
+        password = request.POST.get('password').strip()
+
+        errors = {}
+        if not email:
+                errors['email'] = 'Email is required.'
+        if not password:
+                errors['password'] = 'Password is required.'
+        if errors:
+            return JsonResponse({'status': 'error', 'errors': errors}, status=400)
+        
+        email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+        if not re.match(email_pattern, email):
+            return JsonResponse({'status': 'error', 'errors': {'email': 'Invalid email format.'}}, status=400)
+
+        if len(password) < 6:
+            return JsonResponse({'status': 'error', 'errors': {'password': 'Password must be at least 8 characters long.'}}, status=400)
 
         try:
             user = Users.objects.get(email=email)
 
             if not user.is_active:
                 return JsonResponse({'status': 'error', 'errors': {'account': 'Your account is blocked.'}}, status=403)
-            # Authenticate the user using username (or email) and password
-            authenticated_user = authenticate(request, username=user.username, password=password)  # Use username for authentication
+            
+            authenticated_user = authenticate(request, username=user.username, password=password) 
             if authenticated_user is not None:
-                login(request, authenticated_user)  # Log the user in
+                login(request, authenticated_user) 
                 redirect_url = reverse('accounts:home_user')
                 return JsonResponse({'status': 'success', 'redirect_url': redirect_url}, status=200)
             else:
@@ -216,15 +230,16 @@ def login_user(request):
 
     return render(request, 'user/login.html')
 
-
-
+@never_cache
 def home_user(request):
 
     variants = Variant.objects.select_related('product__brand').prefetch_related('product__category').all()
     return render(request,'user/home.html',{'variants':variants})
 
+
 @never_cache
 def logout_user(request):
+    request.session.flush()
     logout(request)
     return redirect('accounts:login_user')
 
@@ -253,7 +268,7 @@ def admin_login(request):
 
     return render(request, 'admin/admin_login.html')
 
-
+@never_cache
 def admin_logout(request):
     logout(request)
     return redirect('accounts:admin_login')

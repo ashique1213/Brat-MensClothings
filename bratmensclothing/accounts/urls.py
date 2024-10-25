@@ -16,7 +16,6 @@ Including another URLconf
 """
 from django.urls import path,include
 from . import views
-# from .views import GoogleLogin
 
 app_name = 'accounts'
 
