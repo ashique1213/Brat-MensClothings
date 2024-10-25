@@ -16,6 +16,7 @@ from datetime import timedelta
 from django.conf import settings
 import datetime
 import time
+from django.db.models import Q
 from django.views.decorators.cache import never_cache
 
         
@@ -233,7 +234,18 @@ def login_user(request):
 @never_cache
 def home_user(request):
 
-    variants = Variant.objects.select_related('product__brand').prefetch_related('product__category').all()
+    # variants = Variant.objects.select_related('product__brand').prefetch_related('product__category').all()
+    # variants = Variant.objects.select_related('product__brand').prefetch_related('product__category').filter(product__is_deleted=False)
+    variants = (
+        Variant.objects.select_related('product__brand')
+        .prefetch_related('product__category')
+        .filter(                      
+            Q(product__is_deleted=False),             # Product is not deleted
+            Q(product__brand__is_deleted=False),      # Brand of product is not deleted
+            Q(product__category__is_deleted=False)    # Categories of product are not deleted
+        )
+    )
+    
     return render(request,'user/home.html',{'variants':variants})
 
 

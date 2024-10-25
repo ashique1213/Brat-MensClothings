@@ -11,10 +11,9 @@ def is_staff(user):
 
 def add_brands(request):
     if request.method=='POST':
-        brand=request.POST.get('brandname').strip()
+        brand=request.POST.get('brandname')
         value=Brand.objects.create(brandname=brand)
         print(value)
-    
         messages.success(request, 'Brand added successfully!')  
         return redirect('products:view_brands')
     return render(request,'admin/brand.html')

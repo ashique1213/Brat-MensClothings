@@ -53,8 +53,6 @@
         </ul>
     </nav>
 
-
-
     <div id="layoutSidenav">
         <div id="layoutSidenav_nav">
             <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
@@ -276,13 +274,7 @@
                         <label for="brandname" class="form-label">Brand Name</label>
                         <input type="text" name="brandname" class="form-control" id="brandname" required>
                     </div>
-                    {% if messages %}
-                    <div class="alert alert-danger" role="alert">
-                        {% for message in messages %}
-                            {{ message }}
-                        {% endfor %}
-                    </div>
-                    {% endif %}
+                
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-primary">Submit</button>
@@ -360,18 +352,6 @@
         
             modal.find('form').attr('action', actionUrl);
         });
-
-        
-        document.addEventListener('DOMContentLoaded', function () {
-            // If there are error messages, reopen the modal
-            const messagesExist = document.querySelectorAll('.alert-danger').length > 0;
-            if (messagesExist) {
-                const addBrandModal = new bootstrap.Modal(document.getElementById('addBrandModal'));
-                addBrandModal.show();
-            }
-        });
-
-        
 
     </script>
 </body>
