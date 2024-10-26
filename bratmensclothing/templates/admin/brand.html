@@ -272,17 +272,35 @@
                     {% csrf_token %}
                     <div class="mb-3">
                         <label for="brandname" class="form-label">Brand Name</label>
-                        <input type="text" name="brandname" class="form-control" id="brandname" required>
+                        <input type="text"  name="brandname" class="form-control" id="brandname" required>
+                        <p hidden id="brandNameError" style="color:red; font-size: 12px;">Field cannot be empty</p>
                     </div>
                 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="submit" id="brandNameSubmitBtn" class="btn btn-primary">Submit</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+    <script>
+        const brandNameError = document.getElementById('brandNameError')
+        const brandNameInput = document.getElementById('brandname')
+        const brandNameSubmitBtn = document.getElementById('brandNameSubmitBtn');
+        brandNameSubmitBtn.addEventListener('click',(event)=>{
+            const value = brandNameInput.value;
+            
+            console.log(value);
+            if(value.trim()===''){
+                event.preventDefault();
+                brandNameError.hidden = false
+                return
+            }else{
+                brandNameError.hidden = true
+            }
+        })
+    </script>
 </div>
 
 {% for brand in brands %}
@@ -300,6 +318,7 @@
                     <div class="mb-3">
                         <label for="brandname" class="form-label">Brand Name</label>
                         <input type="text" name="brandname" class="form-control" id="brandname{{ brand.brand_id }}" value="{{ brand.brandname }}" required>
+                      
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -327,6 +346,7 @@
 
 
     <script>
+
         document.addEventListener("DOMContentLoaded", function() {
             const toasts = document.querySelectorAll('.toast');
             toasts.forEach(toast => {

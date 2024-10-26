@@ -193,20 +193,60 @@ def restore_product(request, product_id):
 @login_required(login_url='accounts:admin_login')
 @never_cache
 @user_passes_test(is_staff,'accounts:admin_login')
-def add_variants(request,product_id):
-    product=get_object_or_404(Product,product_id=product_id)
+def add_variants(request, product_id):
+    product = get_object_or_404(Product, product_id=product_id)
 
-    if request.method=='POST':
-        image1=request.FILES.get('image1')
-        image2=request.FILES.get('image2')
-        image3=request.FILES.get('image3')
-        image4=request.FILES.get('image4')
+    if request.method == 'POST':
+        # Get uploaded images
+        image1 = request.FILES.get('image1')
+        image2 = request.FILES.get('image2')
+        image3 = request.FILES.get('image3')
+        image4 = request.FILES.get('image4')
+
         size = request.POST.getlist('sizes[]')
-        color = request.POST.get('colors')
-        occation = request.POST.get('occasions')
-        fit = request.POST.get('fit')
-        price = request.POST.get('price')
-        quantity = request.POST.get('quantity')
+        color = request.POST.get('color').strip()
+        occation = request.POST.get('occasions').strip()
+        fit = request.POST.get('fit').strip()
+        price = request.POST.get('price').strip()
+        quantity = request.POST.get('quantity').strip()
+
+        errors = {}
+        if not size:
+            errors['size_error'] = "At least one size must be selected."
+
+        if not color or color.strip() == "":
+            errors['color_error'] = "Color is required."
+
+        if not occation or occation.strip() == "":
+            errors['occasion_error'] = "Occasion is required."
+
+        if not fit or fit.strip() == "":
+            errors['fit_error'] = "Fit is required."
+
+        if not price or price.strip() == "":
+            errors['price_error'] = "Price is required."
+        else:
+            try:
+                price = float(price)
+                if price < 0:
+                    errors['price_error'] = "Price must be a positive number."
+            except (ValueError, TypeError):
+                errors['price_error'] = "Price must be a valid number."
+
+        if not quantity or quantity.strip() == "":
+            errors['quantity_error'] = "Quantity is required."
+        else:
+            try:
+                quantity = int(quantity)
+                if quantity < 1:
+                    errors['quantity_error'] = "Quantity must be at least 1."
+            except (ValueError, TypeError):
+                errors['quantity_error'] = "Quantity must be a valid integer."
+
+        if errors:
+            for error in errors.values():
+                messages.error(request, error)
+            return render(request, 'admin/add_variants.html', {'product': product})
 
         variant = Variant(
             image1=image1,
@@ -225,7 +265,8 @@ def add_variants(request,product_id):
         variant.save()
         messages.success(request, 'Variant added successfully!')
         return redirect('products:view_variants', product_id=product_id)
-    return render(request,'admin/add_variants.html', {'product': product})
+
+    return render(request, 'admin/add_variants.html', {'product': product})
 
 
 @login_required(login_url='accounts:admin_login')
@@ -241,11 +282,11 @@ def view_variants(request, product_id):
 @login_required(login_url='accounts:admin_login')
 @never_cache
 @user_passes_test(is_staff,'accounts:admin_login')
-def edit_variants(request,product_id):
-    product=get_object_or_404(Product,product_id=product_id)
-    variant=get_object_or_404(Variant,product=product)
+def edit_variants(request, product_id):
+    product = get_object_or_404(Product, product_id=product_id)
+    variant = get_object_or_404(Variant, product=product)
 
-    if request.method=='POST':
+    if request.method == 'POST':
         if request.FILES.get('image1'):
             variant.image1 = request.FILES['image1']
         if request.FILES.get('image2'):
@@ -257,15 +298,58 @@ def edit_variants(request,product_id):
 
         variant.size = request.POST.getlist('sizes[]')
         variant.color = request.POST.get('colors')
-        variant.occation = request.POST.get('occasions')
+        variant.occation = request.POST.get('occasions') 
         variant.fit = request.POST.get('fit')
-        variant.qty = request.POST.get('quantity', variant.qty)
+        variant.qty = request.POST.get('quantity', variant.qty)  
         variant.price = request.POST.get('price', variant.price)
+
+        errors = {}
+
+        if not variant.size:
+            errors['size_error'] = "At least one size must be selected."
+
+        if not variant.color or variant.color.strip() == "":
+            errors['color_error'] = "Color is required."
+
+        if not variant.occation or variant.occation.strip() == "":
+            errors['occasion_error'] = "Occasion is required."
+
+        if not variant.fit or variant.fit.strip() == "":
+            errors['fit_error'] = "Fit is required."
+
+        if not variant.price or variant.price.strip() == "":
+            errors['price_error'] = "Price is required."
+        
+        else:
+            try:
+                variant.price = float(variant.price)
+                if variant.price < 0:
+                    errors['price_error'] = "Price must be a positive number."
+            except (ValueError, TypeError):
+                errors['price_error'] = "Price must be a valid number."
+
+        if not variant.qty or variant.qty.strip() == "":
+            errors['quantity_error'] = "Quantity is required."
+
+        else:
+            try:
+                variant.qty = int(variant.qty)
+                if variant.qty < 1:
+                    errors['quantity_error'] = "Quantity must be at least 1."
+            except (ValueError, TypeError):
+                errors['quantity_error'] = "Quantity must be a valid integer."
+
+        if errors:
+            for error in errors.values():
+                messages.error(request, error)
+            return render(request, 'admin/edit_variants.html', {'variant': variant, 'product': product})
 
         variant.save()
         messages.success(request, 'Variant updated successfully!')
         return redirect('products:view_variants', product_id=product_id)
-    return render(request, 'admin/edit_variants.html', {'product': product,'variant': variant})
+
+    return render(request, 'admin/edit_variants.html', {'product': product, 'variant': variant})
+
 
 
 def delete_variants(request, product_id):

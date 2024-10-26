@@ -210,7 +210,7 @@ def login_user(request):
             return JsonResponse({'status': 'error', 'errors': {'email': 'Invalid email format.'}}, status=400)
 
         if len(password) < 6:
-            return JsonResponse({'status': 'error', 'errors': {'password': 'Password must be at least 8 characters long.'}}, status=400)
+            return JsonResponse({'status': 'error', 'errors': {'password': 'Password must be at least 6 characters long.'}}, status=400)
 
         try:
             user = Users.objects.get(email=email)
@@ -233,7 +233,6 @@ def login_user(request):
 
 @never_cache
 def home_user(request):
-
     # variants = Variant.objects.select_related('product__brand').prefetch_related('product__category').all()
     # variants = Variant.objects.select_related('product__brand').prefetch_related('product__category').filter(product__is_deleted=False)
     variants = (
