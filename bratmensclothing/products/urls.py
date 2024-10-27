@@ -27,20 +27,24 @@ urlpatterns = [
     path('edit-brands/<int:brand_id>', views.edit_brands, name='edit_brands'),
     path('brand/soft-delete/<int:brand_id>/', views.soft_delete_brand, name='soft_delete_brand'),
     path('brand/restore/<int:brand_id>/', views.restore_brand, name='restore_brand'),
+    
     path('addcategory/',views.add_category,name='add_category'),
     path('viewcategory/', views.view_category, name='view_category'),
     path('edit-category/<int:category_id>', views.edit_category, name='edit_category'),
     path('category/soft-delete/<int:category_id>/', views.soft_delete_category, name='soft_delete_category'),
     path('category/restore/<int:category_id>/', views.restore_category, name='restore_category'),
-    path('addproduct/',views.add_products,name='add_products'),
-    path('viewproducts/', views.view_products, name='view_products'),
-    path('edit-product/<int:product_id>', views.edit_product, name='edit_product'),
-    path('products/soft-delete/<int:product_id>/', views.soft_delete_product, name='soft_delete_product'),
-    path('products/restore/<int:product_id>/', views.restore_product, name='restore_product'),
-    path('addvariants/<int:product_id>/', views.add_variants, name='add_variants'),
-    path('variants/<int:product_id>/', views.view_variants, name='view_variants'),
-    path('edit-variants/<int:product_id>/', views.edit_variants, name='edit_variants'),
-    path('delete-variants/<int:product_id>/', views.delete_variants, name='delete_variants'),
+
+    path('view_products/',views.viewproducts,name='viewproducts'),
+    path('addproducts/',views.addproducts,name='addproducts'),
+    path('editproduct/<int:product_id>',views.editproduct,name='editproduct'),
+    path('soft-delete/<int:product_id>/', views.softdelete_product, name='softdelete_product'),
+    path('restore/<int:product_id>/', views.restoreproduct, name='restoreproduct'),
+
+    path('viewsizevariants/<int:product_id>/', views.view_sizevariants, name='view_sizevariants'),
+    path('addsizevariants/<int:product_id>/', views.add_sizevariants, name='add_sizevariants'),
+    path('editsizevariants/<int:variant_id>/', views.edit_sizevariants, name='edit_sizevariants'),
+    path('delete_sizevariant/<int:variant_id>/', views.delete_sizevariant, name='delete_sizevariant'),
+
 
     
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

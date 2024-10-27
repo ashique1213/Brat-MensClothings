@@ -68,25 +68,24 @@
 
                             <!--====== Product Detail Zoom ======-->
 
-                            {% for variant in varaints %}
 
                             <div class="pd u-s-m-b-30 ">
                                 <div class="slider-fouc pd-wrap">
                                     <div id="pd-o-initiate">
-                                        <div class="pd-o-img-wrap" data-src="{{ variant.image1.url }}">
-                                            <img class="u-img-fluid" src="{{ variant.image1.url }}" data-zoom-image="{{ variant.image1.url }}" alt="">
+                                        <div class="pd-o-img-wrap" data-src="{{ product.image1.url }}">
+                                            <img class="u-img-fluid" src="{{ product.image1.url }}" data-zoom-image="{{ product.image1.url }}" alt="">
                                         </div>
 
-                                        <div class="pd-o-img-wrap" data-src="{{ variant.image2.url }}">
-                                            <img class="u-img-fluid" src="{{ variant.image2.url }}" data-zoom-image="{{ variant.image2.url }}" alt="">
+                                        <div class="pd-o-img-wrap" data-src="{{ product.image2.url }}">
+                                            <img class="u-img-fluid" src="{{ product.image2.url }}" data-zoom-image="{{ product.image2.url }}" alt="">
                                         </div>
 
-                                        <div class="pd-o-img-wrap" data-src="{{ variant.image3.url }}">
-                                            <img class="u-img-fluid" src="{{ variant.image3.url }}" data-zoom-image="{{ variant.image3.url }}" alt="">
+                                        <div class="pd-o-img-wrap" data-src="{{ product.image3.url }}">
+                                            <img class="u-img-fluid" src="{{ product.image3.url }}" data-zoom-image="{{ product.image3.url }}" alt="">
                                         </div>
 
-                                        <div class="pd-o-img-wrap" data-src="{{ variant.image4.url }}">
-                                            <img class="u-img-fluid" src="{{ variant.image4.url }}" data-zoom-image="{{ variant.image4.url }}" alt="">
+                                        <div class="pd-o-img-wrap" data-src="{{ product.image4.url }}">
+                                            <img class="u-img-fluid" src="{{ product.image4.url }}" data-zoom-image="{{ product.image4.url }}" alt="">
                                         </div>
 
                                         <!-- <div class="pd-o-img-wrap" data-src="{% static 'images/product/product-d-5.jpg' %}">
@@ -102,39 +101,38 @@
                                         <div id="pd-o-thumbnail">
                                             <div>
 
-                                                <img class="u-img-fluid" src="{{ variant.image1.url }}" alt=""></div>
+                                                <img class="u-img-fluid" src="{{ product.image1.url }}" alt=""></div>
                                             <div>
 
-                                                <img class="u-img-fluid" src="{{ variant.image1.url }}" alt=""></div>
+                                                <img class="u-img-fluid" src="{{ product.image1.url }}" alt=""></div>
                                             <div>
 
-                                                <img class="u-img-fluid" src="{{ variant.image2.url }}" alt=""></div>
+                                                <img class="u-img-fluid" src="{{ product.image2.url }}" alt=""></div>
                                             <div>
 
-                                                <img class="u-img-fluid" src="{{ variant.image3.url }}" alt=""></div>
+                                                <img class="u-img-fluid" src="{{ product.image3.url }}" alt=""></div>
                                             <div>
 
-                                                <img class="u-img-fluid" src="{{ variant.image3.url }} " alt=""></div>
+                                                <img class="u-img-fluid" src="{{ product.image3.url }} " alt=""></div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {% endfor %}
                             <!--====== End - Product Detail Zoom ======-->
                         </div>
                         <div class="col-lg-7 ">
-                            {% for variant in varaints %}
                           
                             <!--====== Product Right Side Details ======-->
                             <div class="pd-detail  u-s-m-b-30">
                                 <div>
 
-                                    <span class="pd-detail__name ">{{ productdetails.product_name }}</span></div>
+                                    <span class="pd-detail__name ">{{ product.product_name }}</span></div>
                                 <div>
                                     <div class="pd-detail__inline">
-
-                                        <span class="pd-detail__price">₹ {{ variant.price}} </span>
+                                        {% if product.variants.all %}
+                                        <span class="pd-detail__price">₹ {{product.variants.all.0.price}} </span>
+                                        {% endif %}
 
                                         <span class="pd-detail__discount">(76% OFF)</span><del class="pd-detail__del">₹28.97</del></div>
                                 </div>
@@ -147,14 +145,20 @@
                                 </div>
                                 <div class="u-s-m-b-15">
                                     <div class="pd-detail__inline">
-
-                                        <span class="pd-detail__stock">{{ variant.qty}} in stock</span>
-
-                                        <span class="pd-detail__left">Only {{ variant.qty}} left</span></div>
+                                        
+                                        {% if product.variants.all %}
+                                        {% with first_variant=product.variants.all.0 %}
+                                            <span class="pd-detail__stock">{{ first_variant.qty }} in stock</span>
+                                            <span class="pd-detail__left">Only {{ first_variant.qty }} left</span>
+                                        {% endwith %}
+                                        {% else %}
+                                        <span class="pd-detail__stock">No stock available</span>
+                                        {% endif %}
+                                    </div>
                                 </div>
                                 <div class="u-s-m-b-15">
 
-                                    <span class="pd-detail__preview-desc">{{ productdetails.description }}</span></div>
+                                    <span class="pd-detail__preview-desc">{{ product.description }}</span></div>
                                 <div class="u-s-m-b-15">
                                     <div class="pd-detail__inline">
 
@@ -173,8 +177,12 @@
                                             <div class="product-details">
                                                 <h3>Available Sizes:</h3>
                                                 <div class="size-buttons">
-                                                    {% for size in variant.size %}
-                                                        <button class="size-button" onclick="selectSize(this, '{{ size }}')">{{ size }}</button>
+                                                    {% for variant in product.variants.all %}
+                                                        <button 
+                                                            class="size-button" 
+                                                            onclick="selectSize(this, '{{ variant.size }}')">
+                                                            {{ variant.size }}
+                                                        </button>
                                                     {% endfor %}
                                                 </div>
                                                 <div id="selected-size" class="sele">Selected Size: None</div> <!-- Display the selected size -->
@@ -284,20 +292,24 @@
                                                         <tbody>
                                                             <tr>
                                                                 <td>Occasion</td>
-                                                                <td>{{ variant.occation }}</td>
+                                                                <td>{{ product.occasion }}</td>
                                                             </tr>
                                                             <tr>
                                                                 <td>Color</td>
-                                                                <td>{{ variant.color }}</td>
+                                                                <td>{{ product.color }}</td>
                                                             </tr>  
                                                             <tr>
                                                                 <td>Fit</td>
-                                                                <td>{{ variant.fit }}</td>
+                                                                <td>{{ product.fit }}</td>
                                                             </tr>
                                                             <tr>
                                                                 <tr>
                                                                     <td>Size available</td>
-                                                                    <td>{{ variant.size|join:", " }}</td>  <!-- Sizes in a single cell -->
+                                                                    <td>
+                                                                        {% for variant in product.variants.all %}
+                                                                        {{ variant.size }}{% if not forloop.last %}, {% endif %}
+                                                                            {% endfor %}
+                                                                    </td>  <!-- Sizes in a single cell -->
                                                                 </tr>
                                                             </tr>
                                                             <!-- <tr>
@@ -328,7 +340,6 @@
                                         </div>
                                     </div>
                                     <!--====== End - Tab 1 ======-->
-                                    {% endfor %}
 
                                     <!--====== Tab 2 ======-->
                                     <div class="tab-pane" id="pd-rev">
@@ -623,7 +634,7 @@
                     <div class="container">
                         <div class="slider-fouc">
                             <div class="owl-carousel product-slider" data-item="4">
-                                {% for variant in allvariants %}
+                                {% for product in products %}
 
                                 <div class="u-s-m-b-30">
 
@@ -633,7 +644,7 @@
 
                                             <a class="aspect aspect--bg-grey aspect--square u-d-block" href="">
 
-                                                <img class="aspect__img" src="{{ variant.image1.url }}" alt=""></a>
+                                                <img class="aspect__img" src="{{ product.image1.url }}" alt=""></a>
                                             <div class="product-o__action-wrap">
                                                 <ul class="product-o__action-list">
                                                     <li>
@@ -655,18 +666,18 @@
 
                                         <span class="product-o__category">
 
-                                            <a href="">{{ variant.product.brand.brandname }}</a></span>
+                                            <a href="">{{ product.brand.brandname }}</a></span>
 
                                         <span class="product-o__name">
 
-                                            <a href="">{{ variant.product.product_name }}</a></span>
+                                            <a href="">{{ product.product_name }}</a></span>
                                         <div class="product-o__rating gl-rating-style"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
 
                                             <span class="product-o__review">(20)</span></div>
-
-                                        <span class="product-o__price"> ₹{{variant.price }}
-
-                                            <span class="product-o__discount">₹ 160.00</span></span>
+                                        {% if product.variants.all %}
+                                        <span class="product-o__price">₹{{product.variants.all.0.price}}
+                                        <span class="product-o__discount">₹160.00</span></span>
+                                        {% endif %}
                                     </div>
 
                                 </div>

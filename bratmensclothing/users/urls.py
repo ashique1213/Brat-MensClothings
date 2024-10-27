@@ -26,6 +26,15 @@ urlpatterns = [
     path('block-user/<int:userid>',views.block_user,name='block_user'),
     path('unblock-user/<int:userid>',views.unblock_user,name='unblock_user'),
     path('categorydetails/',views.category_details,name='category_details'),
-    path('productdetails/<int:product_id>/',views.product_details,name='product_details')
+    path('productdetails/<int:product_id>/',views.product_details,name='product_details'),
+    
+    path('accountdetails/<int:userid>',views.account_details,name='accountdetails'),
+    path('edit_account_dtails/<int:userid>',views.edit_account_details,name='edit_account_dtails'),
+    
+    path('addressdetails/<int:userid>',views.address_details,name='addressdetails'),
+    path('addaddress/<int:userid>',views.add_address,name='addaddress'),
+    path('editaddress/<int:id>',views.edit_address,name='editaddress'),
+    path('removeaddress/<int:id>/', views.remove_address, name='removeaddress'),
+    
     
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

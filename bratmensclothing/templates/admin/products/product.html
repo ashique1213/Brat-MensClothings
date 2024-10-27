@@ -1,0 +1,594 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
+    <link href="{% static 'admin/css/styles.css'%}" rel="stylesheet" />
+    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+   
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" />
+
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"> -->
+
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body class="sb-nav-fixed">
+    <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+        <a class="navbar-brand " href="" style="padding-left: 5%;">B.R.A.T</a>
+        <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!">
+            <i class="fas fa-bars"></i>
+        </button>
+        <ul class="navbar-nav ms-auto me-3 me-lg-4">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-user fa-fw"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                    <li><a class="dropdown-item" href="#!">Settings</a></li>
+                    <li><a class="dropdown-item" href="#!">Profile</a></li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li><a class="dropdown-item" href="{% url 'accounts:admin_logout' %}">Logout</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+
+
+
+    <div id="layoutSidenav">
+        <div id="layoutSidenav_nav">
+            <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+                <div class="sb-sidenav-menu p-5" >
+                    <div class="nav">
+                        <a class="nav-link " href="{% url 'admin_dashboard' %}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                            Dashboard
+                        </a>
+                        <a class="nav-link" href="{% url 'userss:view_user' %}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
+                            Users
+                        </a>
+                        <a class="nav-link active" href="{% url 'products:view_brands' %}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-flag"></i></div>
+                            Brands
+                        </a>
+                        <a class="nav-link" href="{% url 'products:view_category' %}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-list"></i></div>
+                            Category
+                        </a>
+                        <a class="nav-link" href="{% url 'products:viewproducts' %}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-box-open"></i></div>
+                            Products
+                        </a>
+                        <a class="nav-link" href="">
+                            <div class="sb-nav-link-icon"><i class="fas fa-shopping-cart"></i></div>
+                            Orders
+                        </a>
+                        <a class="nav-link" href="">
+                            <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
+                            Coupons
+                        </a>
+                        <a class="nav-link" href="">
+                            <div class="sb-nav-link-icon"><i class="fas fa-gift"></i></div>
+                            Offers
+                        </a>
+                        <a class="nav-link" href="">
+                            <div class="sb-nav-link-icon"><i class="fas fa-chart-line"></i></div>
+                            Sales Report
+                        </a>
+                    </div>
+                    
+                </div>
+            </nav>
+        </div>
+
+
+
+        <div id="layoutSidenav_content">
+            <main>
+                <div class="container-fluid px-4">
+                    <h1 class="mt-4">Products</h1>
+                    <ol class="breadcrumb mb-4">
+                        <li class="breadcrumb-item"><a href="">Dashboard</a></li>
+                        <li class="breadcrumb-item active">Products</li>
+                    </ol>
+
+                    <div class="d-flex justify-content-between mb-3">
+                        <div class="input-group ms-1">
+                            <span class="input-group-text">
+                                <i class="fas fa-search"></i> <!-- Search Icon -->
+                            </span>
+                            <input type="text" id="searchProduct" class="form-control" placeholder="Search Products..." />
+                        </div>
+                        <div class="input-group ms-1">
+                            <span class="input-group-text">
+                                <i class="fas fa-filter"></i> 
+                            </span>
+                            <select id="sortOption" class="form-select">
+                                <option value="">Sort by</option>
+                                <!-- <option value="name">Name</option> -->
+                                <!-- <option value="date">Start Date</option> -->
+                            </select>
+                        </div>
+                    </div>
+
+
+ 
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-box me-1"></i>
+                                <span>Products Table</span>
+                            </div>
+                            <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                                Add Products
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <table id="productsTable" style="font-size: 14px;">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Images</th>
+                                        <th>Name</th>
+                                        <th>Description</th>
+                                        <th>Brand</th>
+                                        <th>Category</th>
+                                        <th>Color</th>
+                                        <th>Occasion</th>
+                                        <th>Fit</th>
+                                        <th>Variant</th>
+                                        <th>Edit</th>
+                                        <th>Unlist</th>
+                                        
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for product in products %}
+                                    <tr>
+                                        
+                                        <td>{{ product.product_id }}</td>
+                                        <td>
+                                        {% if product.image1 %}
+                                            <img src="{{ product.image1.url }}" alt="Current Image 1" width="100" class="mb-2">
+                                        {% endif %}
+                                        </td>
+                                        <td>{{ product.product_name }}</td>
+                                        <td>{{ product.description }}</td>
+                                        <td>{{ product.brand.brandname }}</td>
+                                        <td>
+                                            {% for category in product.category.all %}
+                                                {{ category.category }}-{{ category.category_type }}{% if not forloop.last %}, {% endif %}
+                                            {% endfor %}
+                                        </td>
+                                        <td>{{ product.color }}</td>
+                                        <td>{{ product.occasion }}</td>
+                                        <td>{{ product.fit }}</td>
+                                        
+
+                                        <td>
+                                            <a href="{% url 'products:view_sizevariants' product.product_id %}" class="btn btn-primary btn-sm">Variants</a>
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-primary btn-sm me-3" data-bs-toggle="modal" data-bs-target="#editProductModal{{ product.product_id }}">
+                                                Edit
+                                            </button>
+                                        </td>
+                                       
+                                        
+                                        <td>
+                                            {% if not product.is_deleted %}
+                                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal{{ product.product_id }}" 
+                                                    data-action-url="{% url 'products:softdelete_product' product.product_id %}" 
+                                                    data-message="Are you sure you want to soft delete {{ product.product_name }}?">
+                                                    Unlist
+                                                </button>
+                                            {% else %}
+                                                <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#confirmRestoreModal{{ product.product_id }}" 
+                                                    data-action-url="{% url 'products:restoreproduct' product.product_id %}" 
+                                                    data-message="Are you sure you want to restore {{ product.product_name }}?">
+                                                    List
+                                                </button>
+                                            {% endif %}
+                                            
+                                            <div class="modal fade" id="confirmDeleteModal{{ product.product_id }}" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel{{ product.product_id }}" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="confirmDeleteModalLabel{{ product.product_id }}">Confirmation</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <p id="deleteModalMessage">Are you sure you want to Unlist {{ product.product_name }}?</p>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <form method="POST" action="{% url 'products:softdelete_product' product.product_id %}">
+                                                                {% csrf_token %}
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                <button type="submit" class="btn btn-danger">Confirm</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                    
+                                            <!-- Confirmation Modal for Restore -->
+                                            <div class="modal fade" id="confirmRestoreModal{{ product.product_id }}" tabindex="-1" role="dialog" aria-labelledby="confirmRestoreModalLabel{{ product.product_id }}" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="confirmRestoreModalLabel{{ product.product_id }}">Confirmation</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <p id="restoreModalMessage">Are you sure you want to list {{ product.product_name }}?</p>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <form method="POST" action="{% url 'products:restoreproduct' product.product_id %}">
+                                                                {% csrf_token %}
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                <button type="submit" class="btn btn-success">Confirm</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                </div>
+            </main>
+        </div>
+    </div>
+
+
+
+<!-- Add Product Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addProductModalLabel">Add Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'products:addproducts' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Images</label>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <input type="file" name="image1" class="form-control" id="image1" accept="image/*" onchange="previewSelectedImage(this, 'preview1')" required>
+                                <img id="preview1" class="img-thumbnail mt-2" style="display: none; max-width: 100px; max-height: 100px;">
+                            </div>
+                            <div class="col-md-3">
+                                <input type="file" name="image2" class="form-control" id="image2" accept="image/*" onchange="previewSelectedImage(this, 'preview2')" required>
+                                <img id="preview2" class="img-thumbnail mt-2" style="display: none; max-width: 100px; max-height: 100px;">
+                            </div>
+                            <div class="col-md-3">
+                                <input type="file" name="image3" class="form-control" id="image3" accept="image/*" onchange="previewSelectedImage(this, 'preview3')" required>
+                                <img id="preview3" class="img-thumbnail mt-2" style="display: none; max-width: 100px; max-height: 100px;">
+                            </div>
+                            <div class="col-md-3">
+                                <input type="file" name="image4" class="form-control" id="image4" accept="image/*" onchange="previewSelectedImage(this, 'preview4')" required>
+                                <img id="preview4" class="img-thumbnail mt-2" style="display: none; max-width: 100px; max-height: 100px;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Product Name</label>
+                        <input type="text" name="productname" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Product Description</label>
+                        <textarea name="description" class="form-control" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Brand</label>
+                        <select name="brandname" class="form-control form-select">
+                            <option value="">Select Brand</option>
+                            {% for brand in brands %}
+                                <option value="{{ brand.brandname }}">{{ brand.brandname }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Category</label>
+                        <select name="category" class="form-control form-select" required>
+                            <option value="">Select Category</option>
+                            {% for category in categories %}
+                                <option value="{{ category.category_id }}">{{ category.category_type }}-{{ category.category }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Color</label>
+                        <input type="text" name="color" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Occasion</label>
+                        <input type="text" name="occasion" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Fit</label>
+                        <input type="text" name="fit" class="form-control" required>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cropper Overlay -->
+<div id="cropperOverlay" style="display:none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.8); z-index: 9999; justify-content: center; align-items: center;">
+    <div class="text-center" style="position: relative; width: 80vw; height: 80vh; max-width: 800px; max-height: 800px;">
+        <img id="cropImage" style="max-width: 100%; max-height: 100vh; display: none;">
+        <button id="cropButton" class="btn btn-primary mt-3">Crop Image</button>
+        <button id="closeOverlayButton" class="btn btn-secondary mt-3" style="position: absolute; top: 10px; right: 10px;">Close</button>
+    </div>
+</div>
+
+
+
+{% for product in products %}
+<!-- Modal Edit -->
+<div class="modal fade" id="editProductModal{{ product.product_id }}" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProductModalLabel">Edit Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <form method="post" action="{% url 'products:editproduct' product.product_id %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            {% if product.image1 %}
+                                <img src="{{ product.image1.url }}" alt="Current Image 1" id="currentImage1{{ product.product_id }}" width="100" class="mb-2">
+                            {% endif %}
+                            <input type="file" name="image1" class="form-control" id="image1{{ product.product_id }}" accept="image/*" onchange="previewSelectedImage(this, 'preview1{{ product.product_id }}')" {% if not product.image1 %}required{% endif %}>
+                            <img id="preview1{{ product.product_id }}" class="img-thumbnail mt-2" style="display: none; max-width: 100px; max-height: 100px;">
+                        </div>
+                
+                        <div class="col-md-3">
+                            {% if product.image2 %}
+                                <img src="{{ product.image2.url }}" alt="Current Image 2" id="currentImage2{{ product.product_id }}" width="100" class="mb-2">
+                            {% endif %}
+                            <input type="file" name="image2" class="form-control" id="image2{{ product.product_id }}" accept="image/*" onchange="previewSelectedImage(this, 'preview2{{ product.product_id }}')" {% if not product.image2 %}required{% endif %}>
+                            <img id="preview2{{ product.product_id }}" class="img-thumbnail mt-2" style="display: none; max-width: 100px; max-height: 100px;">
+                        </div>
+                
+                        <div class="col-md-3">
+                            {% if product.image3 %}
+                                <img src="{{ product.image3.url }}" alt="Current Image 3" id="currentImage3{{ product.product_id }}" width="100" class="mb-2">
+                            {% endif %}
+                            <input type="file" name="image3" class="form-control" id="image3{{ product.product_id }}" accept="image/*" onchange="previewSelectedImage(this, 'preview3{{ product.product_id }}')" {% if not product.image3 %}required{% endif %}>
+                            <img id="preview3{{ product.product_id }}" class="img-thumbnail mt-2" style="display: none; max-width: 100px; max-height: 100px;">
+                        </div>
+                
+                        <div class="col-md-3">
+                            {% if product.image4 %}
+                                <img src="{{ product.image4.url }}" alt="Current Image 4" id="currentImage4{{ product.product_id }}" width="100" class="mb-2">
+                            {% endif %}
+                            <input type="file" name="image4" class="form-control" id="image4{{ product.product_id }}" accept="image/*" onchange="previewSelectedImage(this, 'preview4{{ product.product_id }}')" {% if not product.image4 %}required{% endif %}>
+                            <img id="preview4{{ product.product_id }}" class="img-thumbnail mt-2" style="display: none; max-width: 100px; max-height: 100px;">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Product Name</label>
+                        <input type="text" name="product_name" class="form-control" value="{{ product.product_name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Product Description</label>
+                        <textarea name="description" class="form-control" required>{{ product.description }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Brand</label>
+                        <select name="brandname" class="form-control form-select" required>
+                            <option value="">Select Brand</option>
+                            {% for brand in brands %}
+                                <option value="{{ brand.brand_id }}" 
+                                    {% if brand.brand_id == product.brand_id %} selected{% endif %}>
+                                    {{ brand.brandname }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Category</label>
+                        <select name="category" class="form-control form-select" required>
+                            {% for category in categories %}
+                                <option value="{{ category.category_id }}" 
+                                        {% if category in product.category.all %} selected {% endif %}>
+                                    {{ category.category }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Color</label>
+                        <input type="text" name="color" class="form-control" value="{{ product.color }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Occasion</label>
+                        <input type="text" name="occasion" class="form-control" value="{{ product.occasion }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Fit</label>
+                        <input type="text" name="fit" class="form-control" value="{{ product.fit }}" required>
+                    </div>
+                    
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="{% static 'admin/js/scripts.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+    <!-- Include Cropper.js JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+
+
+    <script>
+
+        
+
+        $('body').on('show.bs.modal', '.modal', function (event) {
+            var button = $(event.relatedTarget); 
+            var actionUrl = button.data('action-url'); 
+            var message = button.data('message');
+        
+            var modal = $(this);
+        
+            if (modal.find('#deleteModalMessage').length) {
+                modal.find('#deleteModalMessage').text(message); 
+            }
+            if (modal.find('#restoreModalMessage').length) {
+                modal.find('#restoreModalMessage').text(message); 
+            }
+        
+            modal.find('form').attr('action', actionUrl);
+        });
+
+        
+        let cropperInstance = null;
+        let currentImageInput = null;
+
+        function previewSelectedImage(input, previewId) {
+            currentImageInput = input;
+            const file = input.files[0];
+
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    openCropperOverlay(e.target.result, previewId);
+                };
+
+                reader.readAsDataURL(file);
+            } else {
+                alert('Please upload a valid image file.');
+            }
+        }
+
+        function openCropperOverlay(imageSrc, previewId) {
+            const cropImage = document.getElementById('cropImage');
+            const cropperOverlay = document.getElementById('cropperOverlay');
+
+            cropImage.src = imageSrc;
+            cropImage.style.display = "block";
+            cropperOverlay.style.display = "flex";
+
+            // Destroy any previous instance
+            if (cropperInstance) {
+                cropperInstance.destroy();
+                cropperInstance = null;
+            }
+
+            // Initialize Cropper.js
+            cropperInstance = new Cropper(cropImage, {
+                aspectRatio: 1,  // Adjust to desired aspect ratio
+                viewMode: 1,
+                autoCropArea: 1,
+            });
+
+            // Store the preview ID to update the correct image
+            cropImage.dataset.previewId = previewId;
+        }
+
+        document.getElementById('cropButton').addEventListener('click', function () {
+            if (cropperInstance) {
+                const canvas = cropperInstance.getCroppedCanvas({
+                    width: 300, // Desired width
+                    height: 300 // Desired height
+                });
+
+                canvas.toBlob(function (blob) {
+                    const croppedImage = new File([blob], currentImageInput.files[0].name, { type: 'image/png' });
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(croppedImage);
+                    currentImageInput.files = dataTransfer.files;
+
+                    // Update the correct preview image
+                    const imgPreviewId = currentImageInput.id.replace('image', 'preview'); // Update here
+                    const imgPreview = document.getElementById(imgPreviewId);
+                    imgPreview.src = URL.createObjectURL(croppedImage);
+                    imgPreview.style.display = "block";
+
+                    // Close the cropper overlay
+                    document.getElementById('cropperOverlay').style.display = "none"; 
+                }, 'image/png');
+            }
+        });
+
+        document.getElementById('closeOverlayButton').addEventListener('click', function () {
+            document.getElementById('cropperOverlay').style.display = "none";
+            if (cropperInstance) {
+                cropperInstance.destroy();
+                cropperInstance = null;
+            }
+        });
+
+
+    </script>
+</body>
+</html>

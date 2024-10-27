@@ -32,40 +32,37 @@ class Brand(models.Model):
         return self.brandname
 
 
-class Product(models.Model):
+class ProductDetails(models.Model):
     product_id = models.AutoField(primary_key=True)  
     product_name = models.CharField(max_length=100)
     description = models.TextField()
-    brand = models.ForeignKey(Brand, on_delete=models.CASCADE)
-    category = models.ManyToManyField(Category, related_name='products')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    is_deleted = models.BooleanField(default=True)
-
-    def __str__(self):
-        return self.product_name
-
-
-
-class Variant(models.Model):  
-    variant_id = models.AutoField(primary_key=True)  
     image1 = models.ImageField(upload_to='products/', null=False, blank=False)
     image2 = models.ImageField(upload_to='products/', null=False, blank=False) 
     image3 = models.ImageField(upload_to='products/', null=False, blank=False)  
     image4 = models.ImageField(upload_to='products/', null=False, blank=False)  
-    size = ArrayField(models.CharField(max_length=10), blank=True, default=list)
-    # color = ArrayField(models.CharField(max_length=10), blank=True, default=list)
     color = models.CharField(max_length=30) 
-    occation = models.CharField(max_length=30) 
+    occasion = models.CharField(max_length=30) 
     fit = models.CharField(max_length=30)
+    brand = models.ForeignKey('Brand', on_delete=models.CASCADE)
+    category = models.ManyToManyField('Category', related_name='product_list', blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_deleted = models.BooleanField(default=True)  
+    def __str__(self):
+        return self.product_name
+
+
+class VariantSize(models.Model):  
+    variant_id = models.AutoField(primary_key=True)  
+    size = models.CharField(max_length=10)
     qty = models.IntegerField()
     price = models.IntegerField(null=True, blank=True)
     status = models.BooleanField(default=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True)  
+    product = models.ForeignKey(ProductDetails, related_name='variants', on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"Variant of {self.product} - Size: {self.size}, Color: {self.color}"
-
+        return f"Variant of {self.product.product_name} - Size: {self.size}"
+    
 
 
     

@@ -1,9 +1,8 @@
 from django.shortcuts import render,redirect,get_object_or_404
-from .models import Brand,Category,Product,Variant
+from .models import Brand,Category,ProductDetails,VariantSize
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.views.decorators.cache import never_cache
-
 
 
 def is_staff(user):
@@ -80,7 +79,7 @@ def view_category(request):
 
 def soft_delete_category(request,category_id):
     category= get_object_or_404(Category,category_id=category_id)
-    category.is_deleted=True
+    category.is_deleted=True 
     category.save()
 
     messages.success(request, 'Category successfully Unlisted!')
@@ -108,263 +107,185 @@ def edit_category(request, category_id):
     return render(request, 'admin/category.html', {'category': category})
 
 
-def add_products(request):
+
+@login_required(login_url='accounts:admin_login')
+@never_cache
+@user_passes_test(is_staff,'accounts:admin_login')
+def viewproducts(request):
+    products = ProductDetails.objects.all()
+    brands = Brand.objects.filter(is_deleted=False)
+    categories = Category.objects.filter(is_deleted=False)
+
+    return render(request, 'admin/products/product.html', {'products': products,'brands': brands,'categories': categories})
+
+
+def addproducts(request):
     if request.method == 'POST':
         productname = request.POST.get('productname')
         description = request.POST.get('description')
-        brand = request.POST.get('brandname')
-        category_ids = request.POST.getlist('category')  
+        brand_name = request.POST.get('brandname')
+        category_ids = request.POST.getlist('category')
+        color = request.POST.get('color')
+        occasion = request.POST.get('occasion')
+        fit = request.POST.get('fit')
 
-        try:
-            brand = Brand.objects.get(brandname=brand)
-        except Brand.DoesNotExist:
-            brand = None  
-
-        product = Product.objects.create(
-            product_name=productname,
-            description=description,
-            brand=brand
-        ) 
-        product.category.set(category_ids)  
-        messages.success(request, 'Product added successfully!')  
-        return redirect('products:view_products')  
-    # categories = Category.objects.all()
-    categories = Category.objects.filter(is_deleted=False)
-    # brands = Brand.objects.all()
-    brands = Brand.objects.filter(is_deleted=False)
-    return render(request, 'admin/product.html', {'categories': categories, 'brands': brands})
-
-
-@login_required(login_url='accounts:admin_login')
-@never_cache
-@user_passes_test(is_staff,'accounts:admin_login')
-def view_products(request):
-    products=Product.objects.all().order_by('is_deleted', '-created_at')
-    # products = Product.objects.filter(brand__is_deleted=False, category__is_deleted=False).order_by('is_deleted', '-created_at')
-
-    # brands = Brand.objects.all()
-    brands = Brand.objects.filter(is_deleted=False)
-    # categories = Category.objects.all()
-    categories = Category.objects.filter(is_deleted=False)
-
-
-    return render(request,'admin/product.html',{'products':products ,'brands': brands,'categories': categories})
-
-
-
-def edit_product(request, product_id):
-    products = get_object_or_404(Product, product_id=product_id)
-    # brands = Brand.objects.all() 
-    brands = Brand.objects.filter(is_deleted=False)
-    # categories = Category.objects.all() 
-    categories = Category.objects.filter(is_deleted=False)
-
-
-    if request.method == 'POST':
-        products.product_name = request.POST.get('product_name')
-        products.description = request.POST.get('description')
-        products.brand_id = request.POST.get('brandname')  
-        category_id = request.POST.get('category')
-        
-        if category_id:
-            products.category.set([category_id]) 
-        products.save()  
-        messages.success(request, 'Product updated successfully!')  
-        return redirect('products:view_products') 
-    return render(request, 'admin/product.html', {'products': products,'brands': brands,'categories': categories,})
-
-
-def soft_delete_product(request, product_id):
-    product = get_object_or_404(Product, product_id=product_id)
-    product.is_deleted = True
-    product.save()
-    messages.success(request, 'Product successfully soft Unlisted!')
-    return redirect('products:view_products')
-
-
-def restore_product(request, product_id):
-    product = get_object_or_404(Product, product_id=product_id)
-    product.is_deleted = False
-    product.save()
-    messages.success(request, 'Product successfully listed!')
-    return redirect('products:view_products') 
-
-
-@login_required(login_url='accounts:admin_login')
-@never_cache
-@user_passes_test(is_staff,'accounts:admin_login')
-def add_variants(request, product_id):
-    product = get_object_or_404(Product, product_id=product_id)
-
-    if request.method == 'POST':
-        # Get uploaded images
         image1 = request.FILES.get('image1')
         image2 = request.FILES.get('image2')
         image3 = request.FILES.get('image3')
         image4 = request.FILES.get('image4')
 
-        size = request.POST.getlist('sizes[]')
-        color = request.POST.get('color').strip()
-        occation = request.POST.get('occasions').strip()
-        fit = request.POST.get('fit').strip()
-        price = request.POST.get('price').strip()
-        quantity = request.POST.get('quantity').strip()
+        try:
+            brand = Brand.objects.get(brandname=brand_name)
+        except Brand.DoesNotExist:
+            brand = None
 
-        errors = {}
-        if not size:
-            errors['size_error'] = "At least one size must be selected."
-
-        if not color or color.strip() == "":
-            errors['color_error'] = "Color is required."
-
-        if not occation or occation.strip() == "":
-            errors['occasion_error'] = "Occasion is required."
-
-        if not fit or fit.strip() == "":
-            errors['fit_error'] = "Fit is required."
-
-        if not price or price.strip() == "":
-            errors['price_error'] = "Price is required."
-        else:
-            try:
-                price = float(price)
-                if price < 0:
-                    errors['price_error'] = "Price must be a positive number."
-            except (ValueError, TypeError):
-                errors['price_error'] = "Price must be a valid number."
-
-        if not quantity or quantity.strip() == "":
-            errors['quantity_error'] = "Quantity is required."
-        else:
-            try:
-                quantity = int(quantity)
-                if quantity < 1:
-                    errors['quantity_error'] = "Quantity must be at least 1."
-            except (ValueError, TypeError):
-                errors['quantity_error'] = "Quantity must be a valid integer."
-
-        if errors:
-            for error in errors.values():
-                messages.error(request, error)
-            return render(request, 'admin/add_variants.html', {'product': product})
-
-        variant = Variant(
+        product = ProductDetails.objects.create(
+            product_name=productname,
+            description=description,
+            brand=brand,
+            color=color,
+            occasion=occasion,
+            fit=fit,
             image1=image1,
             image2=image2,
             image3=image3,
-            image4=image4,
-            size=size,
-            color=color,
-            occation=occation,
-            fit=fit,
-            price=price,
-            qty=quantity,
-            status=True,  
-            product=product,  
+            image4=image4
         )
-        variant.save()
-        messages.success(request, 'Variant added successfully!')
-        return redirect('products:view_variants', product_id=product_id)
+        product.category.set(category_ids)  
+        messages.success(request, 'Product added successfully!')  
+        return redirect('products:viewproducts')  
 
-    return render(request, 'admin/add_variants.html', {'product': product})
+    categories = Category.objects.filter(is_deleted=False)
+    brands = Brand.objects.filter(is_deleted=False)
+    return render(request, 'admin/products/product.html',{'categories': categories, 'brands': brands})
+
+
+def editproduct(request, product_id):
+    product = get_object_or_404(ProductDetails, product_id=product_id)
+
+    brands = Brand.objects.filter(is_deleted=False)
+    categories = Category.objects.filter(is_deleted=False)
+
+    if request.method == 'POST':
+        product.product_name = request.POST.get('product_name')
+        if not product.product_name:
+            messages.error(request, 'Product name cannot be empty.')
+            return redirect('products:viewproducts')
+
+        product.description = request.POST.get('description')
+
+        brand_id = request.POST.get('brandname')
+        product.brand_id = brand_id if brand_id else product.brand_id
+
+        category_ids = request.POST.getlist('category')
+        product.category.set(category_ids)
+        product.color = request.POST.get('color')
+        product.occasion = request.POST.get('occasion')
+        product.fit = request.POST.get('fit')
+
+        if 'image1' in request.FILES:
+            product.image1 = request.FILES['image1']
+        if 'image2' in request.FILES:
+            product.image2 = request.FILES['image2']
+        if 'image3' in request.FILES:
+            product.image3 = request.FILES['image3']
+        if 'image4' in request.FILES:
+            product.image4 = request.FILES['image4']
+
+        product.save()
+        messages.success(request, 'Product updated successfully!')
+        return redirect('products:viewproducts')
+
+    return render(request, 'admin/products/product.html', {
+        'product': product,
+        'brands': brands,
+        'categories': categories,
+    })
+
+
+def softdelete_product(request, product_id):
+    product = get_object_or_404(ProductDetails, product_id=product_id)
+    product.is_deleted = True
+    product.save()
+    messages.success(request, 'Product successfully soft Unlisted!')
+    return redirect('products:viewproducts')
+
+
+def restoreproduct(request, product_id):
+    product = get_object_or_404(ProductDetails, product_id=product_id)
+    product.is_deleted = False
+    product.save()
+    messages.success(request, 'Product successfully listed!')
+    return redirect('products:viewproducts')
 
 
 @login_required(login_url='accounts:admin_login')
 @never_cache
 @user_passes_test(is_staff,'accounts:admin_login')
-def view_variants(request, product_id):
-    product = get_object_or_404(Product, product_id=product_id)
-    variants = Variant.objects.filter(product=product)
-    variants_added = variants.exists()
-    return render(request, 'admin/variants.html', {'product': product, 'variants': variants,'variants_added': variants_added})
+def view_sizevariants(request, product_id):
+    product = get_object_or_404(ProductDetails, product_id=product_id)
+    variant_sizes = VariantSize.objects.filter(product=product)
+    
+    return render(request, 'admin/products/variantsize.html', {
+        'product': product,
+        'variant_sizes': variant_sizes
+    })
 
 
-@login_required(login_url='accounts:admin_login')
-@never_cache
-@user_passes_test(is_staff,'accounts:admin_login')
-def edit_variants(request, product_id):
-    product = get_object_or_404(Product, product_id=product_id)
-    variant = get_object_or_404(Variant, product=product)
-
-    if request.method == 'POST':
-        if request.FILES.get('image1'):
-            variant.image1 = request.FILES['image1']
-        if request.FILES.get('image2'):
-            variant.image2 = request.FILES['image2']
-        if request.FILES.get('image3'):
-            variant.image3 = request.FILES['image3']
-        if request.FILES.get('image4'):
-            variant.image4 = request.FILES['image4']
-
-        variant.size = request.POST.getlist('sizes[]')
-        variant.color = request.POST.get('colors')
-        variant.occation = request.POST.get('occasions') 
-        variant.fit = request.POST.get('fit')
-        variant.qty = request.POST.get('quantity', variant.qty)  
-        variant.price = request.POST.get('price', variant.price)
-
-        errors = {}
-
-        if not variant.size:
-            errors['size_error'] = "At least one size must be selected."
-
-        if not variant.color or variant.color.strip() == "":
-            errors['color_error'] = "Color is required."
-
-        if not variant.occation or variant.occation.strip() == "":
-            errors['occasion_error'] = "Occasion is required."
-
-        if not variant.fit or variant.fit.strip() == "":
-            errors['fit_error'] = "Fit is required."
-
-        if not variant.price or variant.price.strip() == "":
-            errors['price_error'] = "Price is required."
-        
-        else:
-            try:
-                variant.price = float(variant.price)
-                if variant.price < 0:
-                    errors['price_error'] = "Price must be a positive number."
-            except (ValueError, TypeError):
-                errors['price_error'] = "Price must be a valid number."
-
-        if not variant.qty or variant.qty.strip() == "":
-            errors['quantity_error'] = "Quantity is required."
-
-        else:
-            try:
-                variant.qty = int(variant.qty)
-                if variant.qty < 1:
-                    errors['quantity_error'] = "Quantity must be at least 1."
-            except (ValueError, TypeError):
-                errors['quantity_error'] = "Quantity must be a valid integer."
-
-        if errors:
-            for error in errors.values():
-                messages.error(request, error)
-            return render(request, 'admin/edit_variants.html', {'variant': variant, 'product': product})
-
-        variant.save()
-        messages.success(request, 'Variant updated successfully!')
-        return redirect('products:view_variants', product_id=product_id)
-
-    return render(request, 'admin/edit_variants.html', {'product': product, 'variant': variant})
-
-
-
-def delete_variants(request, product_id):
-    product = get_object_or_404(Product, product_id=product_id)
+def add_sizevariants(request, product_id):
+    product = get_object_or_404(ProductDetails, product_id=product_id)
 
     if request.method == 'POST':
-        variant_id = request.POST.get('variant_id')
-        if not variant_id: 
-            return redirect('products:view_variants', product_id=product_id)
-        variant = get_object_or_404(Variant, variant_id=variant_id, product=product)
-        variant.delete()
+        size = request.POST.get('size')
+        price = request.POST.get('price')
+        quantity = request.POST.get('quantity')
 
-        messages.success(request, 'Reset successfully!')
-        return redirect('products:view_variants', product_id=product_id)
-    variants = Variant.objects.filter(product=product)
-    return render(request, 'admin/variants.html', {'product': product, 'variants': variants})
+        if size and price and quantity:
+            VariantSize.objects.create(
+                product=product,  
+                size=size,
+                price=price,
+                qty=quantity
+            )
+            messages.success(request, 'Size variant added successfully!')
+            return redirect('products:view_sizevariants', product_id=product_id)  
+        else:
+            messages.error(request, 'All fields are required.')
 
+    return render(request, 'admin/products/variantsize.html', {'product': product})
+
+
+def edit_sizevariants(request, variant_id):
+    variant = get_object_or_404(VariantSize, variant_id=variant_id)
+
+    if request.method == 'POST':
+        size = request.POST.get('size')
+        price = request.POST.get('price')
+        quantity = request.POST.get('quantity')
+
+        if size and price and quantity:
+            variant.size = size
+            variant.price = price
+            variant.qty = quantity
+            variant.save() 
+
+            messages.success(request, 'Size variant updated successfully!')
+            return redirect('products:view_sizevariants', product_id=variant.product.product_id)
+        else:
+            messages.error(request, 'All fields are required.')
+
+    return render(request, 'admin/products/edit_variantsize.html', {
+        'variant': variant,
+        'product': variant.product
+    })
+
+
+def delete_sizevariant(request, variant_id):
+    variant = get_object_or_404(VariantSize, variant_id=variant_id)
+
+    if request.method == 'POST':
+        variant.delete()  
+        messages.success(request, f'Variant size {variant.size} has been permanently deleted!')
+        return redirect('products:view_sizevariants', product_id=variant.product.product_id)
+    
 

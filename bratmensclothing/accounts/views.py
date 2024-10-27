@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect
 from . models import Users
-from products.models import Variant,Product,Brand,Category
+from products.models import Brand,Category,ProductDetails,VariantSize
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password
@@ -93,7 +93,6 @@ def signup_user(request):
                 )
                 return JsonResponse({'status': 'success', 'redirect_url': reverse('accounts:otp_verify')})
             except Exception as e:
-                print(f"Email send error: {e}") 
                 return JsonResponse({'status': 'error', 'errors': {'email': 'Failed to send OTP. Please try again.'}}, status=500)
         else:
             return JsonResponse({'status': 'error', 'errors': {'password': 'Passwords do not match.'}}, status=400)
@@ -151,14 +150,6 @@ def resend_otp(request):
     if 'resend_otp' not in request.session:
         request.session['resend_otp'] = 0  # Set a default value to prevent KeyError
     
-    # Check if the user can resend the OTP
-
-    # if 'otp' in request.session and time.time() < request.session['resend_otp']:
-    #     remaining_time = request.session['resend_otp'] - time.time()
-    #     minutes = int(remaining_time // 60)
-    #     seconds = int(remaining_time % 60)
-    #     return JsonResponse({'status': 'error', 'message': f"You can resend the OTP in {minutes}m {seconds}s."})
-
     email = request.session.get('email')
 
     if email:
@@ -169,7 +160,6 @@ def resend_otp(request):
         # Update session with new OTP and expiry
         request.session['otp'] = otp
         request.session['otp_expiry'] = otp_expiry.timestamp()
-        # request.session['resend_otp'] = time.time() + 60  # Allow resend after 60 seconds
 
         # Attempt to send the new OTP email
         try:
@@ -231,21 +221,26 @@ def login_user(request):
 
     return render(request, 'user/login.html')
 
+
+
+def reset_password(request):
+
+    return render(request,'user/reset_password.html')
+
+
 @never_cache
 def home_user(request):
-    # variants = Variant.objects.select_related('product__brand').prefetch_related('product__category').all()
-    # variants = Variant.objects.select_related('product__brand').prefetch_related('product__category').filter(product__is_deleted=False)
-    variants = (
-        Variant.objects.select_related('product__brand')
-        .prefetch_related('product__category')
-        .filter(                      
-            Q(product__is_deleted=False),             # Product is not deleted
-            Q(product__brand__is_deleted=False),      # Brand of product is not deleted
-            Q(product__category__is_deleted=False)    # Categories of product are not deleted
+    products=(
+        ProductDetails.objects.select_related('brand')
+        .prefetch_related('category','variants')
+        .filter(
+            Q(is_deleted=False),
+            Q(brand__is_deleted=False),
+            Q(category__is_deleted=False)
         )
+
     )
-    
-    return render(request,'user/home.html',{'variants':variants})
+    return render(request,'user/home.html',{'products':products})
 
 
 @never_cache
@@ -283,5 +278,3 @@ def admin_login(request):
 def admin_logout(request):
     logout(request)
     return redirect('accounts:admin_login')
-
-

@@ -1,0 +1,136 @@
+{% extends "user/base.html" %}
+
+
+{% block content %}  
+{% load static %}
+
+<style>
+    #profileImageInput {
+        display: none; /* Hide the default file input */
+    }
+</style>
+
+
+   <!--====== App Content ======-->
+   <div class="app-content">
+
+    <!--====== Section 1 ======-->
+    <div class="u-s-p-b-30">
+
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="container">
+                <div class="breadcrumb">
+                    <div class="breadcrumb__wrap">
+                        <ul class="breadcrumb__list">
+                            <li class="has-separator">
+
+                                <a href="">Home</a></li>
+                            <li class="is-marked">
+
+                                <a href="">My Account</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--====== End - Section 1 ======-->
+
+
+    <!--====== Section 2 ======-->
+    <div class="u-s-p-b-60">
+
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="dash">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-3 col-md-12">
+
+                            <!--====== Dashboard Features ======-->
+                            <div class="dash__box dash__box--bg-white dash__box--shadow u-s-m-b-30">
+                                <div class="dash__pad-1">
+
+                                    <span class="dash__text u-s-m-b-16">Hello, Ashique</span>
+                                    <ul class="dash__f-list">
+
+                                        <li>
+
+                                            <a class="dash-active" href="{% url 'userss:accountdetails' user.userid %}">My Profile</a></li>
+                                        <li>
+
+                                            <a href="{% url 'userss:addressdetails' user.userid %}">Address Book</a></li>
+                                        <li>
+
+                                            <a href="">My Orders</a></li>
+                                        <li>
+
+                                            <a href="">My Wishlist</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                           
+                            <!--====== End - Dashboard Features ======-->
+                        </div>
+                        <div class="col-lg-9 col-md-12">
+                            <div class="dash__box dash__box--shadow dash__box--radius dash__box--bg-white">
+                                <div class="dash__pad-2">
+                                    <h1 class="dash__h1 u-s-m-b-14">Edit Profile</h1>
+
+                                    <span class="dash__text u-s-m-b-30">Looks like you haven't update your profile</span>
+
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <form class="dash-edit-p" method="post" action="">
+                                                {% csrf_token %}
+                                                <div class="gl-inline">
+                                                    <div class="u-s-m-b-30">
+
+                                                        <label class="gl-label" for="reg-fname">User name *</label>
+
+                                                        <input class="input-text input-text--primary-style" name="username" required value="{{ user.username }}" type="text" id="reg-fname" placeholder="">
+                                                    </div>
+                                                    <div class="u-s-m-b-30">
+
+                                                        <label class="gl-label" for="reg-lname">E mail * </label>
+
+                                                        <input class="input-text input-text--primary-style" name="email" value="{{ user.email }}"  type="email" id="reg-lname" placeholder="">
+                                                    </div>
+                                                </div>
+                                                <div class="gl-inline">
+                                                    <div class="u-s-m-b-30">
+                                                        
+                                                        <label class="gl-label" for="reg-lname">Phone </label>
+
+                                                        <input class="input-text input-text--primary-style"  name="phone" value="{{ user.phone_number }}"  type="number" id="reg-lname" placeholder="">
+                                                    </div>
+                                                    <div class="u-s-m-b-30">
+                                                        <h2 class="dash__h2 u-s-m-b-8"></h2>
+
+                                                        <span class="dash__text">Please Enter Valid Details *</span>
+                                                        <div class="dash__link dash__link--secondary">
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <button class="btn btn--e-brand-b-2" type="submit">SAVE</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--====== End - Section Content ======-->
+    </div>
+    <!--====== End - Section 2 ======-->
+</div>
+     
+
+
+{% endblock %}

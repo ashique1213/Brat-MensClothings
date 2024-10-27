@@ -1,7 +1,9 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from accounts.models import Users
+from products.models import ProductDetails
 from django.contrib import messages
-from products.models import Variant,Product,Category,Brand
+from products.models import Category,Brand
+from .models import Address
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.views.decorators.cache import never_cache
 from django.db.models import Q
@@ -35,46 +37,141 @@ def unblock_user(request,userid):
     messages.success(request,'User Un-Blocked Succesfully')
     return redirect('userss:view_user')
 
-
+@never_cache
 def category_details(request):
-    # variants = Variant.objects.select_related('product__brand').prefetch_related('product__category').all()
-    # variants = Variant.objects.select_related('product__brand').prefetch_related('product__category').filter(product__is_deleted=False)
-    variants = (
-        Variant.objects.select_related('product__brand')
-        .prefetch_related('product__category')
+    products=(
+        ProductDetails.objects.select_related('brand')
+        .prefetch_related('category','variants')
         .filter(
-            Q(product__is_deleted=False),             # Product is not deleted
-            Q(product__brand__is_deleted=False),      # Brand of product is not deleted
-            Q(product__category__is_deleted=False)    # Categories of product are not deleted
+            Q(is_deleted=False),
+            Q(brand__is_deleted=False),
+            Q(category__is_deleted=False)
         )
+
     )
-    return render(request,'user/categorylist.html',{'variants':variants})
+    return render(request,'user/categorylist.html',{'products':products})
 
 
 def product_details(request, product_id):
-    # productdetails = get_object_or_404(Product, product_id=product_id)
-    # varaints=Variant.objects.filter(product=productdetails)
-    # allvariants=Variant.objects.select_related('product__brand').prefetch_related('product__category').all()
-    
-    # productdetails = get_object_or_404(Product, product_id=product_id, is_deleted=False)
-    # varaints = Variant.objects.filter(product=productdetails)
-    # allvariants = Variant.objects.select_related('product__brand').prefetch_related('product__category').filter(product__is_deleted=False) 
-    
-    productdetails = get_object_or_404(Product, product_id=product_id, is_deleted=False)
-    varaints = Variant.objects.filter(product=productdetails)
-    allvariants = (
-        Variant.objects.select_related('product__brand')
-        .prefetch_related('product__category')
+    product = get_object_or_404(ProductDetails, product_id=product_id, is_deleted=False)
+    products=(
+        ProductDetails.objects.select_related('brand')
+        .prefetch_related('category','variants')
         .filter(
-            product__is_deleted=False,        # Product is not deleted
-            product__brand__is_deleted=False, # Brand is not deleted
-            product__category__is_deleted=False  # Category is not deleted
+            Q(is_deleted=False),
+            Q(brand__is_deleted=False),
+            Q(category__is_deleted=False)
         )
-    )
-    return render(request, 'user/productdetails.html', 
-                  {'productdetails': productdetails,
-                   'varaints':varaints,
-                   'allvariants':allvariants
-                   })
 
+    )  
+    return render(request, 'user/productdetails.html', 
+        {
+            'product': product,
+            'products':products
+         })
+
+
+
+@never_cache
+def account_details(request,userid):
+    user = get_object_or_404(Users, userid=userid)
+ 
+    return render(request, 'user/accountdetails.html', {'user': user})
+
+@never_cache
+def edit_account_details(request, userid):
+    userdetails = get_object_or_404(Users, userid=userid)
+
+    if request.method == 'POST':
+        email = request.POST.get('email').strip()
+        username = request.POST.get('username').strip()
+        phone = request.POST.get('phone').strip()
+        
+        userdetails.email = email
+        userdetails.username = username
+        userdetails.phone_number = phone
+        
+        userdetails.save() 
+        
+        messages.success(request, 'Your account details have been updated successfully.')
+        
+        return redirect('userss:accountdetails',userid=userid)  
+
+    return render(request, 'user/edit_account.html', {'user': userdetails})
+
+
+
+@never_cache
+def address_details(request, userid):
+    user = get_object_or_404(Users, userid=userid)
+    addresses = Address.objects.filter(user=user)
+
+    return render(request, 'user/address.html', {'addresses': addresses})
+
+
+@never_cache
+def add_address(request,userid):
+    user_id=get_object_or_404(Users,userid=userid)
+
+    if request.method=='POST':
+        address=request.POST.get('address').strip()
+        street=request.POST.get('street').strip()
+        landmark=request.POST.get('landmark').strip()
+        city=request.POST.get('city').strip()
+        pincode=request.POST.get('pincode').strip()
+        district=request.POST.get('district').strip()
+        state=request.POST.get('state').strip()
+
+        Address.objects.create(
+            address=address,
+            street=street,
+            landmark=landmark,
+            city=city,
+            pincode=pincode,
+            district=district,
+            state=state,
+            user=user_id
+        )
+        return redirect('userss:addressdetails',userid=userid)
+    
+    return render(request,'user/add_address.html')
+
+
+@never_cache
+def remove_address(request, id):
+    address = get_object_or_404(Address, id=id) 
+    user_id = address.user.userid  
+    address.delete() 
+    messages.success(request, 'Address has been successfully deleted.')
+    return redirect('userss:addressdetails', userid=user_id) 
+
+
+@never_cache
+def edit_address(request, id):
+    address = get_object_or_404(Address, id=id)
+    user_id = address.user.userid 
+
+    if request.method == 'POST':
+        addres = request.POST.get('address').strip()
+        street = request.POST.get('street').strip()
+        landmark = request.POST.get('landmark').strip()
+        city = request.POST.get('city').strip()
+        pincode = request.POST.get('pincode').strip()
+        district = request.POST.get('district').strip()
+        state = request.POST.get('state').strip()
+
+        address.address = addres
+        address.street = street
+        address.landmark = landmark
+        address.city = city
+        address.pincode = pincode
+        address.district = district
+        address.state = state
+
+        address.save()
+        messages.success(request, 'Your Address details have been updated successfully.')
+
+        return redirect('userss:addressdetails', userid=user_id)
+
+    return render(request, 'user/edit_address.html', {'address': address})
 

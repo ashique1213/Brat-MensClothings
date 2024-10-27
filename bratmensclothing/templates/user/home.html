@@ -169,7 +169,7 @@
                     <div class="col-lg-12">
                         <div class="filter__grid-wrapper u-s-m-t-30">
 
-                            {% for variant in variants %}
+                            {% for product in products %}
                             <div class="row">
                                 <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 u-s-m-b-30 filter__item ">
                                     <div class="product-o product-o--hover-on product-o--radius">
@@ -177,7 +177,7 @@
 
                                             <a class="aspect aspect--bg-grey aspect--square u-d-block" href="">
 
-                                                <img class="aspect__img object-cover" src="{{ variant.image1.url }}" alt=""></a>
+                                                <img class="aspect__img object-cover" src="{{ product.image1.url }}" alt=""></a>
                                             <div class="product-o__action-wrap">
                                                 <ul class="product-o__action-list">
                                                     <li>
@@ -196,19 +196,20 @@
 
                                         <span class="product-o__category">
 
-                                            <a href="">{{ variant.product.brand.brandname }}</a></span>
+                                            <a href="">{{ product.brand.brandname }}</a></span>
 
                                         <span class="product-o__name">
 
-                                            <a href="">{{ variant.product.product_name }}</a></span>
+                                            <a href="">{{ product.product_name }}</a></span>
                                         <div class="product-o__rating gl-rating-style"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
 
                                             <!-- <span class="product-o__review">(23)</span> -->
                                         </div>
-
-                                        <span class="product-o__price">₹{{ variant.price}}
-
+                                        {% if product.variants.all %}
+                                        <span class="product-o__price">₹{{product.variants.all.0.price}}
                                             <span class="product-o__discount">₹160.00</span></span>
+                                            {% endif %}
+
                                     </div>
                                 </div>
                             </div>

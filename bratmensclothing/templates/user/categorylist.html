@@ -13,7 +13,6 @@
                         <div class="breadcrumb__wrap">
                             <ul class="breadcrumb__list">
                                 <li class="has-separator">
-
                                     <a href="{% url 'accounts:home_user' %}">Home</a></li>
                                 <li class="is-marked">
 
@@ -36,7 +35,6 @@
             <div class="col-lg-3 col-md-12">
                 <div class="shop-w-master">
                     <h1 class="shop-w-master__heading u-s-m-b-30"><i class="fas fa-filter u-s-m-r-8"></i>
-
                     <span>FILTERS</span></h1>
                     <div class="shop-w-master__sidebar sidebar--bg-snow">
                         <div class="u-s-m-b-30">
@@ -440,13 +438,13 @@
 
                     <div class="shop-p__collection">
                         <div class="row is-grid-active">
-                            {% for variant in variants %}
+                            {% for product in products %}
                             <div class="col-lg-4 col-md-6 col-sm-6">
                                 <div class="product-m" >
                                     <div class="product-m__thumb">
 
                                         <a class="aspect aspect--bg-grey aspect--square u-d-block" href="">
-                                            <img class="aspect__img" src="{{ variant.image1.url }}" alt="" >
+                                            <img class="aspect__img" src="{{ product.image1.url }}" alt="" >
                                         </a>
                                         <div class="product-m__quick-look">
 
@@ -459,18 +457,20 @@
                                     <div class="product-m__content">
                                         <div class="product-m__category">
 
-                                            <a href="">{{ variant.product.brand.brandname }}</a></div>
+                                            <a href="">{{ product.brand.brandname}}</a></div>
                                         <div class="product-m__name">
 
-                                            <a href="{% url 'userss:product_details' variant.product.product_id %}">{{ variant.product.product_name }}</a></div>
+                                            <a href="{% url 'userss:product_details' product.product_id %}">{{ product.product_name }}</a></div>
                                         <div class="product-m__rating gl-rating-style"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i><i class="far fa-star"></i><i class="far fa-star"></i>
 
                                             <span class="product-m__review">()</span></div>
-                                        <div class="product-m__price">₹{{ variant.price}}</div>
+                                        {% if product.variants.all %}
+                                        <div class="product-m__price">₹{{ product.variants.all.0.price}}</div>
+                                        {% endif %}
                                         <div class="product-m__hover">
                                             <div class="product-m__preview-description">
 
-                                                <span>{{ variant.product.description }}</span></div>
+                                                <span>{{ product.description }}</span></div>
                                             <div class="product-m__wishlist">
 
                                                 <a class="far fa-heart" href="#" data-tooltip="tooltip" data-placement="top" title="Add to Wishlist"></a></div>
