@@ -100,9 +100,9 @@
                                             <div class="u-s-m-b-16">
 
                                                 <a class="dash__custom-link btn--e-transparent-brand-b-2" href="{% url 'userss:edit_account_dtails' user.userid %}">Edit Profile</a></div>
-                                            <!-- <div>
+                                            <div>
 
-                                                <a class="dash__custom-link btn--e-brand-b-2" href="#">Change Password</a></div> -->
+                                                <a class="dash__custom-link btn--e-brand-b-2" href="{% url 'userss:resetpassword' user.userid %}">Change Password</a></div>
                                         </div>
                                     </div>
                                 </div>

@@ -72,7 +72,7 @@
                             <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
                             Users
                         </a>
-                        <a class="nav-link active" href="{% url 'products:view_brands' %}">
+                        <a class="nav-link " href="{% url 'products:view_brands' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-flag"></i></div>
                             Brands
                         </a>
@@ -80,7 +80,7 @@
                             <div class="sb-nav-link-icon"><i class="fas fa-list"></i></div>
                             Category
                         </a>
-                        <a class="nav-link" href="{% url 'products:viewproducts' %}">
+                        <a class="nav-link active" href="{% url 'products:viewproducts' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-box-open"></i></div>
                             Products
                         </a>
@@ -106,6 +106,30 @@
             </nav>
         </div>
 
+
+        {% if messages %}
+        <div aria-live="polite" aria-atomic="true" style="position: relative;">
+            <div id="toast-container" class="toast-container position-fixed end-0 translate-middle-y p-3" style="top: 150px;">
+                {% for message in messages %}
+                    {% if message.tags == 'success' %}
+                        <div class="toast show bg-success text-white" role="alert" aria-live="assertive" aria-atomic="true">
+                    {% elif message.tags == 'error' %}
+                        <div class="toast show bg-danger text-white" role="alert" aria-live="assertive" aria-atomic="true">
+                    {% elif message.tags == 'info' %}
+                        <div class="toast show bg-info text-white" role="alert" aria-live="assertive" aria-atomic="true">
+                    {% elif message.tags == 'warning' %}
+                        <div class="toast show bg-warning text-dark" role="alert" aria-live="assertive" aria-atomic="true">
+                    {% else %}
+                        <div class="toast show bg-secondary text-white" role="alert" aria-live="assertive" aria-atomic="true">
+                    {% endif %}
+                            <div class="toast-body">
+                                {{ message }}
+                            </div>
+                        </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
 
 
         <div id="layoutSidenav_content">
@@ -490,7 +514,14 @@
 
     <script>
 
-        
+        document.addEventListener("DOMContentLoaded", function() {
+            const toasts = document.querySelectorAll('.toast');
+            toasts.forEach(toast => {
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000); // Change this to adjust how long the toast is displayed
+            });
+        });
 
         $('body').on('show.bs.modal', '.modal', function (event) {
             var button = $(event.relatedTarget); 

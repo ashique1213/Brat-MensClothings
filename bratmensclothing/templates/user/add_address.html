@@ -3,6 +3,17 @@
 
 {% block content %}  
 
+<style>
+
+    p.error {
+        font-size: 10px;
+        margin-left: 5px;
+        color: red; /* Set the text color to red for error messages */
+      }
+      
+</style>
+
+
  <!--====== App Content ======-->
  <div class="app-content">
 
@@ -78,7 +89,10 @@
 
                                                 <label class="gl-label">ADDRESS *</label>
 
-                                                <input class="input-text input-text--primary-style" required name="address" type="text" id="address-fname" placeholder="Address">
+                                                <input class="input-text input-text--primary-style"  name="address" type="text" id="address-fname" placeholder="Address">
+                                                {% if errors.address_error %}
+                                                <p class="error">{{ errors.address_error }}</p> <!-- Display username error in red -->
+                                                {% endif %}
                                             </div>
                                         </div>
                                         <div class="gl-inline">
@@ -87,12 +101,18 @@
                                                 <label class="gl-label" >STREET *</label>
 
                                             <input class="input-text input-text--primary-style" required name="street" type="text" id="address-lname" placeholder="Street">
-                                            </div>
+                                            {% if errors.street_error %}
+                                            <p class="error">{{ errors.street_error }}</p> <!-- Display username error in red -->
+                                            {% endif %}    
+                                        </div>
                                             <div class="u-s-m-b-30">
 
-                                                <label class="gl-label" for="address-phone">LANDMARK *</label>
+                                                <label class="gl-label" for="address-phone">LANDMARK </label>
 
                                                 <input class="input-text input-text--primary-style" required name="landmark" type="text" id="address-phone" placeholder="landmark">
+                                                {% if errors.landmark_error %}
+                                                <p class="error">{{ errors.landmark_error }}</p> <!-- Display username error in red -->
+                                                {% endif %}
                                             </div>
                                         </div>
                                         <div class="gl-inline">
@@ -100,13 +120,23 @@
 
                                                 <label class="gl-label" for="address-city">TOWN/CITY *</label>
 
-                                                <input class="input-text input-text--primary-style" required name="city" type="text" id="address-city"></div>
-                                            <div class="u-s-m-b-30">
+                                                <input class="input-text input-text--primary-style" required name="city" type="text" id="address-city">
+                                                {% if errors.city_error %}
+                                                <p class="error">{{ errors.city_error }}</p> <!-- Display username error in red -->
+                                                {% endif %}
+                                            </div>
+                                                
+                                                <div class="u-s-m-b-30">
 
                                                 <label class="gl-label" for="address-street">ZIP/POSTAL CODE *</label>
 
-                                                <input class="input-text input-text--primary-style" required name="pincode" type="text" id="address-postal" placeholder="Zip/Postal Code"></div>
-                                        </div>
+                                                <input class="input-text input-text--primary-style" required name="pincode" type="text" id="address-postal" placeholder="Zip/Postal Code">
+                                                {% if errors.pincode_error %}
+                                                <p class="error">{{ errors.pincode_error }}</p> <!-- Display username error in red -->
+                                                {% endif %}
+                                            </div>
+                                                
+                                            </div>
                                         <div class="gl-inline">
                                             <div class="gl-inline">
                                                 <div class="u-s-m-b-30">
@@ -135,6 +165,9 @@
                                                 <label class="gl-label" for="address-street">STATE *</label>
 
                                                 <input class="input-text input-text--primary-style" required name="state" type="text" id="address-street" placeholder="State">
+                                                {% if errors.state_error %}
+                                                <p class="error">{{ errors.state_error }}</p> <!-- Display username error in red -->
+                                                {% endif %}
                                             </div>
                                         </div>
                                        

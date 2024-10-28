@@ -7,6 +7,11 @@ from .models import Address
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.views.decorators.cache import never_cache
 from django.db.models import Q
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
+
+import re
 
 
 def is_staff(user):
@@ -86,6 +91,41 @@ def edit_account_details(request, userid):
         email = request.POST.get('email').strip()
         username = request.POST.get('username').strip()
         phone = request.POST.get('phone').strip()
+
+        errors = {}
+
+        if not username:
+            errors['username_error'] = 'Username is required.'
+        elif any(char.isdigit() or char.isspace() for char in username):
+            errors['username_error'] = 'Username should not contain numbers or spaces.'
+        elif len(username) < 3:
+            errors['username_error'] = 'Username must be at least 3 characters long.'
+        elif Users.objects.filter(username=username).exclude(userid=userid).exists():
+            errors['username_error'] = 'This username is already taken.'
+
+        if not email:
+            errors['email_error'] = 'Email is required.'
+        else:
+            try:
+                validate_email(email)  
+            except ValidationError:
+                errors['email_error'] = 'Enter a valid email address.'
+
+            if Users.objects.filter(email=email).exclude(userid=userid).exists():
+                errors['email_error'] = 'This email is already in use.'
+    
+
+        if Users.objects.filter(email=email).exclude(userid=userid).exists():
+            errors['email_error'] = 'This email is already in use.'
+
+        if phone: 
+            if not re.match(r'^\+?[1-9]\d{1,14}$', phone):  
+                errors['phone_error'] = 'Enter a valid phone number.'
+            elif Users.objects.filter(phone_number=phone).exclude(userid=userid).exists():
+                errors['phone_error'] = 'This phone number is already in use.'
+
+        if errors:
+            return render(request, 'user/edit_account.html', {'errors': errors, 'user': userdetails})
         
         userdetails.email = email
         userdetails.username = username
@@ -99,6 +139,34 @@ def edit_account_details(request, userid):
 
     return render(request, 'user/edit_account.html', {'user': userdetails})
 
+@never_cache
+def reset_password(request, userid):
+    user = get_object_or_404(Users, userid=userid)
+
+    if request.method == 'POST':
+        new_password = request.POST.get('new_password').strip()
+        confirm_password = request.POST.get('confirm_password').strip()
+
+        errors = {}
+
+        if not new_password:
+            errors['password_error'] = 'Password is required.'
+        elif len(new_password) < 8:  # Example validation rule
+            errors['password_error'] = 'Password must be at least 8 characters long.'
+        
+        if new_password != confirm_password:
+            errors['confirm_password_error'] = 'Passwords do not match.'
+
+        if errors:
+            return render(request, 'user/reset_password.html', {'errors': errors, 'user': user})
+
+        # Set the new password
+        user.set_password(new_password)
+        user.save()
+        messages.success(request, 'Your password has been reset successfully.')
+        return redirect('login')  # Redirect to the login page or wherever necessary
+
+    return render(request, 'user/reset_password.html', {'user': user})
 
 
 @never_cache
@@ -121,6 +189,42 @@ def add_address(request,userid):
         pincode=request.POST.get('pincode').strip()
         district=request.POST.get('district').strip()
         state=request.POST.get('state').strip()
+        
+        errors = {}
+
+        if not address:
+            errors['address_error'] = 'Address is required.'
+        elif len(address) < 10:
+            errors['address_error'] = 'Address must be at least 10 characters long.'
+
+        if not street:
+            errors['street_error'] = 'Street is required.'
+        elif len(street) < 3:
+            errors['street_error'] = 'Street must be at least 3 characters long.'
+
+        if not landmark:
+            errors['landmark_error'] = 'Landmark is required.'
+        elif len(landmark) < 3:
+            landmark['landmark_error'] = 'Landmark must be at least 3 characters long.'
+
+        if not city:
+            errors['city_error'] = 'City is required.'
+        elif len(city) < 3:
+            errors['city_error'] = 'City must be at least 3 characters long.'
+
+        pincode_regex = RegexValidator(regex=r'^\d{6}$', message='Pincode must be a 6-digit number.')
+        try:
+            pincode_regex(pincode)
+        except ValidationError:
+            errors['pincode_error'] = 'Pincode must be a valid 6-digit number.'
+
+        if not state:
+            errors['state_error'] = 'State is required.'
+        elif len(state) < 3:
+            errors['state_error'] = 'State must be at least 3 characters long.'
+
+        if errors:
+            return render(request, 'user/add_address.html', {'errors': errors, 'user': user_id})
 
         Address.objects.create(
             address=address,
@@ -167,6 +271,42 @@ def edit_address(request, id):
         address.pincode = pincode
         address.district = district
         address.state = state
+
+        errors = {}
+
+        if not addres:
+            errors['address_error'] = 'Address is required.'
+        elif len(addres) < 10:
+            errors['address_error'] = 'Address must be at least 10 characters long.'
+
+        if not street:
+            errors['street_error'] = 'Street is required.'
+        elif len(street) < 3:
+            errors['street_error'] = 'Street must be at least 3 characters long.'
+
+        if not landmark:
+            errors['landmark_error'] = 'Landmark is required.'
+        elif len(landmark) < 3:
+            landmark['landmark_error'] = 'Landmark must be at least 3 characters long.'
+
+        if not city:
+            errors['city_error'] = 'City is required.'
+        elif len(city) < 3:
+            errors['city_error'] = 'City must be at least 3 characters long.'
+
+        pincode_regex = RegexValidator(regex=r'^\d{6}$', message='Pincode must be a 6-digit number.')
+        try:
+            pincode_regex(pincode)
+        except ValidationError:
+            errors['pincode_error'] = 'Pincode must be a valid 6-digit number.'
+
+        if not state:
+            errors['state_error'] = 'State is required.'
+        elif len(state) < 3:
+            errors['state_error'] = 'State must be at least 3 characters long.'
+
+        if errors:
+            return render(request, 'user/edit_address.html', {'address': address, 'errors': errors})
 
         address.save()
         messages.success(request, 'Your Address details have been updated successfully.')

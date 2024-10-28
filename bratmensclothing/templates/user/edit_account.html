@@ -5,9 +5,13 @@
 {% load static %}
 
 <style>
-    #profileImageInput {
-        display: none; /* Hide the default file input */
-    }
+
+    p.error {
+        font-size: 10px;
+        margin-left: 5px;
+        color: red; /* Set the text color to red for error messages */
+      }
+      
 </style>
 
 
@@ -88,14 +92,23 @@
                                                     <div class="u-s-m-b-30">
 
                                                         <label class="gl-label" for="reg-fname">User name *</label>
-
+                                                        
                                                         <input class="input-text input-text--primary-style" name="username" required value="{{ user.username }}" type="text" id="reg-fname" placeholder="">
+                                                        {% if errors.username_error %}
+                                                        <p class="error">{{ errors.username_error }}</p> <!-- Display username error in red -->
+                                                        {% endif %}
                                                     </div>
+                                                    
                                                     <div class="u-s-m-b-30">
 
                                                         <label class="gl-label" for="reg-lname">E mail * </label>
+                                                        
 
                                                         <input class="input-text input-text--primary-style" name="email" value="{{ user.email }}"  type="email" id="reg-lname" placeholder="">
+                                                        {% if errors.email_error %}
+                                                        <p class="error">{{ errors.email_error }}</p> <!-- Display username error in red -->
+                                                        {% endif %}
+                                                   
                                                     </div>
                                                 </div>
                                                 <div class="gl-inline">
@@ -104,6 +117,9 @@
                                                         <label class="gl-label" for="reg-lname">Phone </label>
 
                                                         <input class="input-text input-text--primary-style"  name="phone" value="{{ user.phone_number }}"  type="number" id="reg-lname" placeholder="">
+                                                        {% if errors.phone_error %}
+                                                        <p class="error">{{ errors.phone_error }}</p> <!-- Display username error in red -->
+                                                        {% endif %}
                                                     </div>
                                                     <div class="u-s-m-b-30">
                                                         <h2 class="dash__h2 u-s-m-b-8"></h2>

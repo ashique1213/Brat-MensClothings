@@ -121,6 +121,7 @@
     
         $('#loginForm').on('submit', function(event) {
             event.preventDefault(); // Prevent the default form submission
+            $('.preloader').addClass('is-active');
     
             $.ajax({
                 type: 'POST',
@@ -134,6 +135,7 @@
                     }
                 },
                 error: function(xhr) {
+                    $('.preloader').removeClass('is-active');
                     if (xhr.status === 403) {
                         // Handle the blocked user error
                         Swal.fire({

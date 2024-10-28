@@ -4,6 +4,8 @@
 
 {% load socialaccount %}
 
+{% load static %}
+
 
 <!--====== Section 1 ======-->
 <div class="">
@@ -45,6 +47,7 @@
             </div>
         </div>
 <!--====== End - Section Intro ======-->
+
 
 
 <!--====== Section Content ======-->
@@ -125,6 +128,7 @@
 <!--====== End - Section 2 ======-->   
 
 <script>
+    
     $(document).ready(function() {
         // Set up CSRF token
         $.ajaxSetup({
@@ -135,13 +139,18 @@
     
         $('#signupForm').on('submit', function(event) {
             event.preventDefault(); // Prevent default form submission
-    
+            
+            //$('#loader').show();
+            $('.preloader').addClass('is-active'); 
+
             $.ajax({
                 type: 'POST',
                 url: '{% url "accounts:signup_user" %}',  // Use correct URL
                 data: $(this).serialize(),  // Serialize form data
                 dataType: 'json',  // Expect JSON response
                 success: function(response) {
+
+
                     if (response.status === 'success') {
                         // Redirect to the OTP verification page
                         window.location.href = response.redirect_url; 
@@ -164,7 +173,12 @@
                         });
                     }
                 },
+
                 error: function(xhr) {
+
+                    //$('#loader').hide();
+                    $('.preloader').removeClass('is-active');
+                    
                     if (xhr.status === 403) {
                         Swal.fire({
                             icon: 'error',

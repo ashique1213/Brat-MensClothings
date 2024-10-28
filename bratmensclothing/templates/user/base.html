@@ -100,11 +100,15 @@
       .brand-name {
         color: black; /* Set text color to black */
       }
+
+
+        /* Center the loader */
+       
     </style>
   </head>
   <body class="config">
     <div class="preloader is-active">
-      <div class="preloader__wrap">
+      <div class="preloader__wrap" >
         <img
           class="preloader__img"
           src="{% static 'images/preloader.png' %} "
@@ -112,6 +116,7 @@
         />
       </div>
     </div>
+
 
     <!--====== Main App ======-->
     <div id="app">
@@ -182,13 +187,13 @@
                         </li>
                         {% else %}
                         <li>
-                          <a href="{% url 'accounts:signup_user' %}"
+                          <a href="{% url 'accounts:signup_user' %}" id="signupButton"
                             ><i class="fas fa-user-plus u-s-m-r-6"></i>
                             <span>Signup</span>
                           </a>
                         </li>
                         <li>
-                          <a href="{% url 'accounts:login_user' %}"
+                          <a href="{% url 'accounts:login_user' %}" id="loginButtonn"
                             ><i class="fas fa-lock u-s-m-r-6"></i>
                             <span>Signin</span>
                           </a>
@@ -221,7 +226,7 @@
                         </li>
                         {% else %}
                         <li>
-                          <a href="{% url 'accounts:login_user' %}"
+                          <a href="{% url 'accounts:login_user' %}" id=""
                             ><i class="fas fa-lock u-s-m-r-6"></i>
                             <span>Signin</span>
                           </a>
@@ -306,7 +311,7 @@
                       <a href="{% url 'accounts:home_user' %}">HOME</a>
                     </li>
                     <li class="">
-                      <a href="{% url 'userss:category_details' %}"
+                      <a href="{% url 'userss:category_details' %}" id="categoriesLink"
                         >CATEGORIES
                         <!-- <i class="fas fa-angle-down u-s-m-l-6"></i> -->
                       </a>
@@ -595,6 +600,8 @@
     <!--====== End - Main App ======-->
 
     <!--====== Google Analytics: change UA-XXXXX-Y to be your site's ID ======-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
     <script>
       window.ga = function () {
         ga.q.push(arguments);
@@ -618,5 +625,35 @@
 
     <!--====== App ======-->
     <script src="{% static 'js/app.js' %}"></script>
+
+    <script>
+
+        $(document).ready(function() {
+            // Show the preloader when the login button is clicked
+            $('#loginButton').click(function() {
+                $('.preloader').addClass('is-active');
+            });
+
+            $('#loginButtonn').click(function() {
+                $('.preloader').addClass('is-active');
+            });
+        
+            // Show the preloader when the logout button is clicked
+            $('#logoutButton').click(function() {
+                $('.preloader').addClass('is-active');
+            });
+        
+            $('#signupButton').click(function() {
+                $('.preloader').addClass('is-active');
+            });
+        
+            
+            // Optional: Show the preloader on category link click
+            $('#categoriesLink').click(function() {
+                $('.preloader').addClass('is-active');
+            });
+        });
+        
+    </script>
   </body>
 </html>

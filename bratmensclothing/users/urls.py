@@ -30,6 +30,7 @@ urlpatterns = [
     
     path('accountdetails/<int:userid>',views.account_details,name='accountdetails'),
     path('edit_account_dtails/<int:userid>',views.edit_account_details,name='edit_account_dtails'),
+    path('resetpassword/<int:userid>',views.reset_password,name='resetpassword'),
     
     path('addressdetails/<int:userid>',views.address_details,name='addressdetails'),
     path('addaddress/<int:userid>',views.add_address,name='addaddress'),
