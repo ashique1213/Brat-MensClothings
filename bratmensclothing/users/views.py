@@ -10,7 +10,7 @@ from django.db.models import Q
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
-
+from django.contrib.auth.hashers import check_password
 import re
 
 
@@ -81,7 +81,7 @@ def product_details(request, product_id):
 def account_details(request,userid):
     user = get_object_or_404(Users, userid=userid)
  
-    return render(request, 'user/accountdetails.html', {'user': user})
+    return render(request, 'user/accountdetails.html', {'user':user})
 
 @never_cache
 def edit_account_details(request, userid):
@@ -144,37 +144,50 @@ def reset_password(request, userid):
     user = get_object_or_404(Users, userid=userid)
 
     if request.method == 'POST':
-        new_password = request.POST.get('new_password').strip()
-        confirm_password = request.POST.get('confirm_password').strip()
+        old_password = request.POST.get('oldpassword').strip()
+        new_password = request.POST.get('newpassword1').strip()
+        confirm_password = request.POST.get('newpassword2').strip()
 
         errors = {}
 
+        if not old_password:
+            errors['old_password_error'] = 'Old password is required.'
+        elif not check_password(old_password, user.password):
+            errors['old_password_error'] = 'Old password does not match.'
+
         if not new_password:
-            errors['password_error'] = 'Password is required.'
-        elif len(new_password) < 8:  # Example validation rule
-            errors['password_error'] = 'Password must be at least 8 characters long.'
-        
+            errors['password_error'] = 'New password is required.'
+        else:
+            if len(new_password) < 6:
+                errors['password_error'] = 'Password must be at least 6 characters long.'
+            if not re.search(r'[A-Z]', new_password):
+                errors['password_error'] = 'Password must include at least one uppercase letter.'
+            if not re.search(r'[a-z]', new_password):
+                errors['password_error'] = 'Password must include at least one lowercase letter.'
+            if not re.search(r'[0-9]', new_password):
+                errors['password_error'] = 'Password must include at least one digit.'
+            if not re.search(r'[!@#$%^&*(),.?":{}|<>]', new_password):
+                errors['password_error'] = 'Password must include at least one special character.'
+
         if new_password != confirm_password:
             errors['confirm_password_error'] = 'Passwords do not match.'
 
         if errors:
             return render(request, 'user/reset_password.html', {'errors': errors, 'user': user})
 
-        # Set the new password
         user.set_password(new_password)
         user.save()
         messages.success(request, 'Your password has been reset successfully.')
-        return redirect('login')  # Redirect to the login page or wherever necessary
+        return redirect('userss:accountdetails',userid=userid)
 
     return render(request, 'user/reset_password.html', {'user': user})
-
 
 @never_cache
 def address_details(request, userid):
     user = get_object_or_404(Users, userid=userid)
     addresses = Address.objects.filter(user=user)
 
-    return render(request, 'user/address.html', {'addresses': addresses})
+    return render(request, 'user/address.html', {'addresses': addresses,'user':user})
 
 
 @never_cache
@@ -195,7 +208,7 @@ def add_address(request,userid):
         if not address:
             errors['address_error'] = 'Address is required.'
         elif len(address) < 10:
-            errors['address_error'] = 'Address must be at least 10 characters long.'
+            errors['address_error'] = 'Address must be at least 100 characters long.'
 
         if not street:
             errors['street_error'] = 'Street is required.'
@@ -224,7 +237,7 @@ def add_address(request,userid):
             errors['state_error'] = 'State must be at least 3 characters long.'
 
         if errors:
-            return render(request, 'user/add_address.html', {'errors': errors, 'user': user_id})
+            return render(request, 'user/add_address.html', {'errors': errors, 'user':user_id})
 
         Address.objects.create(
             address=address,
@@ -238,7 +251,7 @@ def add_address(request,userid):
         )
         return redirect('userss:addressdetails',userid=userid)
     
-    return render(request,'user/add_address.html')
+    return render(request,'user/add_address.html',{'user':user_id})
 
 
 @never_cache

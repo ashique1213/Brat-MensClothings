@@ -7,7 +7,7 @@ class Address(models.Model):
     address = models.CharField(max_length=255)
     street = models.CharField(max_length=100)
     landmark = models.CharField(max_length=100)
-    city = models.CharField(max_length=20)
+    city = models.CharField(max_length=100)
     pincode = models.IntegerField()
     district = models.CharField(max_length=100)
     state = models.CharField(max_length=100)

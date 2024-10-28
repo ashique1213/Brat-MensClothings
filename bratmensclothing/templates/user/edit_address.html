@@ -60,10 +60,10 @@
 
                                         <li>
 
-                                            <a  href="{% url 'userss:accountdetails' user.userid %}">My Profile</a></li>
+                                            <a  href="{% url 'userss:accountdetails' address.user.userid %}">My Profile</a></li>
                                         <li>
 
-                                            <a class="dash-active" href="{% url 'userss:addressdetails' user.userid %}">Address Book</a></li>
+                                            <a class="dash-active" href="{% url 'userss:addressdetails' address.user.userid %}">Address Book</a></li>
                                         <li>
 
                                             <a href="">My Orders</a></li>
