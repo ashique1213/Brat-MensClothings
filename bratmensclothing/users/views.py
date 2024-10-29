@@ -56,7 +56,7 @@ def category_details(request):
     )
     return render(request,'user/categorylist.html',{'products':products})
 
-@never_cache
+
 def product_details(request, product_id):
     product = get_object_or_404(ProductDetails, product_id=product_id, is_deleted=False)
     products=(

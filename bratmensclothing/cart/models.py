@@ -16,7 +16,7 @@ class CartItem(models.Model):
     cartitem_id = models.AutoField(primary_key=True)
     cart =models.ForeignKey(Cart,on_delete=models.CASCADE,related_name="items")
     variant=models.ForeignKey(VariantSize,on_delete=models.CASCADE)
-    quantity=models.PositiveBigIntegerField(default=1)
+    quantity=models.PositiveBigIntegerField(default=0)
 
 
     @property

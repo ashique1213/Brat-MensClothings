@@ -13,9 +13,8 @@ from .models import Cart, CartItem
 @never_cache
 def view_cart(request):
     if request.user.is_authenticated:
-        
         cart = Cart.objects.filter(user=request.user).first()
-        cart_items = cart.items.all() 
+        cart_items = cart.items.all() if cart else []  
     else:
         cart_items = []
 
@@ -38,4 +37,12 @@ def add_to_cart(request, variant_id):
     else:
         messages.error(request, "Please log in to add items to your cart.")
 
-    return redirect('cart:viewcart')  # Redi
+    return redirect('cart:viewcart')
+
+
+def delete_item(request,cartitem_id):
+    item=get_object_or_404(CartItem,cartitem_id=cartitem_id)
+
+    item.delete()
+    messages.success(request, "Item deleted successfully ")
+    return redirect('cart:viewcart')
