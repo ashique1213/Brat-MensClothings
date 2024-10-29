@@ -22,8 +22,9 @@ from django.conf.urls.static import static
 app_name = 'cart'
 
 urlpatterns = [
-    # path('cart/',views.view_cart,name='Viewcart'),
+    # path('cart/',views.view_cart,name='viewcart'),
    
-    
+    path('cart/', views.view_cart, name='viewcart'),  
+    path('cart/add/<int:variant_id>/', views.add_to_cart, name='addtocart'),  
     
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -190,7 +190,7 @@
                                         <span class="pd-detail__click-wrap">
                                             <!-- <i class="far fa-envelope u-s-m-r-6"></i> -->
 
-                                            <div class="product-details">
+                                            <!-- <div class="product-details">
                                                 <h3>Available Sizes:</h3>
                                                 <div class="size-buttons">
                                                     {% for variant in product.variants.all %}
@@ -203,10 +203,29 @@
                                                         </button>
                                                     {% endfor %}
                                                 </div>
-                                                <div id="selected-size" class="sele">Selected Size: None</div> <!-- Display the selected size -->
+                                                <div id="selected-size" class="sele">Selected Size: None</div> 
                                             </div>
-                                            
+                                             -->
                                             <!-- <span class="pd-detail__click-count">()</span> -->
+
+
+
+                                            <div class="size-buttons">
+                                                {% for variant in product.variants.all %}
+                                                    <button 
+                                                        class="size-button" 
+                                                        data-price="{{ variant.price }}" 
+                                                        data-qty="{{ variant.qty }}"
+                                                        data-variant-id="{{ variant.variant_id }}" 
+                                                        onclick="selectSize(this, '{{ variant.size }}')">
+                                                        {{ variant.size }}
+                                                    </button>
+                                                {% endfor %}
+                                            </div>
+                                            <div id="selected-size" class="sele">Selected Size: None</div> 
+
+
+                                            
                                         </span></div>
                                 </div>
                                 <div class="u-s-m-b-15">
@@ -228,27 +247,57 @@
                                             <a class="s-gplus--color-hover" href="#"><i class="fab fa-google-plus-g"></i></a></li>
                                     </ul>
                                 </div>
+
+
                                 <div class="u-s-m-b-15">
-                                    <form class="pd-detail__form">
+                                    {% if product.variants.all %}
+                                <!-- 
+                                    <form class="pd-detail__form" method="post" action="{% url 'cart:addtocart' 0 %}">
+                                        {% csrf_token %}
                                         <div class="pd-detail-inline-2">
                                             <div class="u-s-m-b-15">
 
-                                                <!--====== Input Counter ======-->
                                                 <div class="input-counter">
 
                                                     <span class="input-counter__minus fas fa-minus"></span>
 
-                                                    <input class="input-counter__text input-counter--text-primary-style" type="text" value="1" data-min="1" data-max="6">
+                                                    <input class="input-counter__text input-counter--text-primary-style" name="quantity" type="text" value="1" data-min="1" data-max="6">
 
                                                     <span class="input-counter__plus fas fa-plus"></span></div>
-                                                <!--====== End - Input Counter ======-->
                                             </div>
                                             <div class="u-s-m-b-15">
                                                 <input type="hidden" id="selected-size-input" name="selected_size" value="">
+                                                
                                                 <button class="btn btn--e-brand-b-2" type="submit">Add to Cart</button></div>
                                         </div>
+                                    </form> -->
+
+                                    <form class="pd-detail__form" method="post" id="add-to-cart-form" action="">
+                                        {% csrf_token %}
+                                        <div class="pd-detail-inline-2">
+                                            <div class="u-s-m-b-15">
+                                                <div class="input-counter">
+                                                    <span class="input-counter__minus fas fa-minus"></span>
+                                                    <input class="input-counter__text input-counter--text-primary-style" name="quantity" type="text" value="1" data-min="1" data-max="6">
+                                                    <span class="input-counter__plus fas fa-plus"></span>
+                                                </div>
+                                            </div>
+                                            <div class="u-s-m-b-15">
+                                                <input type="hidden" id="selected-size-input" name="selected_size" value="">
+                                                <button class="btn btn--e-brand-b-2" type="submit">Add to Cart</button>
+                                            </div>
+                                        </div>
                                     </form>
+
+                                    
+                                    {% else %}
+                                    <p>No variants available for this product.</p>
+                                    {% endif %}
                                 </div>
+                               
+
+
+
                                 <div class="u-s-m-b-15">
 
                                     <span class="pd-detail__label u-s-m-b-8">Product Policy:</span>
@@ -714,18 +763,42 @@
         </div>
         <!--====== End - App Content ======-->
         <script>
-            function selectSize(button, size) {
+          //  function selectSize(button, size) {
                 // Get the price and quantity from the button's data attributes
+              //  const price = button.getAttribute('data-price');
+               // const qty = button.getAttribute('data-qty');
+            
+                // Update the displayed price and stock
+              //  document.getElementById('product-price').innerText = '₹ ' + price;
+                //const stockText = qty > 0 ? qty + ' in stock' : 'Out of stock';
+               // document.getElementById('product-stock').innerText = stockText;
+            
+                // Update the selected size display
+               // document.getElementById('selected-size').innerText = 'Selected Size: ' + size;
+            //}
+
+
+            function selectSize(button, size) {
                 const price = button.getAttribute('data-price');
                 const qty = button.getAttribute('data-qty');
             
-                // Update the displayed price and stock
+                // Update the displayed price
                 document.getElementById('product-price').innerText = '₹ ' + price;
                 const stockText = qty > 0 ? qty + ' in stock' : 'Out of stock';
                 document.getElementById('product-stock').innerText = stockText;
             
                 // Update the selected size display
                 document.getElementById('selected-size').innerText = 'Selected Size: ' + size;
+            
+                // Update the hidden input for selected size
+                document.getElementById('selected-size-input').value = size;
+            
+                // Get the variant ID from the button's data attribute
+                const variantId = button.getAttribute('data-variant-id'); // You need to set this in the button below
+            
+                // Update the form action
+                const form = document.getElementById('add-to-cart-form');
+                form.action = "{% url 'cart:addtocart' 0 %}".replace('0', variantId); // Update to your URL pattern
             }
         </script>
 {% endblock %}
