@@ -3,88 +3,75 @@
 
 {% block content %}   
 
-<style>
-    /* Table Container */
-    .table-responsive {
-        margin-top: 20px;
-    }
 
-    /* Table Styling */
-    .custom-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-        background-color: #ffffff;
-        border-radius: 8px;
-        font-size: 0.7rem;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-    }
-
-    .custom-table thead {
-        background-color: #f8f9fa;
-        text-transform: uppercase;
-        font-size: 0.7rem;
-        font-weight: bold;
-        color: #343a40;
-    }
-
-    .custom-table th,
-    .custom-table td {
-        padding: 15px 20px;
-        text-align: left;
-        border-bottom: 1px solid #e9ecef;
-    }
-
-    /* Row Hover Effect */
-    .custom-table tbody tr:hover {
-        background-color: #f1f3f5;
-        cursor: pointer;
-    }
-
-    /* Custom Button for Edit */
-    .custom-edit-btn {
-        background-color: #007bff;
-        color: #ffffff;
-        padding: 5px 15px;
-        border-radius: 5px;
-        transition: background-color 0.3s;
-        text-decoration: none;
-    }
-
-    .custom-edit-btn:hover {
-        background-color: #0056b3;
-    }
-
-    /* Badge Styling */
-    .badge {
-        display: inline-block;
-        padding: 0.4em 0.8em;
-        font-size: 0.7rem;
-        color: #fff;
-        border-radius: 12px;
-    }
-
-    .badge-primary {
-        background-color: #17a2b8;
-    }
-
-    .badge-secondary {
-        background-color: #6c757d;
-    }
-
-    /* Mobile Adjustments */
-    @media (max-width: 768px) {
-        .custom-table th,
-        .custom-table td {
-            padding: 10px;
+    <style>
+        /* Modal styles */
+        .custom-modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0, 0, 0, 0.5); /* Black w/ opacity */
         }
 
-        .custom-table thead {
-            font-size: 0.7rem;
+        .modal-content {
+            background-color: #fff;
+            margin: 15% auto; /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+            max-width: 500px; /* Maximum width of the modal */
+            border-radius: 5px;
         }
-    }
-</style>
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close {
+            cursor: pointer;
+            font-size: 20px;
+            color: #aaa;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .cancel-btn {
+            background-color: #000; /* Red */
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: white; /* Green */
+            color: black;
+        }
+    </style>
+
+
 
 
 
@@ -129,7 +116,7 @@
                                     <div class="dash__box dash__box--bg-white dash__box--shadow u-s-m-b-30">
                                         <div class="dash__pad-1">
         
-                                            <span class="dash__text u-s-m-b-16">Hello, Ashique</span>
+                                            <span class="dash__text u-s-m-b-16">Hello, {{ user.username |upper }}</span>
                                             <ul class="dash__f-list">
         
                                                 <li>
@@ -178,7 +165,31 @@
                                                                                     <a href="{% url 'userss:editaddress' addres.id %}" class="dash__text u-s-m-b-8">Edit</a>
                                                                                 
                                                                                     <!-- Remove Link -->
-                                                                                    <a href="{% url 'userss:removeaddress' addres.id %}" class="dash__text u-s-m-b-8" onclick="return confirm('Are you sure you want to delete this address?');">Remove</a>
+                                                                                    <!-- <a href="{% url 'userss:removeaddress' addres.id %}" class="dash__text u-s-m-b-8" onclick="return confirm('Are you sure you want to delete this address?');">Remove</a> -->
+                                                                                    
+                                                                                    
+                                                                                    <a href="{% url 'userss:removeaddress' addres.id %}" class="dash__text u-s-m-b-8" 
+                                                                                    onclick="openConfirmDeleteModal('{{ addres.id }}'); return false;">Remove</a>
+                                                                             
+                                                                                 <!-- Custom Modal -->
+                                                                                 <div id="confirmDeleteModal" class="custom-modal">
+                                                                                     <div class="modal-content">
+                                                                                         <div class="modal-header">
+                                                                                             <h5>Confirm Deletion</h5>
+                                                                                             <span class="close" onclick="closeModal()">&times;</span>
+                                                                                         </div>
+                                                                                         <div class="modal-body">
+                                                                                             Are you sure you want to delete this address?
+                                                                                         </div>
+                                                                                         <div class="modal-footer">
+                                                                                             <button class="btn cancel-btn" onclick="closeModal()">Cancel</button>
+                                                                                             <button class="btn delete-btn" id="confirmDeleteButton">Delete</button>
+                                                                                         </div>
+                                                                                     </div>
+                                                                                 </div>
+                                                                             
+                                                                                
+                                                                                
                                                                                 </div>                                                                                
                                                                                 
                                                                             </div>
@@ -211,6 +222,22 @@
         </div>
         <!--====== End - App Content ======-->
 
-
+        <script>
+            let addressIdToDelete;
+    
+            function openConfirmDeleteModal(addressId) {
+                addressIdToDelete = addressId; // Store the address ID
+                document.getElementById('confirmDeleteModal').style.display = 'block'; // Show the modal
+            }
+    
+            function closeModal() {
+                document.getElementById('confirmDeleteModal').style.display = 'none'; // Hide the modal
+            }
+    
+            document.getElementById('confirmDeleteButton').onclick = function () {
+                // Redirect to the remove address URL
+                window.location.href = "{% url 'userss:removeaddress' 0 %}".replace('0', addressIdToDelete);
+            };
+        </script>
 
 {% endblock %}

@@ -131,8 +131,11 @@
                                 <div>
                                     <div class="pd-detail__inline">
                                         {% if product.variants.all %}
-                                        <span class="pd-detail__price">₹ {{product.variants.all.0.price}} </span>
+                                        <span class="pd-detail__price" id="product-price">₹ {{ product.variants.all.0.price }} </span>
                                         {% endif %}
+
+                                        <!-- <span class="pd-detail__price">₹ {{product.variants.all.price}} </span> -->
+
 
                                         <span class="pd-detail__discount">(76% OFF)</span><del class="pd-detail__del">₹28.97</del></div>
                                 </div>
@@ -145,15 +148,28 @@
                                 </div>
                                 <div class="u-s-m-b-15">
                                     <div class="pd-detail__inline">
-                                        
-                                        {% if product.variants.all %}
+                                         
+                                        <!-- {% if product.variants.all %}
                                         {% with first_variant=product.variants.all.0 %}
+
                                             <span class="pd-detail__stock">{{ first_variant.qty }} in stock</span>
                                             <span class="pd-detail__left">Only {{ first_variant.qty }} left</span>
                                         {% endwith %}
                                         {% else %}
                                         <span class="pd-detail__stock">No stock available</span>
-                                        {% endif %}
+                                        {% endif %} -->
+
+                                        {% if product.variants.all %}
+                                        {% with first_variant=product.variants.all.0 %}
+                                            {% if first_variant.qty > 0 %}
+                                                <span class="pd-detail__stock" id="product-stock">{{ first_variant.qty }} in stock</span>
+                                                <span class="pd-detail__left">Only {{ first_variant.qty }} left</span>
+                                            {% else %}
+                                                <span class="pd-detail__left" id="product-stock">Out of stock</span>
+                                            {% endif %}
+                                        {% endwith %}
+                                    {% endif %}
+                                    
                                     </div>
                                 </div>
                                 <div class="u-s-m-b-15">
@@ -180,6 +196,8 @@
                                                     {% for variant in product.variants.all %}
                                                         <button 
                                                             class="size-button" 
+                                                            data-price="{{ variant.price }}" 
+                                                            data-qty="{{ variant.qty }}"
                                                             onclick="selectSize(this, '{{ variant.size }}')">
                                                             {{ variant.size }}
                                                         </button>
@@ -187,6 +205,7 @@
                                                 </div>
                                                 <div id="selected-size" class="sele">Selected Size: None</div> <!-- Display the selected size -->
                                             </div>
+                                            
                                             <!-- <span class="pd-detail__click-count">()</span> -->
                                         </span></div>
                                 </div>
@@ -219,13 +238,13 @@
 
                                                     <span class="input-counter__minus fas fa-minus"></span>
 
-                                                    <input class="input-counter__text input-counter--text-primary-style" type="text" value="1" data-min="1" data-max="1000">
+                                                    <input class="input-counter__text input-counter--text-primary-style" type="text" value="1" data-min="1" data-max="6">
 
                                                     <span class="input-counter__plus fas fa-plus"></span></div>
                                                 <!--====== End - Input Counter ======-->
                                             </div>
                                             <div class="u-s-m-b-15">
-
+                                                <input type="hidden" id="selected-size-input" name="selected_size" value="">
                                                 <button class="btn btn--e-brand-b-2" type="submit">Add to Cart</button></div>
                                         </div>
                                     </form>
@@ -696,15 +715,17 @@
         <!--====== End - App Content ======-->
         <script>
             function selectSize(button, size) {
-                // Remove 'selected' class from all buttons
-                const buttons = document.querySelectorAll('.size-button');
-                buttons.forEach(btn => btn.classList.remove('selected'));
-        
-                // Add 'selected' class to the clicked button
-                button.classList.add('selected');
-        
-                // Update the display for the selected size
-                document.getElementById('selected-size').innerText = "Selected Size: " + size;
+                // Get the price and quantity from the button's data attributes
+                const price = button.getAttribute('data-price');
+                const qty = button.getAttribute('data-qty');
+            
+                // Update the displayed price and stock
+                document.getElementById('product-price').innerText = '₹ ' + price;
+                const stockText = qty > 0 ? qty + ' in stock' : 'Out of stock';
+                document.getElementById('product-stock').innerText = stockText;
+            
+                // Update the selected size display
+                document.getElementById('selected-size').innerText = 'Selected Size: ' + size;
             }
         </script>
 {% endblock %}

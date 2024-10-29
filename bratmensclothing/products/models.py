@@ -64,11 +64,4 @@ class VariantSize(models.Model):
         return f"Variant of {self.product.product_name} - Size: {self.size}"
     
 
-
-    
-# class Review(models.Model):
-#     product_id = models.ForeignKey(variant,on_delete=models.CASCADE)
-#     user_id = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
-#     review = models.TextField()
-#     created_at = models.DateTimeField(default=timezone.now)
     

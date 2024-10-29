@@ -29,12 +29,12 @@ urlpatterns = [
     path('productdetails/<int:product_id>/',views.product_details,name='product_details'),
     
     path('accountdetails/<int:userid>',views.account_details,name='accountdetails'),
-    path('edit_account_dtails/<int:userid>',views.edit_account_details,name='edit_account_dtails'),
-    path('resetpassword/<int:userid>',views.reset_password,name='resetpassword'),
+    path('accountdetails/edit_account_dtails/<int:userid>',views.edit_account_details,name='edit_account_dtails'),
+    path('accountdetails/resetpassword/<int:userid>',views.reset_password,name='resetpassword'),
     
     path('addressdetails/<int:userid>',views.address_details,name='addressdetails'),
-    path('addaddress/<int:userid>',views.add_address,name='addaddress'),
-    path('editaddress/<int:id>',views.edit_address,name='editaddress'),
+    path('addressdetails/addaddress/<int:userid>',views.add_address,name='addaddress'),
+    path('addressdetails/editaddress/<int:id>',views.edit_address,name='editaddress'),
     path('removeaddress/<int:id>/', views.remove_address, name='removeaddress'),
     
     

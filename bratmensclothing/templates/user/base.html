@@ -102,8 +102,38 @@
       }
 
 
-        /* Center the loader */
+
+    /* Toast Modal Styles */
+    .toast-modal {
+      display: none; /* Hidden by default */
+      position: fixed;
+      z-index: 1000;
+      right: 20px;
+      top: 50px;
+      width: auto;
+      min-width: 250px;
+      max-width: 350px;
+  }
+
+  .toast-content {
+      background-color: #fff;
+      color: #fff;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+      animation: fadeInOut 3s ease forwards;
+  }
+
+  /* Fade-in and Fade-out animation */
+  @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateY(-20px); }
+      10% { opacity: 1; transform: translateY(0); }
+      90% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-20px); }
+  }
+    
        
+
     </style>
   </head>
   <body class="config">
@@ -117,7 +147,7 @@
       </div>
     </div>
 
-
+<!-- 
           {% if messages %}
                     <div aria-live="polite" aria-atomic="true" style="position: relative;">
                         <div id="toast-container" class="toast-container position-fixed end-0 translate-middle-y p-3" style="top: 150px;">
@@ -140,7 +170,16 @@
                             {% endfor %}
                         </div>
                     </div>
-                    {% endif %}
+                    {% endif %} -->
+
+                    <div id="toastModal" class="toast-modal">
+                      <div class="toast-content">
+                          <div id="toastBody" class="toast-body">
+                              <!-- Message will be injected here -->
+                          </div>
+                      </div>
+                  </div>
+
 
 
 
@@ -242,7 +281,7 @@
                       <span class="js-menu-toggle"></span>
                       <ul style="width: 120px">
                         {% if user.is_authenticated %}
-                        <li>
+                        <li> 
                           <a
                             href="{% url 'userss:accountdetails' user.userid %}"
                             ><i class="fas fa-user-circle u-s-m-r-6"></i>
@@ -398,12 +437,9 @@
                       <a href=""><i class="far fa-heart"></i></a>
                     </li>
                     <!-- wishlist -->
-                    <li class="has-dropdown">
-                      <a class="mini-cart-shop-link"
-                        ><i class="fas fa-shopping-bag"></i
-                      ></a>
-
-                      <!-- <span class="total-item-round">2</span> -->
+                    <li>
+                      <a href=""><i class="fas fa-shopping-bag">   
+                    </i></a>
                     </li>
                   </ul>
                   <!--====== End - List ======-->
@@ -422,7 +458,10 @@
       <!--====== Section 2 ======-->
       <div class="">
         <!--====== Section Content ======-->
-        {% block content %} {% endblock %}
+        {% block content %} 
+        
+
+        {% endblock %}
 
         <!--====== End - Section Content ======-->
       </div>
@@ -689,6 +728,51 @@
             });
         });
         
-    </script>
+
+
+
+
+
+// toastmodal
+
+        function showToastMessage(message, type) {
+          // Set message content
+          const toastBody = document.getElementById('toastBody');
+          toastBody.innerText = message;
+  
+          // Apply type-specific styles
+          if (type === 'success') {
+              toastBody.style.color = 'green';
+          } else if (type === 'error') {
+              toastBody.style.color = 'red';
+          } else if (type === 'info') {
+              toastBody.style.color = 'blue';
+          } else if (type === 'warning') {
+              toastBody.style.color = 'orange';
+          } else {
+              toastBody.style.backgroundColor = '#fff'; // Default color
+          }
+  
+          // Show the toast
+          const toastModal = document.getElementById('toastModal');
+          toastModal.style.display = 'block';
+  
+          // Hide the toast automatically after 3 seconds
+          setTimeout(() => {
+              toastModal.style.display = 'none';
+          }, 3000); // 3000ms = 3 seconds
+      }
+  </script>
+  
+  {% if messages %}
+      <script>
+          {% for message in messages %}
+              showToastMessage("{{ message|escapejs }}", "{{ message.tags }}");
+          {% endfor %}
+      </script>
+  {% endif %}
+
+   
+
   </body>
 </html>

@@ -56,7 +56,7 @@ def category_details(request):
     )
     return render(request,'user/categorylist.html',{'products':products})
 
-
+@never_cache
 def product_details(request, product_id):
     product = get_object_or_404(ProductDetails, product_id=product_id, is_deleted=False)
     products=(
@@ -249,6 +249,7 @@ def add_address(request,userid):
             state=state,
             user=user_id
         )
+        messages.success(request, 'Address added successfully.')
         return redirect('userss:addressdetails',userid=userid)
     
     return render(request,'user/add_address.html',{'user':user_id})
@@ -327,4 +328,6 @@ def edit_address(request, id):
         return redirect('userss:addressdetails', userid=user_id)
 
     return render(request, 'user/edit_address.html', {'address': address})
+
+
 

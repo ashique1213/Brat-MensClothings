@@ -3,7 +3,7 @@ from .models import Brand,Category,ProductDetails,VariantSize
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.views.decorators.cache import never_cache
-
+from django.db.models import F
 
 def is_staff(user):
     return user.is_staff
@@ -267,6 +267,7 @@ def edit_sizevariants(request, variant_id):
             variant.size = size
             variant.price = price
             variant.qty = quantity
+            # variant.qty = F('qty') + quantity
             variant.save() 
 
             messages.success(request, 'Size variant updated successfully!')
