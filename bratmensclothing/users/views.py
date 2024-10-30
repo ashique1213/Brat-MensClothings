@@ -12,6 +12,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.contrib.auth.hashers import check_password
 import re
+from django.views.decorators.cache import cache_control
 
 
 def is_staff(user):
@@ -57,6 +58,7 @@ def category_details(request):
     return render(request,'user/categorylist.html',{'products':products})
 
 
+@cache_control(private=True, no_cache=True)
 def product_details(request, product_id):
     product = get_object_or_404(ProductDetails, product_id=product_id, is_deleted=False)
     products=(

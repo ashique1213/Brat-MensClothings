@@ -90,23 +90,23 @@
                                               
                                             </div>
                                         </td>
-                                        <td>
 
-                                            <span class="table-p__price">₹ {{ cart_item.item_total }}</span></td>
+
+
+                                        <td>
+                                            <span class="table-p__price">₹ <span class="item-total" data-id="{{ cart_item.cartitem_id }}">{{ cart_item.item_total }}</span></span>
+                                        </td>
                                         <td>
                                             <div class="table-p__input-counter-wrap">
-
-                                                <!--====== Input Counter ======-->
                                                 <div class="input-counter">
-
-                                                    <span class="input-counter__minus fas fa-minus"></span>
-
-                                                    <input class="input-counter__text input-counter--text-primary-style" type="text" value="{{ cart_item.quantity }}" data-min="1" data-max="1000">
-
-                                                    <span class="input-counter__plus fas fa-plus"></span></div>
-                                                <!--====== End - Input Counter ======-->
+                                                    <span class="input-counter__minus fas fa-minus" data-id="{{ cart_item.cartitem_id }}"></span>
+                                                    <input class="input-counter__text input-counter--text-primary-style" type="text" value="{{ cart_item.quantity }}" data-min="1" data-max="6" data-id="{{ cart_item.cartitem_id }}">
+                                                    <span class="input-counter__plus fas fa-plus" data-id="{{ cart_item.cartitem_id }}"></span>
+                                                </div>
                                             </div>
                                         </td>
+
+
                                         <td>
                                             <div class="table-p__del-wrap">
 
@@ -123,6 +123,71 @@
                 {% empty %}
                     <p>Your cart is empty.</p>
                 {% endfor %}   
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    const minusButtons = document.querySelectorAll('.input-counter__minus');
+                                    const plusButtons = document.querySelectorAll('.input-counter__plus');
+
+                                    function updateCartItemQuantity(cartItemId, quantity) {
+                                        fetch(`/cart/update/${cartItemId}/`, {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'X-CSRFToken': getCookie('csrftoken'), // Ensure this function works
+                                            },
+                                            body: JSON.stringify({ quantity: quantity })
+                                        })
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            if (data.success) {
+                                                const itemTotalElement = document.querySelector(`.item-total[data-id="${cartItemId}"]`);
+                                                itemTotalElement.textContent = ' ' + data.new_total; // Update the displayed total for the specific item
+                                            } else {
+                                                console.error(data.error); // Log error for debugging
+                                            }
+                                        })
+                                        .catch(error => console.error('Error:', error));
+                                    }
+
+                                    minusButtons.forEach(button => {
+                                        button.addEventListener('click', function () {
+                                            const input = button.nextElementSibling;
+                                            const cartItemId = button.getAttribute('data-id');
+                                            let quantity = parseInt(input.value);
+
+                                                updateCartItemQuantity(cartItemId, quantity);
+                                            }
+                                        );
+                                    });
+
+                                    plusButtons.forEach(button => {
+                                        button.addEventListener('click', function () {
+                                            const input = button.previousElementSibling;
+                                            const cartItemId = button.getAttribute('data-id');
+                                            let quantity = parseInt(input.value);
+
+                                           
+                                                updateCartItemQuantity(cartItemId, quantity);
+                                            }
+                                        );
+                                    });
+
+                                    function getCookie(name) {
+                                        let cookieValue = null;
+                                        if (document.cookie && document.cookie !== '') {
+                                            const cookies = document.cookie.split(';');
+                                            for (let i = 0; i < cookies.length; i++) {
+                                                const cookie = cookies[i].trim();
+                                                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                                                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        return cookieValue;
+                                    }
+                                });
+                            </script>
 
 
                     <div class="col-lg-12">

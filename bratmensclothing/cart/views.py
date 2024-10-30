@@ -46,3 +46,27 @@ def delete_item(request,cartitem_id):
     item.delete()
     messages.success(request, "Item deleted successfully ")
     return redirect('cart:viewcart')
+
+
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+import json
+from .models import CartItem
+
+@require_POST
+def update_cart_item(request, cart_item_id):
+    data = json.loads(request.body)
+    quantity = data.get('quantity')
+
+    try:
+        cart_item = CartItem.objects.get(cartitem_id=cart_item_id)
+        cart_item.quantity = quantity
+        cart_item.save()
+
+        return JsonResponse({
+            'success': True,
+            'new_total': cart_item.item_total  # Calculate the new total based on updated quantity
+        })
+    except CartItem.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Item not found'}, status=404)
