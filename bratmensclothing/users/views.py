@@ -1,12 +1,12 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from accounts.models import Users
-from products.models import ProductDetails
+from products.models import ProductDetails,VariantSize
 from django.contrib import messages
 from products.models import Category,Brand
 from .models import Address
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.views.decorators.cache import never_cache
-from django.db.models import Q
+from django.db.models import Q,Min  
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
@@ -43,8 +43,12 @@ def unblock_user(request,userid):
     messages.success(request,'User Un-Blocked Succesfully')
     return redirect('userss:view_user')
 
+ 
+
 @never_cache
 def category_details(request):
+    sort_option=request.GET.get('sort','')
+    query = request.GET.get('search', '')
     products=(
         ProductDetails.objects.select_related('brand')
         .prefetch_related('category','variants')
@@ -54,8 +58,51 @@ def category_details(request):
             Q(category__is_deleted=False)
         )
 
-    )
-    return render(request,'user/categorylist.html',{'products':products})
+    ) 
+    if query:
+        query_terms = query.split()
+        q_filter = Q()
+        
+        for term in query_terms:
+            q_filter |= (Q(product_name__icontains=term) |
+                         Q(description__icontains=term) |
+                         Q(color__icontains=term) |
+                         Q(occasion__icontains=term) |
+                         Q(fit__icontains=term)|
+                         Q(brand__brandname__icontains=term)|
+                         Q(category__category__icontains=term))
+                         
+        products = products.filter(q_filter)
+
+    if sort_option == 'newly_added':
+        products = products.order_by('-created_at')  
+    elif sort_option == 'atoz':
+        products = products.order_by('product_name') 
+    elif sort_option == 'ztoa':
+        products = products.order_by('-product_name')  
+    elif sort_option == 'lowest_price':
+        products = products.annotate(lowest_price=Min('variants__price')).order_by('lowest_price') 
+    elif sort_option == 'highest_price':
+        products = products.annotate(lowest_price=Min('variants__price')).order_by('-lowest_price')
+    else: 
+        products = products.order_by('created_at')
+   
+    categories=Category.objects.all()
+    Brands=Brand.objects.all()
+    Variants = VariantSize.objects.values('size').distinct().order_by('size')
+    print(Variants)
+
+    return render(request,'user/categorylist.html',
+                  {
+                      'products':products,
+                      'categories':categories,
+                      'Brands':Brands,
+                      'Variants':Variants,
+                      'sort':sort_option,
+                      'query':query
+                })
+
+
 
 
 @cache_control(private=True, no_cache=True)
@@ -80,12 +127,15 @@ def product_details(request, product_id):
 
 
 @never_cache
+@login_required(login_url='accounts:login_user')
 def account_details(request,userid):
     user = get_object_or_404(Users, userid=userid)
  
     return render(request, 'user/accountdetails.html', {'user':user})
 
+
 @never_cache
+@login_required(login_url='accounts:login_user')
 def edit_account_details(request, userid):
     userdetails = get_object_or_404(Users, userid=userid)
 
@@ -142,6 +192,7 @@ def edit_account_details(request, userid):
     return render(request, 'user/edit_account.html', {'user': userdetails})
 
 @never_cache
+@login_required(login_url='accounts:login_user')
 def reset_password(request, userid):
     user = get_object_or_404(Users, userid=userid)
 
@@ -179,12 +230,13 @@ def reset_password(request, userid):
 
         user.set_password(new_password)
         user.save()
-        messages.success(request, 'Your password has been reset successfully.')
-        return redirect('userss:accountdetails',userid=userid)
+        messages.success(request, 'Your password has been reset successfully.PLEASE LOGIN')
+        return redirect('accounts:login_user')
 
     return render(request, 'user/reset_password.html', {'user': user})
 
 @never_cache
+@login_required(login_url='accounts:login_user')
 def address_details(request, userid):
     user = get_object_or_404(Users, userid=userid)
     addresses = Address.objects.filter(user=user)
@@ -193,6 +245,7 @@ def address_details(request, userid):
 
 
 @never_cache
+@login_required(login_url='accounts:login_user')
 def add_address(request,userid):
     user_id=get_object_or_404(Users,userid=userid)
 
@@ -267,6 +320,7 @@ def remove_address(request, id):
 
 
 @never_cache
+@login_required(login_url='accounts:login_user')
 def edit_address(request, id):
     address = get_object_or_404(Address, id=id)
     user_id = address.user.userid 

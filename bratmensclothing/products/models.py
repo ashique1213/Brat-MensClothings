@@ -43,7 +43,7 @@ class ProductDetails(models.Model):
     color = models.CharField(max_length=30) 
     occasion = models.CharField(max_length=30) 
     fit = models.CharField(max_length=30)
-    brand = models.ForeignKey('Brand', on_delete=models.CASCADE)
+    brand = models.ForeignKey('Brand', on_delete=models.CASCADE,related_name='products')
     category = models.ManyToManyField('Category', related_name='product_list', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

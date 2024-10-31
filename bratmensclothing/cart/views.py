@@ -8,6 +8,10 @@ from django.views.decorators.cache import never_cache
 from django.db.models import Q
 import re
 from .models import Cart, CartItem
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+import json
+from .models import CartItem
 
 
 @never_cache
@@ -15,10 +19,16 @@ def view_cart(request):
     if request.user.is_authenticated:
         cart = Cart.objects.filter(user=request.user).first()
         cart_items = cart.items.all() if cart else []  
+
+        total = sum(items.item_total for items in cart_items)
+        tax_rate = 0.02
+        tax = total * tax_rate
+        grand_total = total + tax + 50
+
     else:
         cart_items = []
 
-    return render(request, 'user/cart.html', {'cart_items': cart_items})
+    return render(request, 'user/cart.html', {'cart_items': cart_items,'grand_total':grand_total,'tax':tax})
 
 
 @never_cache
@@ -46,13 +56,6 @@ def delete_item(request,cartitem_id):
     item.delete()
     messages.success(request, "Item deleted successfully ")
     return redirect('cart:viewcart')
-
-
-
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST
-import json
-from .models import CartItem
 
 @require_POST
 def update_cart_item(request, cart_item_id):
