@@ -2,6 +2,31 @@
 
 {% block content %}
 
+
+<style>
+    .table-p__img-wrap {
+        position: relative; /* Ensure child elements can be positioned relative to this */
+    }
+    
+    .out-of-stock-overlay {
+        position: absolute; /* Position overlay relative to the image */
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(202, 129, 129, 0.5); /* Semi-transparent red background */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-weight: bold;
+        font-size: 16px; /* Adjust font size as needed */
+        text-align: center; /* Center text */
+    }
+    
+    
+</style>
+
 {% if cart_items %}
 
    <!--====== App Content ======-->
@@ -62,9 +87,20 @@
                                     <tr>
                                         <td>
                                             <div class="table-p__box d-flex">
-                                                <div class="table-p__img-wrap me-3">
+                                                <!-- <div class="table-p__img-wrap me-3">
                                                     <img class="u-img-fluid" src="{{ cart_item.variant.product.image1.url }}" alt="{{ cart_item.variant.product.product_name }}">
+                                                </div> -->
+                                                <div class="table-p__img-wrap me-3 position-relative">
+                                                    <img class="u-img-fluid" src="{{ cart_item.variant.product.image1.url }}" alt="{{ cart_item.variant.product.product_name }}">
+                                                    
+                                                    {% if cart_item.variant.qty == 0 %}
+                                                    <div class="out-of-stock-overlay">
+                                                        <span class="out-of-stock-text">Out of Stock</span>
+                                                    </div>
+                                                    {% endif %}
                                                 </div>
+
+
                                                 <div class="table-p__info">
                                                     <span class="table-p__name">
                                                         <a href="">{{ cart_item.variant.product.product_name }}</a>
@@ -81,10 +117,12 @@
                                                 </div>
                                             </div>
                                         </td>
+
                                         <td class="text-center">
                                             <span class="table-p__price">₹ <span class="item-total" data-id="{{ cart_item.cartitem_id }}">{{ cart_item.item_total }}</span></span>
                                         </td>
-                                        <td class="text-center">
+
+                                        <!-- <td class="text-center" >
                                             <div class="table-p__input-counter-wrap">
                                                 <div class="input-counter">
                                                     <span class="input-counter__minus fas fa-minus" data-id="{{ cart_item.cartitem_id }}"></span>
@@ -92,7 +130,19 @@
                                                     <span class="input-counter__plus fas fa-plus" data-id="{{ cart_item.cartitem_id }}"></span>
                                                 </div>
                                             </div>
+                                        </td> -->
+                                        <td class="text-center">
+                                            <div class="table-p__input-counter-wrap">
+                                                <div class="input-counter">
+                                                    <span class="input-counter__minus fas fa-minus" data-id="{{ cart_item.cartitem_id }}" {% if cart_item.variant.qty == 0 %}style="opacity: 0.5; pointer-events: none;"{% endif %}></span>
+                                                    <input class="input-counter__text input-counter--text-primary-style" type="text" value="{{ cart_item.quantity }}" data-min="1" data-max="6" data-id="{{ cart_item.cartitem_id }}" {% if cart_item.variant.qty == 0 %}disabled{% endif %}>
+                                                    <span class="input-counter__plus fas fa-plus" data-id="{{ cart_item.cartitem_id }}" {% if cart_item.variant.qty == 0 %}style="opacity: 0.5; pointer-events: none;"{% endif %}></span>
+                                                </div>
+                                            </div>
                                         </td>
+                                        
+
+                                        
                                         <td class="text-center">
                                             <a class="far fa-trash-alt table-p__delete-link" href="{% url 'cart:delete_item' cart_item.cartitem_id %}"></a>
                                         </td>
@@ -112,7 +162,7 @@
                                         <tbody>
                                             <tr>
                                                 <td>SHIPPING</td>
-                                                <td>₹ 50</td>
+                                                <td>₹{{delivery_charge|floatformat:2 }}</td>
                                             </tr>
                                             <tr>
                                                 <td>TAX</td>

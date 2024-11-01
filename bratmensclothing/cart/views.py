@@ -23,12 +23,18 @@ def view_cart(request):
         total = sum(items.item_total for items in cart_items)
         tax_rate = 0.02
         tax = total * tax_rate
-        grand_total = total + tax + 50
+        delivery_charge=50
+        grand_total = total + tax + delivery_charge
 
     else:
         cart_items = []
 
-    return render(request, 'user/cart.html', {'cart_items': cart_items,'grand_total':grand_total,'tax':tax,'cart':cart})
+    return render(request, 'user/cart.html', {
+        'cart_items': cart_items,
+        'grand_total':grand_total,
+        'tax':tax,'cart':cart,
+        'delivery_charge':delivery_charge
+        })
 
 
 @never_cache
@@ -43,7 +49,7 @@ def add_to_cart(request, variant_id):
         cart_item.quantity += quantity if not created else quantity
         cart_item.save()
 
-        messages.success(request, "Item added to cart succesfullty!")
+        messages.success(request, "Item added to cart succesfully")
     else:
         messages.error(request, "Please log in to add items to your cart.")
 

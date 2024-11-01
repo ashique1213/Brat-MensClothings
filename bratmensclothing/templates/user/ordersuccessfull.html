@@ -1,0 +1,45 @@
+
+{% extends "user/base.html" %}
+
+
+{% block content %}     
+
+
+<!--====== App Content ======-->
+<div class="app-content">
+
+    <!--====== Section 1 ======-->
+    <div class="u-s-p-y-60">
+
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 u-s-m-b-30">
+                        <div class="empty">
+                            <div class="empty__wrap">
+
+                                <!-- Success Message for Order Placed -->
+                                <span class="empty__big-text">THANK YOU!</span>
+
+                                <span class="empty__text-1">Your order has been successfully placed.</span>
+                                
+                                <!-- Optional Order Number Display -->
+                                <span class="empty__text-2">Order Number: <strong>{{ order_number }}</strong></span>
+
+                                <a class="empty__redirect-link btn--e-brand" href="{% url 'userss:category_details' %}">CONTINUE SHOPPING</a>
+                                <a class="empty__redirect-link btn--e-secondary" href="">VIEW ORDER DETAILS</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--====== End - Section Content ======-->
+    </div>
+    <!--====== End - Section 1 ======-->
+</div>
+<!--====== End - App Content ======-->
+
+
+{% endblock %}     
