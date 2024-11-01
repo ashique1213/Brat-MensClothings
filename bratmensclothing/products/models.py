@@ -16,7 +16,7 @@ class Category(models.Model):
     updated_date = models.DateTimeField(auto_now=True) 
     is_deleted = models.BooleanField(default=False)
       
-
+ 
     def __str__(self):
         return self.category 
     

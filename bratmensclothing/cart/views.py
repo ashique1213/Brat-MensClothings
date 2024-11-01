@@ -28,7 +28,7 @@ def view_cart(request):
     else:
         cart_items = []
 
-    return render(request, 'user/cart.html', {'cart_items': cart_items,'grand_total':grand_total,'tax':tax})
+    return render(request, 'user/cart.html', {'cart_items': cart_items,'grand_total':grand_total,'tax':tax,'cart':cart})
 
 
 @never_cache
@@ -43,7 +43,7 @@ def add_to_cart(request, variant_id):
         cart_item.quantity += quantity if not created else quantity
         cart_item.save()
 
-        messages.success(request, "Item added to cart!")
+        messages.success(request, "Item added to cart succesfullty!")
     else:
         messages.error(request, "Please log in to add items to your cart.")
 

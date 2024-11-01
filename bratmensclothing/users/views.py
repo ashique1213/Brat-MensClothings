@@ -235,6 +235,7 @@ def reset_password(request, userid):
 
     return render(request, 'user/reset_password.html', {'user': user})
 
+
 @never_cache
 @login_required(login_url='accounts:login_user')
 def address_details(request, userid):

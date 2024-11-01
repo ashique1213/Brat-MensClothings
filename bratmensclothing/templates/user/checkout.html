@@ -3,9 +3,20 @@
 
 
 {% block content %}    
-
-
-
+<style>
+    .form-check-input {
+        appearance: none; /* Remove default radio button style */
+        width: 15px;     /* Custom width */
+        height: 15px;    /* Custom height */
+        border: 2px solid black; /* Custom border color */
+        border-radius: 50%; /* Make it circular */
+        outline: none; /* Remove focus outline */
+    }
+    
+    .form-check-input:checked {
+        background-color: black; /* Background color when checked */
+    }
+</style>
  <!--====== App Content ======-->
  <div class="app-content">
 
@@ -53,102 +64,81 @@
                                         <h1 class="dash__h1 u-s-m-b-14">Add new Address</h1>
     
                                         <span class="dash__text u-s-m-b-30">We need an address where we could deliver products.</span>
-                                        <form class="dash-address-manipulation" method="post" action="{% url 'userss:addaddress' user.userid %}">
+                                        <form class="dash-address-manipulation" id="addressForm" method="post" action="{% url 'order:add_address_checkout' user.userid %}">
                                             {% csrf_token %}
                                             <div class="gl-inline">
                                                 <div class="u-s-m-b-30">
-    
                                                     <label class="gl-label">ADDRESS *</label>
-    
-                                                    <input class="input-text input-text--primary-style"  name="address" type="text" id="address-fname" placeholder="Address">
-                                                    {% if errors.address_error %}
-                                                    <p class="error">{{ errors.address_error }}</p> <!-- Display username error in red -->
-                                                    {% endif %}
+                                                    <input class="input-text input-text--primary-style" name="address" type="text" id="address-fname" placeholder="Address">
+                                                    <p id="address_error" style="display: none; color: red; font-size: 10px;"></p> <!-- Error message placeholder -->
                                                 </div>
                                             </div>
+                                            
                                             <div class="gl-inline">
                                                 <div class="u-s-m-b-30">
-    
-                                                    <label class="gl-label" >STREET *</label>
-    
-                                                <input class="input-text input-text--primary-style" required name="street" type="text" id="address-lname" placeholder="Street">
-                                                {% if errors.street_error %}
-                                                <p class="error">{{ errors.street_error }}</p> <!-- Display username error in red -->
-                                                {% endif %}    
-                                            </div>
+                                                    <label class="gl-label">STREET *</label>
+                                                    <input class="input-text input-text--primary-style" name="street" type="text" id="address-lname" placeholder="Street">
+                                                    <p id="street_error" style="display: none; color: red; font-size: 10px;"></p> <!-- Error message placeholder -->
+                                                </div>
                                                 <div class="u-s-m-b-30">
-    
-                                                    <label class="gl-label" for="address-phone">LANDMARK </label>
-    
-                                                    <input class="input-text input-text--primary-style" required name="landmark" type="text" id="address-phone" placeholder="landmark">
-                                                    {% if errors.landmark_error %}
-                                                    <p class="error">{{ errors.landmark_error }}</p> <!-- Display username error in red -->
-                                                    {% endif %}
+                                                    <label class="gl-label">LANDMARK</label>
+                                                    <input class="input-text input-text--primary-style" name="landmark" type="text" id="address-phone" placeholder="Landmark">
+                                                    <p id="landmark_error" style="display: none; color: red; font-size: 10px;"></p> <!-- Error message placeholder -->
                                                 </div>
                                             </div>
+                                            
                                             <div class="gl-inline">
                                                 <div class="u-s-m-b-30">
-    
-                                                    <label class="gl-label" for="address-city">TOWN/CITY *</label>
-    
-                                                    <input class="input-text input-text--primary-style" required name="city" type="text" id="address-city">
-                                                    {% if errors.city_error %}
-                                                    <p class="error">{{ errors.city_error }}</p> <!-- Display username error in red -->
-                                                    {% endif %}
-                                                </div>
-                                                    
-                                                    <div class="u-s-m-b-30">
-    
-                                                    <label class="gl-label" for="address-street">ZIP/POSTAL CODE *</label>
-    
-                                                    <input class="input-text input-text--primary-style" required name="pincode" type="text" id="address-postal" placeholder="Zip/Postal Code">
-                                                    {% if errors.pincode_error %}
-                                                    <p class="error">{{ errors.pincode_error }}</p> <!-- Display username error in red -->
-                                                    {% endif %}
-                                                </div>
-                                                    
-                                                </div>
-                                            <div class="gl-inline">
-                                                <div class="gl-inline">
-                                                    <div class="u-s-m-b-30">
-                                                        <label class="gl-label" for="address-state">DISTRICT *</label>
-                                                        <select class="select-box select-box--primary-style" id="address-state" name="district" required> 
-                                                            <option selected value="">Choose District</option>
-                                                            <option value="alappuzha">Alappuzha</option>
-                                                            <option value="ernakulam">Ernakulam</option>
-                                                            <option value="idukki">Idukki</option>
-                                                            <option value="kannur">Kannur</option>
-                                                            <option value="kasaragod">Kasaragod</option>
-                                                            <option value="kollam">Kollam</option>
-                                                            <option value="kottayam">Kottayam</option>
-                                                            <option value="kozhikode">Kozhikode</option>
-                                                            <option value="malappuram">Malappuram</option>
-                                                            <option value="palakkad">Palakkad</option>
-                                                            <option value="pathanamthitta">Pathanamthitta</option>
-                                                            <option value="thrissur">Thrissur</option>
-                                                            <option value="thiruvananthapuram">Thiruvananthapuram</option>
-                                                            <option value="wayanad">Wayanad</option>
-                                                        </select>
-                                                    </div>
+                                                    <label class="gl-label">TOWN/CITY *</label>
+                                                    <input class="input-text input-text--primary-style" name="city" type="text" id="address-city" placeholder="City">
+                                                    <p id="city_error" style="display: none; color: red; font-size: 10px;"></p> <!-- Error message placeholder -->
                                                 </div>
                                                 <div class="u-s-m-b-30">
-    
-                                                    <label class="gl-label" for="address-street">STATE *</label>
-    
-                                                    <input class="input-text input-text--primary-style" required name="state" type="text" id="address-street" placeholder="State">
-                                                    {% if errors.state_error %}
-                                                    <p class="error">{{ errors.state_error }}</p> <!-- Display username error in red -->
-                                                    {% endif %}
+                                                    <label class="gl-label">ZIP/POSTAL CODE *</label>
+                                                    <input class="input-text input-text--primary-style" name="pincode" type="text" id="address-postal" placeholder="Zip/Postal Code">
+                                                    <p id="pincode_error" style="display: none; color: red; font-size: 10px;"></p> <!-- Error message placeholder -->
                                                 </div>
                                             </div>
-                                           
+                                            
+                                            <div class="gl-inline">
+                                                <div class="u-s-m-b-30">
+                                                    <label class="gl-label">DISTRICT *</label>
+                                                    <select class="select-box select-box--primary-style" id="address-district" name="district">
+                                                        <option selected value="">Choose District</option>
+                                                        <option value="alappuzha">Alappuzha</option>
+                                                        <option value="ernakulam">Ernakulam</option>
+                                                        <option value="idukki">Idukki</option>
+                                                        <option value="kannur">Kannur</option>
+                                                        <option value="kasaragod">Kasaragod</option>
+                                                        <option value="kollam">Kollam</option>
+                                                        <option value="kottayam">Kottayam</option>
+                                                        <option value="kozhikode">Kozhikode</option>
+                                                        <option value="malappuram">Malappuram</option>
+                                                        <option value="palakkad">Palakkad</option>
+                                                        <option value="pathanamthitta">Pathanamthitta</option>
+                                                        <option value="thrissur">Thrissur</option>
+                                                        <option value="thiruvananthapuram">Thiruvananthapuram</option>
+                                                        <option value="wayanad">Wayanad</option>
+                                                    </select>
+                                                    <p id="district_error" style="display: none; color: red; font-size: 10px;"></p> <!-- Error message placeholder -->
+                                                </div>
+                                                
+                                                <div class="u-s-m-b-30">
+                                                    <label class="gl-label">STATE *</label>
+                                                    <input class="input-text input-text--primary-style" name="state" type="text" id="address-state" placeholder="State">
+                                                    <p id="state_error" style="display: none; color: red; font-size: 10px;"></p> <!-- Error message placeholder -->
+                                                </div>
+                                            </div>
+                                        
                                             <button class="btn btn--e-brand-b-2" type="submit">SAVE</button>
                                         </form>
+                                        
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
                     <div class="msg">
 
                         <span class="msg__text">Have a coupon?
@@ -197,96 +187,77 @@
                         <div class="o-summary__section u-s-m-b-30">
                             <div class="o-summary__item-wrap gl-scroll">
                                 <!-- Order Items -->
+
+                                 {% for item in cart_items %}
                                 <div class="o-card">
                                     <div class="o-card__flex">
                                         <div class="o-card__img-wrap">
-                                            <img class="u-img-fluid" src="images/product/electronic/product3.jpg" alt="">
+                                            <img class="u-img-fluid" src="{{ item.variant.product.image1.url }}" alt="">
                                         </div>
                                         <div class="o-card__info-wrap">
                                             <span class="o-card__name">
-                                                <a href="">Yellow Wireless Headphone</a>
+                                                <a href="">{{item.variant.product.product_name}}</a>
                                             </span>
-                                            <span class="o-card__quantity">Quantity x 1</span>
-                                            <span class="o-card__price">$150.00</span>
+                                            <span class="o-card__quantity">Quantity x {{item.quantity}}</span>
+                                            <span class="o-card__price">₹{{item.item_total}}</span>
                                         </div>
                                     </div>
                                     <a class="o-card__del far fa-trash-alt"></a>
                                 </div>
-                                <div class="o-card">
-                                    <div class="o-card__flex">
-                                        <div class="o-card__img-wrap">
-                                            <img class="u-img-fluid" src="images/product/electronic/product18.jpg" alt="">
-                                        </div>
-                                        <div class="o-card__info-wrap">
-                                            <span class="o-card__name">
-                                                <a href="">Nikon DSLR Camera 4k</a>
-                                            </span>
-                                            <span class="o-card__quantity">Quantity x 1</span>
-                                            <span class="o-card__price">$150.00</span>
-                                        </div>
-                                    </div>
-                                    <a class="o-card__del far fa-trash-alt"></a>
-                                </div>
-                                <div class="o-card">
-                                    <div class="o-card__flex">
-                                        <div class="o-card__img-wrap">
-                                            <img class="u-img-fluid" src="images/product/women/product8.jpg" alt="">
-                                        </div>
-                                        <div class="o-card__info-wrap">
-                                            <span class="o-card__name">
-                                                <a href="">New Dress D Nice Elegant</a>
-                                            </span>
-                                            <span class="o-card__quantity">Quantity x 1</span>
-                                            <span class="o-card__price">$150.00</span>
-                                        </div>
-                                    </div>
-                                    <a class="o-card__del far fa-trash-alt"></a>
-                                </div>
+                                {% endfor %}
+                                
+                                
                             </div>
                         </div>
                     </div>
 
                     <!-- Shipping & Billing -->
+                    <h1 class="checkout-f__h1">Address Avialable</h1>   
                     <div class="o-summary__section u-s-m-b-30">
-                        <div class="o-summary__box">
-                            <h1 class="checkout-f__h1">SHIPPING & BILLING</h1>
+                        <div class="o-summary__item-wrap gl-scroll">
+                            <div class="o-summary__box">
+                            {% for address in addresses %}
                             <div class="ship-b">
-                                <span class="ship-b__text">Ship to:</span>
+                                <span class="ship-b__text">Deliver to:</span>
                                 <div class="ship-b__box u-s-m-b-10">
-                                    <p class="ship-b__p">4247 Ashford Drive Virginia VA-20006 USA (+0) 900901904</p>
-                                    <a class="ship-b__edit btn--e-transparent-platinum-b-2" data-modal="modal" data-modal-id="#edit-ship-address">Edit</a>
-                                </div>
-                                <div class="ship-b__box">
-                                    <span class="ship-b__text">Bill to default billing address</span>
-                                    <a class="ship-b__edit btn--e-transparent-platinum-b-2" data-modal="modal" data-modal-id="#edit-ship-address">Edit</a>
-                                </div>
+                                    <p class="ship-b__p">{{address.street}},{{address.landmark}}{{address.city}} PIN:{{address.pincode}} {{address.district |capfirst }},{{address.state}}</p> 
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="selected_address" id="address1" value="address1">
+                                        <label class="form-check-label" for="address1" style="color: black;">    
+                                        </label>
+                                    </div>                            
+                                </div> 
+                            </div>
+                            {% endfor %}
                             </div>
                         </div>
                     </div>
                 </div>
 
+
                 <!-- Right Column: Order Summary Table and Payment Information -->
                 <div class="col-lg-6">
                     <!-- Summary Table -->
+                    <h1 class="checkout-f__h1">Amount to be paid</h1>   
                     <div class="o-summary__section u-s-m-b-30">
                         <div class="o-summary__box">
                             <table class="o-summary__table">
                                 <tbody>
                                     <tr>
                                         <td>SHIPPING</td>
-                                        <td>$4.00</td>
+                                        <td>₹50.00</td>
                                     </tr>
                                     <tr>
                                         <td>TAX</td>
-                                        <td>$0.00</td>
+                                        <td>₹{{ tax|floatformat:2 }}</td>
                                     </tr>
                                     <tr>
                                         <td>SUBTOTAL</td>
-                                        <td>$379.00</td>
+                                        <td>₹{{ grand_total|floatformat:2 }}</td>
                                     </tr>
                                     <tr>
                                         <td>GRAND TOTAL</td>
-                                        <td>$379.00</td>
+                                        <td>₹{{ grand_total|floatformat:2 }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -312,9 +283,8 @@
 
                                     <span class="gl-text u-s-m-t-6">Pay Upon Cash on delivery. (This service is only available for some countries)</span>
                                 </div>
-                                <div class="u-s-m-b-10">
+                                <!-- <div class="u-s-m-b-10">
 
-                                    <!--====== Radio Box ======-->
                                     <div class="radio-box">
 
                                         <input type="radio" id="direct-bank-transfer" name="payment">
@@ -322,13 +292,11 @@
 
                                             <label class="radio-box__label" for="direct-bank-transfer">Direct Bank Transfer</label></div>
                                     </div>
-                                    <!--====== End - Radio Box ======-->
 
                                     <span class="gl-text u-s-m-t-6">Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order will not be shipped until the funds have cleared in our account.</span>
-                                </div>
-                                <div class="u-s-m-b-10">
+                                </div> -->
+                                <!-- <div class="u-s-m-b-10">
 
-                                    <!--====== Radio Box ======-->
                                     <div class="radio-box">
 
                                         <input type="radio" id="pay-with-check" name="payment">
@@ -336,13 +304,11 @@
 
                                             <label class="radio-box__label" for="pay-with-check">Pay With Check</label></div>
                                     </div>
-                                    <!--====== End - Radio Box ======-->
 
                                     <span class="gl-text u-s-m-t-6">Please send a check to Store Name, Store Street, Store Town, Store State / County, Store Postcode.</span>
-                                </div>
+                                </div> -->
                                 <div class="u-s-m-b-10">
 
-                                    <!--====== Radio Box ======-->
                                     <div class="radio-box">
 
                                         <input type="radio" id="pay-with-card" name="payment">
@@ -350,13 +316,11 @@
 
                                             <label class="radio-box__label" for="pay-with-card">Pay With Credit / Debit Card</label></div>
                                     </div>
-                                    <!--====== End - Radio Box ======-->
 
                                     <span class="gl-text u-s-m-t-6">International Credit Cards must be eligible for use within the United States.</span>
                                 </div>
-                                <div class="u-s-m-b-10">
+                                <!-- <div class="u-s-m-b-10">
 
-                                    <!--====== Radio Box ======-->
                                     <div class="radio-box">
 
                                         <input type="radio" id="pay-pal" name="payment">
@@ -364,10 +328,9 @@
 
                                             <label class="radio-box__label" for="pay-pal">Pay Pal</label></div>
                                     </div>
-                                    <!--====== End - Radio Box ======-->
 
                                     <span class="gl-text u-s-m-t-6">When you click "Place Order" below we'll take you to Paypal's site to set up your billing information.</span>
-                                </div>
+                                </div> -->
                                 <div class="u-s-m-b-15">
 
                                     <!--====== Check Box ======-->
@@ -398,6 +361,41 @@
 
  
 <!--====== End - App Content ======-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    $('#addressForm').submit(function(e) {
+        e.preventDefault(); // Prevent default form submission
+    
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'order:add_address_checkout' user.userid %}",
+            data: $(this).serialize(), // Serialize form data
+            success: function(response) {
+                console.log('Response received:', response); // Debug log
+                if (response.success) {
+                    // Show the success message before reloading
+                    showToastMessage('New address added successfully.', 'success');
+                    
+                    // Reload the page after a short delay to allow the user to see the message
+                    setTimeout(function() {
+                        location.reload(); // Reload the page after 3 seconds
+                    }, 3000); // Adjust this duration as needed (3000ms = 3 seconds)
+                } else {
+                    // Display validation errors from response
+                    $.each(response.errors, function(key, value) {
+                        $('#' + key).text(value).show(); // Display each error
+                    });
+                    // Optionally, show a generic error message
+                    showToastMessage("Please fix the errors in the form.", "error");
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', status, error); // Debug log for AJAX errors
+            }
+        });
+    });
+    
+</script>
 
 
 {% endblock %}

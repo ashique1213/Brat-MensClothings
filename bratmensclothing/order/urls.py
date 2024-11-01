@@ -24,6 +24,7 @@ app_name = 'order'
 urlpatterns = [
    
     path('checkout/', views.checkout, name='checkout'),  
+    path('checkout/<int:userid>', views.add_address_checkout, name='add_address_checkout'),  
     
     
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
