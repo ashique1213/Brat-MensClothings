@@ -58,6 +58,7 @@ class OrderItem(models.Model):
         ("Reject Returned", "Reject Returned"),
     ]
     
+    
     orderitem_id = models.AutoField(primary_key=True)  
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
     variants = models.ForeignKey(VariantSize, on_delete=models.CASCADE)

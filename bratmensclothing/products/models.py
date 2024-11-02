@@ -56,7 +56,8 @@ class VariantSize(models.Model):
     variant_id = models.AutoField(primary_key=True)  
     size = models.CharField(max_length=10)
     qty = models.IntegerField()
-    price = models.IntegerField(null=True, blank=True)
+    # price = models.IntegerField(null=True, blank=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     status = models.BooleanField(default=True)
     product = models.ForeignKey(ProductDetails, related_name='variants', on_delete=models.CASCADE)
 

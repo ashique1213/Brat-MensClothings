@@ -12,18 +12,22 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 import json
 from .models import CartItem
-
+from decimal import Decimal
 
 @never_cache
 def view_cart(request):
+    cart_items = []
+    grand_total = Decimal('0.0')
+    tax = Decimal('0.0')
+    delivery_charge = Decimal('50.0')
+
     if request.user.is_authenticated:
         cart = Cart.objects.filter(user=request.user).first()
         cart_items = cart.items.all() if cart else []  
 
         total = sum(items.item_total for items in cart_items)
-        tax_rate = 0.02
+        tax_rate = Decimal('0.02')
         tax = total * tax_rate
-        delivery_charge=50
         grand_total = total + tax + delivery_charge
 
     else:
@@ -32,8 +36,9 @@ def view_cart(request):
     return render(request, 'user/cart.html', {
         'cart_items': cart_items,
         'grand_total':grand_total,
-        'tax':tax,'cart':cart,
-        'delivery_charge':delivery_charge
+        'tax':tax,
+        'cart':cart if request.user.is_authenticated else None,
+        'delivery_charge':delivery_charge,
         })
 
 

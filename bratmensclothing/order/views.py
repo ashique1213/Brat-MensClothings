@@ -5,7 +5,7 @@ from .models import Order,OrderItem
 from cart.models import Cart, CartItem
 from users.models import Address
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required,user_passes_test
 from django.views.decorators.cache import never_cache
 from django.db.models import Q
 import re
@@ -19,6 +19,10 @@ from django.urls import reverse
 @never_cache
 def checkout(request):
     if request.user.is_authenticated:
+        grand_total = Decimal('0.0')
+        tax = Decimal('0.0')
+        delivery_charge = Decimal('50.0')
+
         user=request.user
         addresses=Address.objects.filter(user=user)
         cart=get_object_or_404(Cart,user=user)
@@ -36,10 +40,10 @@ def checkout(request):
                 messages.error(request, 'Please remove out of stock product')
                 return redirect('cart:viewcart')
 
+
         total = sum(items.item_total for items in cart_items)
-        tax_rate = 0.02
+        tax_rate = Decimal('0.02')
         tax = total * tax_rate
-        delivery_charge=50
         grand_total = total + tax + delivery_charge
         
         return render(request,'user/checkout.html',
@@ -52,7 +56,7 @@ def checkout(request):
                     'grand_total':grand_total
 
                 }) 
-    return redirect('userss:login') 
+    return redirect('accounts:login_user') 
 
 
 @never_cache
@@ -125,9 +129,10 @@ def add_address_checkout(request, userid):
 @never_cache
 def place_order(request):
     if request.user.is_authenticated:
-        if request.session.get('order_placed'):
-            return redirect('home_user')
-        
+        grand_total = Decimal('0.0')
+        tax = Decimal('0.0')
+        delivery_charge = Decimal('50.0')
+
         user = request.user
         addresses = Address.objects.filter(user=user)
         cart = get_object_or_404(Cart, user=user)
@@ -139,10 +144,10 @@ def place_order(request):
             
 
         # Calculate total, tax, and grand total
-        total = sum(item.item_total for item in cart_items)
-        tax_rate = 0.02
+
+        total = sum(items.item_total for items in cart_items)
+        tax_rate = Decimal('0.02')
         tax = total * tax_rate
-        delivery_charge = 50
         grand_total = total + tax + delivery_charge
 
         if request.method == 'POST':
@@ -207,10 +212,94 @@ def place_order(request):
 
             return redirect('order:order_success')
 
-    return redirect('userss:login')
+    return redirect('accounts:login_user')
 
 
 @never_cache
 def order_success(request):
-    request.session.pop('order_placed', None)
-    return render(request,'user/ordersuccessfull.html')
+    if request.user.is_authenticated:
+        return render(request,'user/ordersuccessfull.html')
+    return redirect('accounts:login_user')
+
+
+@never_cache
+def view_orders(request):
+    if request.user.is_authenticated:
+        user=request.user
+        orders=Order.objects.filter(user=user)
+        order_items=OrderItem.objects.filter(order__in=orders)
+
+        return render(request,'user/order_details.html',
+                      {
+                        'orders':orders,
+                        'order_items':order_items,
+                    })
+    
+    return redirect('accounts:login_user')
+    
+
+
+@never_cache
+def manage_orders(request, orderitem_id):
+    if request.user.is_authenticated:
+
+        tax_rate = Decimal('0.02')
+        delivery_charge = Decimal('50.0')
+
+        try:
+            orderitem = OrderItem.objects.get(orderitem_id=orderitem_id)  
+
+
+            item_price = Decimal(orderitem.price)
+            item_quantity = Decimal(orderitem.quantity)  
+            item_tax = item_price * tax_rate * item_quantity 
+
+            return render(request, 'user/manageorder.html', 
+                          {'orderitem': orderitem,
+                           'tax':item_tax,
+                           'delivery_charge':delivery_charge
+                           })
+        
+        except OrderItem.DoesNotExist:
+            return render(request, 'user/manageorder.html', {'error': 'Order item not found.'})
+
+    return redirect('accounts:login_user')
+
+
+def cancel_order(request, orderitem_id):
+    item = get_object_or_404(OrderItem, orderitem_id=orderitem_id) 
+
+    if item.variants:  
+        item.variants.qty += item.quantity 
+        item.variants.save() 
+
+    item.status = 'Cancelled'
+    item.save() 
+
+    messages.success(request, 'Your order has been cancelled successfully.')
+
+    return redirect('order:view_orders')
+
+
+def is_staff(user):
+    return user.is_staff
+
+
+@login_required(login_url='accounts:admin_login')
+@never_cache
+@user_passes_test(is_staff, login_url='accounts:admin_login')
+def order_details(request):
+    orders = OrderItem.objects.all()
+
+    if request.method == 'POST':
+        order_id = request.POST.get('order_id')  
+        action = request.POST.get('status')
+
+        if order_id and action:
+            order = get_object_or_404(OrderItem, orderitem_id=order_id)  
+            order.status = action  
+            order.save() 
+
+            return redirect('order:order_details') 
+
+    return render(request, 'admin/orders.html', {'orders': orders})

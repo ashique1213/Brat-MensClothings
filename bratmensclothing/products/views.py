@@ -4,18 +4,34 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.views.decorators.cache import never_cache
 from django.db.models import F
+from django.http import JsonResponse
+
 
 def is_staff(user):
     return user.is_staff
 
 def add_brands(request):
-    if request.method=='POST':
-        brand=request.POST.get('brandname')
-        value=Brand.objects.create(brandname=brand)
-        print(value)
-        messages.success(request, 'Brand added successfully!')  
-        return redirect('products:view_brands')
-    return render(request,'admin/brand.html')
+    if request.method == 'POST':
+        brand = request.POST.get('brandname', '').strip()
+        
+        errors = {}
+
+        if not brand:
+            errors['brand_error'] = 'Brand name is required.'
+        
+        elif len(brand) < 2:
+            errors['brand_error'] = 'Brand name must be at least 2 characters long.'
+
+        elif Brand.objects.filter(brandname__iexact=brand).exists():
+            errors['brand_error'] = 'Brand already exists.'
+
+        if errors:
+            return JsonResponse({'success': False, 'errors': errors})
+
+        Brand.objects.create(brandname=brand)
+        return JsonResponse({'success': True, 'message': 'Brand added successfully!'})
+
+    return render(request, 'admin/brand.html')
 
 
 @login_required(login_url='accounts:admin_login')
@@ -26,17 +42,29 @@ def view_brands(request):
     return render(request,'admin/brand.html',{'brands':Brands})
 
 
-def edit_brands(request,brand_id):
-    Brands = get_object_or_404(Brand, brand_id=brand_id)
+def edit_brands(request, brand_id):
+    brand = get_object_or_404(Brand, brand_id=brand_id)
 
     if request.method == 'POST':
-        brandname = request.POST.get('brandname')
-        Brands.brandname = brandname
-        Brands.save()  
-        messages.success(request, 'Brand updated successfully!')  
-        return redirect('products:view_brands')  
-    return render(request, 'admin/brand.html', {'brands':Brands})
+        brandname = request.POST.get('brandname', '').strip()
+        errors = {}
 
+        if not brandname:
+            errors['brand_error'] = 'Brand name is required.'
+        elif len(brandname) < 2:
+            errors['brand_error'] = 'Brand name must be at least 2 characters long.'
+        elif Brand.objects.filter(brandname__iexact=brandname).exclude(brand_id=brand_id).exists():
+            errors['brand_error'] = 'Brand already exists.'
+
+        if errors:
+            return JsonResponse({'success': False, 'errors': errors})
+
+        brand.brandname = brandname
+        brand.save()
+        
+        return JsonResponse({'success': True, 'message': 'Brand updated successfully!'})
+
+    return render(request, 'admin/brand.html', {'brand': brand})
 
 
 def soft_delete_brand(request,brand_id):
@@ -65,7 +93,6 @@ def add_category(request):
         messages.success(request, 'Category added successfully!')  
         return redirect('products:view_category')
     return render(request,'admin/category.html')
-
 
 
 @login_required(login_url='accounts:admin_login')
@@ -266,8 +293,8 @@ def edit_sizevariants(request, variant_id):
         if size and price and quantity:
             variant.size = size
             variant.price = price
-            variant.qty = quantity
-            # variant.qty = F('qty') + quantity
+            # variant.qty = quantity
+            variant.qty = F('qty') + quantity
             variant.save() 
 
             messages.success(request, 'Size variant updated successfully!')

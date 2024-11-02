@@ -78,7 +78,7 @@
                             <div class="sb-nav-link-icon"><i class="fas fa-box-open"></i></div>
                             Products
                         </a>
-                        <a class="nav-link" href="">
+                        <a class="nav-link" href="{% url 'order:order_details' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-shopping-cart"></i></div>
                             Orders
                         </a>
@@ -343,6 +343,7 @@
             modal.find('form').attr('action', actionUrl);
         });
 
+        
     </script>
 </body>
 </html>
