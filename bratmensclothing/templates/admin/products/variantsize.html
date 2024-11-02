@@ -187,14 +187,20 @@
                                                 Edit
                                             </button>
                                             
-
-
-                                            <button type="button" class="btn btn-danger btn-sm me-3" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal{{ variant_size.variant_id }}">
-                                                Delete
+                                            {% if not variant_size.is_deleted %}
+                                            <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#confirmDeleteModal{{ variant_size.variant_id }}" 
+                                                data-action-url="{% url 'products:soft_delete_variant' variant_size.variant_id %}" 
+                                                data-message="Are you sure you want to soft delete {{ variant_size.variant_id }}?">
+                                                Unlist
                                             </button>
-                                            
-                                        
-                                            <!-- Confirmation Modal for Delete -->
+                                            {% else %}
+                                            <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#confirmRestoreModal{{ variant_size.variant_id }}" 
+                                                data-action-url="{% url 'products:restore_variant' variant_size.variant_id %}" 
+                                                data-message="Are you sure you want to restore {{ variant_size.variant_id }}?">
+                                                List
+                                            </button>
+                                            {% endif %}
+
                                             <div class="modal fade" id="confirmDeleteModal{{ variant_size.variant_id }}" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel{{ variant_size.variant_id }}" aria-hidden="true">
                                                 <div class="modal-dialog modal-dialog-centered" role="document">
                                                     <div class="modal-content">
@@ -203,19 +209,45 @@
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <p>Are you sure you want to permanently delete {{ variant_size.size }}?</p>
+                                                            <p id="deleteModalMessage">Are you sure you want to Unlist {{ variant_size.variant_id }}?</p>
                                                         </div>
                                                         <div class="modal-footer">
-                                                            <form method="POST" action="{% url 'products:delete_sizevariant' variant_size.variant_id %}">
+                                                            <form method="POST" action="{% url 'products:soft_delete_variant' variant_size.variant_id %}">
                                                                 {% csrf_token %}
-                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                                <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                                <button type="submit" class="btn btn-danger">Confirm</button>
                                                             </form>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                    
+                                    
+                                            <!-- Confirmation Modal for Restore -->
+                                            <div class="modal fade" id="confirmRestoreModal{{ variant_size.variant_id }}" tabindex="-1" role="dialog" aria-labelledby="confirmRestoreModalLabel{{ variant_size.variant_id }}" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="confirmRestoreModalLabel{{variant_size.variant_id}}">Confirmation</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <p id="restoreModalMessage">Are you sure you want to list {{ variant_size.variant_id }}?</p>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <form method="POST" action="{% url 'products:restore_variant' variant_size.variant_id %}">
+                                                                {% csrf_token %}
+                                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                                <button type="submit" class="btn btn-success">Confirm</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            
+                                            
+                                        
+                                           
                                           
                                         </td>
                                     </tr>

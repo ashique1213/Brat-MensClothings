@@ -308,12 +308,20 @@ def edit_sizevariants(request, variant_id):
     })
 
 
-def delete_sizevariant(request, variant_id):
-    variant = get_object_or_404(VariantSize, variant_id=variant_id)
+def soft_delete_variant(request,variant_id):
+    variant= get_object_or_404(VariantSize,variant_id=variant_id)
+    variant.is_deleted=True 
+    variant.save()
 
-    if request.method == 'POST':
-        variant.delete()  
-        messages.success(request, f'Variant size {variant.size} has been permanently deleted!')
-        return redirect('products:view_sizevariants', product_id=variant.product.product_id)
-    
+    messages.success(request, 'Variant successfully Unlisted!')
+    return redirect('products:view_sizevariants',product_id=variant.product.product_id)
+
+def restore_variant(request,variant_id):
+    variant= get_object_or_404(VariantSize,variant_id=variant_id)
+    variant.is_deleted=False 
+    variant.save()
+
+    messages.success(request, 'Variant successfully listed!')
+    return redirect('products:view_sizevariants',product_id=variant.product.product_id)
+
 

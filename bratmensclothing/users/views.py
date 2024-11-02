@@ -12,6 +12,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.contrib.auth.hashers import check_password
 import re
+from django.db.models import Q, Sum, Min
 from django.views.decorators.cache import cache_control
 
 
@@ -57,7 +58,7 @@ def category_details(request):
             Q(brand__is_deleted=False),
             Q(category__is_deleted=False)
         )
-
+        .annotate(total_quantity=Sum('variants__qty'))
     ) 
     if query:
         query_terms = query.split()
@@ -90,8 +91,6 @@ def category_details(request):
     categories=Category.objects.all()
     Brands=Brand.objects.all()
     Variants = VariantSize.objects.values('size').distinct().order_by('size')
-    print(Variants)
-
     return render(request,'user/categorylist.html',
                   {
                       'products':products,
@@ -240,7 +239,7 @@ def reset_password(request, userid):
 @login_required(login_url='accounts:login_user')
 def address_details(request, userid):
     user = get_object_or_404(Users, userid=userid)
-    addresses = Address.objects.filter(user=user)
+    addresses = Address.objects.filter(user=user,status=False)
 
     return render(request, 'user/address.html', {'addresses': addresses,'user':user})
 
@@ -315,7 +314,8 @@ def add_address(request,userid):
 def remove_address(request, id):
     address = get_object_or_404(Address, id=id) 
     user_id = address.user.userid  
-    address.delete() 
+    address.status=True
+    address.save()
     messages.success(request, 'Address has been successfully deleted.')
     return redirect('userss:addressdetails', userid=user_id) 
 

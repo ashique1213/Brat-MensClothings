@@ -14,6 +14,7 @@ import json
 from .models import CartItem
 from decimal import Decimal
 
+
 @never_cache
 def view_cart(request):
     cart_items = []
@@ -47,6 +48,10 @@ def add_to_cart(request, variant_id):
     if request.user.is_authenticated:
         variant = get_object_or_404(VariantSize, variant_id=variant_id)
         quantity = int(request.POST.get('quantity', 1))
+
+        if variant.qty==0:
+            messages.error(request, "The product is out of stock")
+            return redirect('userss:product_details',product_id=variant.product.product_id)
 
         cart, created = Cart.objects.get_or_create(user=request.user)
 

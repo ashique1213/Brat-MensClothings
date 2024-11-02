@@ -285,7 +285,7 @@
                                 <div class="product-m" >
                                     <div class="product-m__thumb">
 
-                                        <a class="aspect aspect--bg-grey aspect--square u-d-block" href="">
+                                        <a class="aspect aspect--bg-grey aspect--square u-d-block" href="{% url 'userss:product_details' product.product_id %}">
                                             <img class="aspect__img" src="{{ product.image1.url }}" alt="" >
                                         </a>
                                         <div class="product-m__quick-look">
@@ -299,10 +299,15 @@
                                     <div class="product-m__content">
                                         <div class="product-m__category">
 
-                                            <a href="">{{ product.brand.brandname}}</a></div>
+                                            <a href="{% url 'userss:product_details' product.product_id %}">{{ product.brand.brandname}}</a>
+                                        </div>
                                         <div class="product-m__name">
-
+                                        
                                             <a href="{% url 'userss:product_details' product.product_id %}">{{ product.product_name }}</a></div>
+
+                                            <div style="background-color: rgba(210, 220, 210, 0.804); color: black; padding: 0px 10px; width: 85px; font-weight: bold; border-radius: 50px; font-size: 12px; ">
+                                                {{ product.total_quantity }} in stock
+                                            </div>
                                         <div class="product-m__rating gl-rating-style"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i><i class="far fa-star"></i><i class="far fa-star"></i>
 
                                             <span class="product-m__review">()</span></div>
