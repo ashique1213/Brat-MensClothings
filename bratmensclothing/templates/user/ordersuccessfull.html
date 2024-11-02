@@ -25,10 +25,9 @@
                                 <span class="empty__text-1">Your order has been successfully placed.</span>
                                 
                                 <!-- Optional Order Number Display -->
-                                <span class="empty__text-2">Order Number: <strong>{{ order_number }}</strong></span>
 
                                 <a class="empty__redirect-link btn--e-brand" href="{% url 'userss:category_details' %}">CONTINUE SHOPPING</a>
-                                <a class="empty__redirect-link btn--e-secondary" href="">VIEW ORDER DETAILS</a>
+                                <a class="empty__redirect-link btn--e-secondary" href="{% url 'order:view_orders' %}">VIEW ORDER DETAILS</a>
                             </div>
                         </div>
                     </div>

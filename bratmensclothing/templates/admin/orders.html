@@ -258,6 +258,7 @@
                                         <th>Name</th>
                                         <th>Order id</th>
                                         <th>Quantity</th>
+                                        <th>Size</th>
                                         <th>Price</th>
                                         <th>Payment Method</th>
                                         <th>Delivery Status</th>
@@ -271,6 +272,7 @@
                                         <td>{{order.order.user.username |upper}}</td>
                                         <td>#{{order.order.tracking_number}}</td>
                                         <td>{{order.quantity}}</td>
+                                        <td>{{order.variants.size}}</td>
                                         <td>₹{{order.subtotal_price}}</td>
                                         <td style="font-weight: bold; text-align: center;">{{order.status}}</td>
 

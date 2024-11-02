@@ -178,9 +178,16 @@
                                             <div class="manage-o__text-2 u-c-secondary">Order #{{orderitem.order.tracking_number}}</div>
                                             <div class="manage-o__text u-c-silver">Placed on {{orderitem.order.created_at}}</div>
                                         </div>
+                                        {% if orderitem.status != 'Cancelled' %}
                                         <div style="background-color: rgb(231, 180, 180); padding: 9px; border-radius: 20px;">
                                             <a href="#" onclick="openConfirmCancelModal({{ orderitem.orderitem_id }})" style="font-weight: bold; font-size: 13px; color: rgb(197, 34, 34);">Cancel Order</a>
                                         </div>
+                                        {% else %}
+                                        <div style="background-color: rgb(231, 180, 180); padding: 9px; border-radius: 20px;">
+                                            <a href="" style="font-weight: bold; font-size: 13px; color: rgb(197, 34, 34);">Order Cancelled</a>
+                                        </div>
+                                        {% endif %}
+
                                         <div>
                                             <div class="manage-o__text-2 u-c-silver">Total:
 

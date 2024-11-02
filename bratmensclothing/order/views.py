@@ -298,8 +298,9 @@ def order_details(request):
         if order_id and action:
             order = get_object_or_404(OrderItem, orderitem_id=order_id)  
             order.status = action  
+            order.variants.qty += order.quantity 
             order.save() 
 
             return redirect('order:order_details') 
 
-    return render(request, 'admin/orders.html', {'orders': orders})
+    return render(request, 'admin/orders.html', {'orders': orders}) 
