@@ -28,8 +28,11 @@ urlpatterns = [
     path('otp-verify/', views.otp_verify, name='otp_verify'),
     path('resend-otp/', views.resend_otp, name='resend_otp'),
     path('logoutuser/', views.logout_user, name='logout_user'),
-    path('resetpassword/', views.reset_password, name='reset_password'),
+    # path('resetpassword/', views.reset_password, name='reset_password'),
+
     path('forgot_password/', views.forgot_password, name='forgot_password'),
     path('verify-otp/', views.verify_otp, name='verify_otp'),
+    path('reset_new_password/', views.reset_new_password, name='reset_new_password'),
+    path('reset_resend_otp/', views.reset_resend_otp, name='reset_resend_otp'),
 ]
  

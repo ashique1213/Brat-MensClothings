@@ -251,7 +251,7 @@ def restoreproduct(request, product_id):
 @user_passes_test(is_staff,'accounts:admin_login')
 def view_sizevariants(request, product_id):
     product = get_object_or_404(ProductDetails, product_id=product_id)
-    variant_sizes = VariantSize.objects.filter(product=product)
+    variant_sizes = VariantSize.objects.filter(product=product).order_by('size')
     
     return render(request, 'admin/products/variantsize.html', {
         'product': product,
@@ -263,10 +263,39 @@ def add_sizevariants(request, product_id):
     product = get_object_or_404(ProductDetails, product_id=product_id)
 
     if request.method == 'POST':
-        size = request.POST.get('size')
-        price = request.POST.get('price')
-        quantity = request.POST.get('quantity')
+        size = request.POST.get('size').strip()
+        price = request.POST.get('price').strip()
+        quantity = request.POST.get('quantity').strip()
 
+        errors={}
+        if not size:
+            errors['variant_error'] = 'Size is required.'
+        
+        elif len(size) > 6:
+            errors['variant_error'] = 'Size length is too long. Maximum 6 characters allowed.'
+        
+        elif VariantSize.objects.filter(size__iexact=size, product=product).exists():
+            errors['variant_error'] = 'This size variant already exists for this product.'
+        
+        try:
+            price = float(price) if price else None
+            if price is None or price <= 0:
+                errors['price_error'] = 'Price must be a positive number.'
+        
+        except (ValueError, TypeError):
+            errors['price_error'] = 'Invalid price format.'
+
+        try:
+            quantity = int(quantity) if quantity else None
+            if quantity is None or quantity <= 0:
+                errors['quantity_error'] = 'Quantity must be a positive integer.'
+        
+        except (ValueError, TypeError):
+            errors['quantity_error'] = 'Invalid quantity format.'
+
+        if errors:
+            return JsonResponse({'success': False, 'errors': errors})
+        
         if size and price and quantity:
             VariantSize.objects.create(
                 product=product,  
@@ -274,8 +303,9 @@ def add_sizevariants(request, product_id):
                 price=price,
                 qty=quantity
             )
-            messages.success(request, 'Size variant added successfully!')
-            return redirect('products:view_sizevariants', product_id=product_id)  
+            # messages.success(request, 'Size variant added successfully!')
+            # return redirect('products:view_sizevariants', product_id=product_id) 
+            return JsonResponse({'success': True, 'message': 'Size variant added successfully!'}) 
         else:
             messages.error(request, 'All fields are required.')
 
@@ -286,9 +316,9 @@ def edit_sizevariants(request, variant_id):
     variant = get_object_or_404(VariantSize, variant_id=variant_id)
 
     if request.method == 'POST':
-        size = request.POST.get('size')
-        price = request.POST.get('price')
-        quantity = request.POST.get('quantity')
+        size = request.POST.get('size').strip()
+        price = request.POST.get('price').strip()
+        quantity = request.POST.get('quantity').strip()
 
         if size and price and quantity:
             variant.size = size
