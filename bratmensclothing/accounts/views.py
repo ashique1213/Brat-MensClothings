@@ -407,7 +407,7 @@ def reset_new_password(request):
         del request.session['otp']
         del request.session['otp_expiry']
 
-        return redirect('accounts:login_user')  # Redirect to the login page after password reset
+        return JsonResponse({'status': 'success', 'redirect_url': reverse('accounts:login_user')})
 
     return render(request, 'user/forgot/reset_forgot_pass.html')
 

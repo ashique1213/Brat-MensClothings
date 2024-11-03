@@ -56,7 +56,7 @@
                            
                             <div id="error-message" class="u-s-m-b-30"></div> <!-- Error message area -->
 
-                            <form class="l-f-o__form" method="post" id="loginForm" action="{% url 'accounts:reset_new_password' %}">
+                            <form class="l-f-o__form" method="post" id="resetpassword" action="{% url 'accounts:reset_new_password' %}">
                                 {% csrf_token %}
                                
                                 <div class="u-s-m-b-30">
@@ -86,16 +86,77 @@
 <!--====== End - Section 2 ======-->
 
 <script>
-    document.getElementById('loginForm').addEventListener('submit', function(event) {
-        var password1 = document.getElementById('password1').value;
-        var password2 = document.getElementById('password2').value;
-
-        if (password1 !== password2) {
-            event.preventDefault(); // Prevent form submission
-            document.getElementById('error-message').textContent = "Passwords do not match!";
-            document.getElementById('error-message').style.color = "red"; // Change color to red for visibility
-        }
+    $(document).ready(function() {
+        $('#resetpassword').on('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+            $('.preloader').addClass('is-active');
+    
+            // Client-side validation for password match
+            const password1 = $('#password1').val();
+            const password2 = $('#password2').val();
+            
+            if (password1 !== password2) {
+                $('.preloader').removeClass('is-active');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Password Mismatch',
+                    text: 'Please make sure both passwords match.',
+                    confirmButtonColor: '#000',
+                    customClass: {
+                        icon: 'black-icon'
+                    }
+                });
+                return;
+            }
+    
+            $.ajax({
+                type: 'POST',
+                url: '{% url "accounts:reset_new_password" %}',  // URL for the reset password view
+                data: $(this).serialize(),
+                dataType: 'json',
+                success: function(response) {
+                    $('.preloader').removeClass('is-active');
+    
+                    if (response.status === 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Password Reset Successfully!',
+                            text: 'Redirecting to login...',
+                            confirmButtonColor: '#000',
+                            customClass: {
+                                icon: 'black-icon'
+                            }
+                        }).then(() => {
+                            window.location.href = response.redirect_url;  // Redirect using the URL in the response
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    $('.preloader').removeClass('is-active');
+    
+                    if (xhr.status === 400) {
+                        const errors = xhr.responseJSON.errors;
+                        let errorMessages = '';
+                        for (let key in errors) {
+                            errorMessages += errors[key] + '<br>';
+                        }
+    
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            html: errorMessages,
+                            confirmButtonColor: '#000',
+                            customClass: {
+                                icon: 'black-icon'
+                            }
+                        });
+                    }
+                }
+            });
+        });
     });
+    
+
 </script>
 
 {% endblock %}
