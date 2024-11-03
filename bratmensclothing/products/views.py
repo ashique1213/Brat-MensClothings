@@ -5,6 +5,8 @@ from django.contrib.auth.decorators import login_required,user_passes_test
 from django.views.decorators.cache import never_cache
 from django.db.models import F
 from django.http import JsonResponse
+from django.core.paginator import Paginator
+
 
 
 def is_staff(user):
@@ -139,7 +141,6 @@ def edit_category(request, category_id):
     return render(request, 'admin/category.html', {'category': category})
 
 
-from django.core.paginator import Paginator
 
 @login_required(login_url='accounts:admin_login')
 @never_cache
@@ -158,31 +159,13 @@ def viewproducts(request):
 
 def addproducts(request):
     if request.method == 'POST':
-        productname = request.POST.get('productname').strip()
-        description = request.POST.get('description').strip()
+        productname = request.POST.get('productname')
+        description = request.POST.get('description')
         brand_name = request.POST.get('brandname')
         category_ids = request.POST.getlist('category')
-        color = request.POST.get('color').strip()
+        color = request.POST.get('color')
         occasion = request.POST.get('occasion')
         fit = request.POST.get('fit')
-
-        errors = {}
-
-        # Validation
-        if not productname or len(productname) < 2:
-            errors['productname'] = 'Product name is required and must be at least 2 characters long.'
-        else:
-            if ProductDetails.objects.filter(product_name=productname).exists():
-                errors['productname'] = 'Product name already exists. Please choose a different name.'
-        
-        if not description or len(description) < 10:
-            errors['description'] = 'Description is required and must be at least 10 characters long.'
-        
-        if not color:
-            errors['color'] = 'Color is required.'
-          
-        if errors:
-            return JsonResponse({'success': False, 'errors': errors})
 
         image1 = request.FILES.get('image1')
         image2 = request.FILES.get('image2')
@@ -207,10 +190,8 @@ def addproducts(request):
             image4=image4
         )
         product.category.set(category_ids)  
-        # messages.success(request, 'Product added successfully!')  
-        # return redirect('products:viewproducts')  
-        return JsonResponse({'success': True, 'message': 'Product created successfully.'})
-
+        messages.success(request, 'Product added successfully!')  
+        return redirect('products:viewproducts')  
 
     categories = Category.objects.filter(is_deleted=False)
     brands = Brand.objects.filter(is_deleted=False)
@@ -353,8 +334,8 @@ def edit_sizevariants(request, variant_id):
         if size and price and quantity:
             variant.size = size
             variant.price = price
-            variant.qty = quantity
-            # variant.qty = F('qty') + quantity
+            # variant.qty = quantity
+            variant.qty = F('qty') + quantity
             variant.save() 
 
             messages.success(request, 'Size variant updated successfully!')

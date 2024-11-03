@@ -296,7 +296,7 @@ def is_staff(user):
 @never_cache
 @user_passes_test(is_staff, login_url='accounts:admin_login')
 def order_details(request):
-    orders = OrderItem.objects.all()
+    orders = OrderItem.objects.all().order_by('-orderitem_id')
     paginator = Paginator(orders, 4)  
 
     page_number = request.GET.get('page') 

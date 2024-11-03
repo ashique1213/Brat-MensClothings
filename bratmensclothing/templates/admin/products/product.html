@@ -43,11 +43,7 @@
             font-weight: bold; /* Makes the current page text bold */
         }
 
-        p.text-danger {
-            font-size: 10px;
-            margin-left: 5px;
-            color: red; /* Set the text color to red for error messages */
-          }
+        
 
         table {
             width: 100%;
@@ -360,7 +356,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form method="post" id="addProduct" action="{% url 'products:addproducts' %}" enctype="multipart/form-data">
+                <form method="post" action="{% url 'products:addproducts' %}" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="mb-3">
                         <label class="form-label">Images</label>
@@ -386,13 +382,10 @@
                     <div class="mb-3">
                         <label class="form-label">Product Name</label>
                         <input type="text" name="productname" class="form-control" required>
-                        <p id="productname" class="text-danger"></p> <!-- Error message container -->
-                        
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Product Description</label>
                         <textarea name="description" class="form-control" required></textarea>
-                        <p id="description" class="text-danger"></p> <!-- Error message container -->
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Brand</label>
@@ -408,18 +401,17 @@
                         <select name="category" class="form-control form-select" required>
                             <option value="">Select Category</option>
                             {% for category in categories %}
-                            <option value="{{ category.category_id }}">{{ category.category_type }}-{{ category.category }}</option>
+                                <option value="{{ category.category_id }}">{{ category.category_type }}-{{ category.category }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Color</label>
-                        <input type="text" name="color" class="form-control " value="{{ product.color }}" required>
-                        <p id="color" class="text-danger"></p> <!-- Error message container -->
+                        <input type="text" name="color" class="form-control" value="{{ product.color }}" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Occasion</label>
-                        <select name="occasion" class="form-control form-select" required>
+                        <select name="occasion" class="form-control" required>
                             <option value="" disabled selected>Select an occasion</option>
                             <option value="casual">Casual</option>
                             <option value="formal">Formal</option>
@@ -430,7 +422,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Fit</label>
-                        <select name="fit" class="form-control form-select" required>
+                        <select name="fit" class="form-control" required>
                             <option value="" disabled selected>Select a fit</option>
                             <option value="slim">Slim</option>
                             <option value="regular">Regular</option>
@@ -692,29 +684,6 @@
             }
         });
 
-
-        $('#addProduct').submit(function(e) {
-            e.preventDefault(); // Prevent default form submission
-    
-            $.ajax({
-                type: 'POST',
-                url: "{% url 'products:addproducts' %}",
-                data: $(this).serialize(), // Serialize form data
-                success: function(response) {
-                    if (response.success) {
-                        // Close the modal and reload the page
-                        alert(response.message);
-                        $('#addProduct').modal('hide');
-                        location.reload();
-                    } else {
-                        // Display validation errors in the form
-                        $.each(response.errors, function(key, value) {
-                            $('#' + key).text(value).show(); // Show each error
-                        });
-                    }
-                }
-            });
-        });
 
     </script>
 </body>
