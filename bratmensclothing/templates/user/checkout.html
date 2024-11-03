@@ -199,10 +199,10 @@
                                                 <a href="">{{item.variant.product.product_name}}</a>
                                             </span>
                                             <span class="o-card__quantity">Quantity x {{item.quantity}}</span>
-                                            <span class="o-card__price">₹{{item.item_total}}</span>
+                                            <span class="o-card__price"></span>
                                         </div>
                                     </div>
-                                    <a class="o-card__del far fa-trash-alt"></a>
+                                    <a class="">₹{{item.item_total}}</a>
                                 </div>
                                 {% endfor %}
                                 
@@ -221,7 +221,7 @@
                             <div class="ship-b">
                                 <span class="ship-b__text">Deliver to:</span>
                                 <div class="ship-b__box u-s-m-b-10">
-                                    <p class="ship-b__p">{{address.street}},{{address.landmark}}{{address.city}} PIN:{{address.pincode}} {{address.district |capfirst }},{{address.state}}</p> 
+                                    <p class="ship-b__p">{{address.address |capfirst }},{{address.street |capfirst }},{{address.landmark |capfirst}} ,{{address.city |capfirst}} PIN:{{address.pincode}} {{address.district |capfirst }},{{address.state |capfirst}}</p> 
                                                                        
                                     <!-- <div class="form-check">
                                         <input class="form-check-input" type="radio" name="selected_address" id="address1" value="address1">

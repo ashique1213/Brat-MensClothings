@@ -39,6 +39,11 @@ def add_brands(request):
 @user_passes_test(is_staff,'accounts:admin_login')
 def view_brands(request):
     Brands=Brand.objects.all().order_by('is_deleted', '-created_at')
+    paginator = Paginator(Brands, 5)  # Show 10 brands per page
+
+    page_number = request.GET.get('page')  # Get the current page number from the URL
+    Brands = paginator.get_page(page_number) 
+
     return render(request,'admin/brand.html',{'brands':Brands})
 
 
@@ -134,6 +139,7 @@ def edit_category(request, category_id):
     return render(request, 'admin/category.html', {'category': category})
 
 
+from django.core.paginator import Paginator
 
 @login_required(login_url='accounts:admin_login')
 @never_cache
@@ -142,6 +148,10 @@ def viewproducts(request):
     products = ProductDetails.objects.all()
     brands = Brand.objects.filter(is_deleted=False)
     categories = Category.objects.filter(is_deleted=False)
+    paginator=Paginator(products,3)
+
+    page_number = request.GET.get('page')  # Get the current page number from the URL
+    products = paginator.get_page(page_number) 
 
     return render(request, 'admin/products/product.html', {'products': products,'brands': brands,'categories': categories})
 

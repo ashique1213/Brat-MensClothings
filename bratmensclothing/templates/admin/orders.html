@@ -17,6 +17,33 @@
     <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"> -->
 
     <style>
+
+        .pagination-container {
+            display: flex; /* Use flexbox for alignment */
+            justify-content: flex-end; /* Aligns child elements to the right */
+            margin-top: 20px; /* Adds space above the pagination */
+        }
+        
+        .pagination {
+            display: flex; /* Ensure pagination links are in a row */
+        }
+        
+        .step-links {
+            display: flex; /* Flexbox for step links to align correctly */
+            align-items: center; /* Center items vertically */
+        }
+        
+        .step-links a {
+            margin: 0 5px; /* Spacing between links */
+            text-decoration: none; /* Removes underline from links */
+        }
+        
+        .current {
+            margin: 0 10px; /* Spacing around current page text */
+            font-weight: bold; /* Makes the current page text bold */
+        }
+
+
             .status-dropdown {
                 color: #000; /* Default color for the dropdown */
             }
@@ -261,7 +288,8 @@
                                         <th>Size</th>
                                         <th>Price</th>
                                         <th>Payment Method</th>
-                                        <th>Delivery Status</th>
+                                        <th>Order Status</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -269,12 +297,13 @@
                                     <tr>
                                         <td><img src="{{ order.variants.product.image1.url }}" alt="Product Image" /></td>
                                         <td>{{order.order.user_id}}</td>
-                                        <td>{{order.order.user.username |upper}}</td>
+                                        <td>{{order.order.user.username |title}}</td>
                                         <td>#{{order.order.tracking_number}}</td>
                                         <td>{{order.quantity}}</td>
-                                        <td>{{order.variants.size}}</td>
+                                        <td>{{order.variants.size|title}}</td>
                                         <td>₹{{order.subtotal_price}}</td>
-                                        <td style="font-weight: bold; text-align: center;">{{order.status}}</td>
+                                        <td>{{order.order.payment_type}}</td>
+                                        <td style="font-weight: bold;">{{order.status}}</td>
 
                                         {% if order.status != 'Cancelled' %}
                                                 <td style="width: 10%;">
@@ -310,6 +339,27 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        <div class="pagination-container">
+                            <div class="pagination">
+                                <span class="step-links">
+                                    {% if orders.has_previous %}
+                                        <a href="?page=1">&laquo; First</a>
+                                        <a href="?page={{ orders.previous_page_number }}">Previous</a>
+                                    {% endif %}
+                            
+                                    <span class="current">
+                                        Page {{ orders.number }} of {{ orders.paginator.num_pages }}.
+                                    </span>
+                            
+                                    {% if orders.has_next %}
+                                        <a href="?page={{ orders.next_page_number }}">Next</a>
+                                        <a href="?page={{ orders.paginator.num_pages }}">Last &raquo;</a>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        
                     </div>
                     
                 </div>

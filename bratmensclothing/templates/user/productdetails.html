@@ -128,7 +128,7 @@
                             <div class="pd-detail  u-s-m-b-30">
                                 <div>
 
-                                    <span class="pd-detail__name ">{{ product.product_name }}</span></div>
+                                    <span class="pd-detail__name ">{{ product.product_name |title }}</span></div>
                                 <div>
                                     <div class="pd-detail__inline">
                                         {% if product.variants.all %}
@@ -166,7 +166,7 @@
                                 </div>
                                 <div class="u-s-m-b-15">
 
-                                    <span class="pd-detail__preview-desc">{{ product.description }}</span></div>
+                                    <span class="pd-detail__preview-desc">{{ product.description |capfirst}}</span></div>
                                 <div class="u-s-m-b-15">
                                     <div class="pd-detail__inline">
 
@@ -341,7 +341,7 @@
                                     <div class="tab-pane fade show active" id="pd-desc">
                                         <div class="pd-tab__desc " >
                                             <div class="u-s-m-b-15 ">
-                                                <p >{{ product.description }}</p>
+                                                <p >{{ product.description |capfirst }}</p>
                                             </div>
                                           
                                             <div class="u-s-m-b-15">
@@ -353,22 +353,22 @@
                                                         <tbody>
                                                             <tr>
                                                                 <td>Occasion</td>
-                                                                <td>{{ product.occasion }}</td>
+                                                                <td>{{ product.occasion |title }}</td>
                                                             </tr>
                                                             <tr>
-                                                                <td>Color</td>
-                                                                <td>{{ product.color }}</td>
+                                                                <td>Color</td> 
+                                                                <td>{{ product.color |title }}</td>
                                                             </tr>  
                                                             <tr>
                                                                 <td>Fit</td>
-                                                                <td>{{ product.fit }}</td>
+                                                                <td>{{ product.fit |title }}</td>
                                                             </tr>
                                                             <tr>
                                                                 <tr>
                                                                     <td>Size available</td>
                                                                     <td>
                                                                         {% for variant in product.variants.all %}
-                                                                        {{ variant.size }}{% if not forloop.last %}, {% endif %}
+                                                                        {{ variant.size|title }}{% if not forloop.last %}, {% endif %}
                                                                             {% endfor %}
                                                                     </td>  <!-- Sizes in a single cell -->
                                                                 </tr>

@@ -13,6 +13,7 @@ from django.http import JsonResponse
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from decimal import Decimal
+from django.core.paginator import Paginator
 from django.urls import reverse
 
 
@@ -290,6 +291,10 @@ def is_staff(user):
 @user_passes_test(is_staff, login_url='accounts:admin_login')
 def order_details(request):
     orders = OrderItem.objects.all()
+    paginator = Paginator(orders, 4)  
+
+    page_number = request.GET.get('page') 
+    orders = paginator.get_page(page_number)  
 
     if request.method == 'POST':
         order_id = request.POST.get('order_id')  

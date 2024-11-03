@@ -246,7 +246,7 @@
                                                 <div class="description__img-wrap">
 
                                                     <img class="u-img-fluid" src="{{ orderitem.variants.product.image1.url }}" alt=""></div>
-                                                <div class="description-title">{{orderitem.variants.product.product_name}}</div>
+                                                <div class="description-title">{{orderitem.variants.product.product_name |title}}</div>
                                                 <div class="description-title">- {{orderitem.variants.size}}</div>
                                             </div>
                                             
@@ -271,7 +271,7 @@
                                     <div class="dash__box dash__box--bg-white dash__box--shadow u-s-m-b-30">
                                         <div class="dash__pad-3">
                                             <h2 class="dash__h2 u-s-m-b-8">Shipping Address</h2>
-                                            <h2 class="dash__h2 u-s-m-b-8">{{ orderitem.order.user.username|upper }}</h2>
+                                            <h2 class="dash__h2 u-s-m-b-8">{{ orderitem.order.user.username|title }}</h2>
 
                                             <span class="dash__text-2">
                                                 {{orderitem.order.shipping_address.address}}

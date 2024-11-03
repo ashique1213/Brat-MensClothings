@@ -13,6 +13,34 @@
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
     
     <style>
+
+
+        .pagination-container {
+            display: flex; /* Use flexbox for alignment */
+            justify-content: flex-end; /* Aligns child elements to the right */
+            margin-top: 20px; /* Adds space above the pagination */
+        }
+        
+        .pagination {
+            display: flex; /* Ensure pagination links are in a row */
+        }
+        
+        .step-links {
+            display: flex; /* Flexbox for step links to align correctly */
+            align-items: center; /* Center items vertically */
+        }
+        
+        .step-links a {
+            margin: 0 5px; /* Spacing between links */
+            text-decoration: none; /* Removes underline from links */
+        }
+        
+        .current {
+            margin: 0 10px; /* Spacing around current page text */
+            font-weight: bold; /* Makes the current page text bold */
+        }
+
+            
         table {
             width: 100%;
             border-collapse: collapse;
@@ -188,7 +216,7 @@
                                     {% for brand in brands %}
                                     <tr>
                                         <td>{{brand.brand_id}}</td>
-                                        <td>{{brand.brandname}}</td>
+                                        <td>{{brand.brandname |title}}</td>
                                         <td>{{brand.created_at |date:"Y-m-d" }}</td>
                                         <td>
                                             <button type="button" class="btn btn-primary btn-sm me-3" data-bs-toggle="modal" data-bs-target="#editBrandModal{{ brand.brand_id }}">
@@ -260,6 +288,28 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        <div class="pagination-container">
+                            <div class="pagination">
+                                <span class="step-links">
+                                    {% if brands.has_previous %}
+                                        <a href="?page=1">&laquo; First</a>
+                                        <a href="?page={{ brands.previous_page_number }}">Previous</a>
+                                    {% endif %}
+                            
+                                    <span class="current">
+                                        Page {{ brands.number }} of {{ brands.paginator.num_pages }}.
+                                    </span>
+                            
+                                    {% if brands.has_next %}
+                                        <a href="?page={{ brands.next_page_number }}">Next</a>
+                                        <a href="?page={{ brands.paginator.num_pages }}">Last &raquo;</a>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+
+
                     </div>
                     
                 </div>

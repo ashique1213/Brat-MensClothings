@@ -160,9 +160,9 @@
                                                                         <h2 class="dash__h2 u-s-m-b-8">ADDRESS {{ forloop.counter }}</h2>                                                                
                                                                         <div class="dash__link dash__link--secondary u-s-m-b-8">
                                                                         </div>
-                                                                        <span class="dash__text" style="font-size: small;">{{ addres.address }}, {{ addres.street }}, {{ addres.landmark }}, {{ addres.city }}</span>
-                                                                        <span class="dash__text" style="font-size: small;">Pin: {{ addres.pincode }} </span>
-                                                                        <span class="dash__text" style="font-size: small;">{{ addres.district }}, {{ addres.state }}</span>
+                                                                        <span class="dash__text" style="font-size: small;">{{ addres.address |capfirst }}, {{ addres.street |capfirst}}, {{ addres.landmark|capfirst }}, {{ addres.city|capfirst }}</span>
+                                                                        <span class="dash__text" style="font-size: small;">Pin: {{ addres.pincode |capfirst}} </span>
+                                                                        <span class="dash__text" style="font-size: small;">{{ addres.district|capfirst }}, {{ addres.state |capfirst}}</span>
                                                                         
                                                                         <hr>
                                                                         <div class="dash__link dash__link--secondary u-s-m-b-8">

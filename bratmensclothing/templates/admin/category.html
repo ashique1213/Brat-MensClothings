@@ -188,8 +188,8 @@
                                     {% for i in category %}
                                     <tr>
                                         <td>{{i.category_id}}</td>
-                                        <td>{{i.category}}</td>
-                                        <td>{{i.category_type}}</td>
+                                        <td>{{i.category |title}}</td>
+                                        <td>{{i.category_type |title}}</td>
                                         <td>{{i.created_date |date:"Y-m-d"}} </td>
                                         <td>
                                             <button type="button" class="btn btn-primary btn-sm me-3" data-toggle="modal" data-target="#editCategoryModal{{ i.category_id }}">

@@ -14,6 +14,7 @@ from django.contrib.auth.hashers import check_password
 import re
 from django.db.models import Q, Sum, Min
 from django.views.decorators.cache import cache_control
+from django.core.paginator import Paginator
 
 
 def is_staff(user):
@@ -25,7 +26,10 @@ def is_staff(user):
 @user_passes_test(is_staff,'accounts:admin_login')
 def view_user(request):
     users=Users.objects.filter(is_superuser=False)
+    paginator=Paginator(users,5)
 
+    page_number=request.GET.get('page')
+    users=paginator.get_page(page_number)
     return render(request,'admin/users.html',{'users':users})
 
 
@@ -100,8 +104,6 @@ def category_details(request):
                       'sort':sort_option,
                       'query':query
                 })
-
-
 
 
 @cache_control(private=True, no_cache=True)
