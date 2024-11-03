@@ -52,6 +52,10 @@ def add_to_cart(request, variant_id):
         if variant.qty==0:
             messages.error(request, "The product is out of stock")
             return redirect('userss:product_details',product_id=variant.product.product_id)
+        
+        if quantity>variant.qty:
+            messages.error(request, "You have selected a quantity above the available stock.")
+            return redirect('userss:product_details',product_id=variant.product.product_id)
 
         cart, created = Cart.objects.get_or_create(user=request.user)
 

@@ -34,6 +34,12 @@ def checkout(request):
             messages.error(request, 'You have exceeded the limit of 10 items in your cart!!')
             return redirect('cart:viewcart')
         
+        for item in cart_items:
+            if item.quantity > item.variant.qty:  
+                messages.error(request, f"'{item.variant.product.product_name}' exceeds available stock.")
+                return redirect('cart:viewcart')
+
+        
         for cart_item in cart_items:
             variant = get_object_or_404(VariantSize, variant_id=cart_item.variant.variant_id)
 

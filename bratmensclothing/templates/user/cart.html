@@ -105,12 +105,12 @@
                                                     <span class="table-p__name">
                                                         <a href="">{{ cart_item.variant.product.product_name }}</a>
                                                     </span>
-                                                    <p class="table-p__category">
+                                                    <p class="table-p__category" style="font-size: 13px; font-weight: bold;">
                                                         {% for category in cart_item.variant.product.category.all %}
                                                             {{ category.category }}{% if not forloop.last %}, {% endif %}
                                                         {% endfor %}
                                                     </p>
-                                                    <ul class="table-p__variant-list list-unstyled">
+                                                    <ul class="table-p__variant-list list-unstyled" style="font-size: 12px; font-weight: bold;">
                                                         <li>Size: {{ cart_item.variant.size }}</li>
                                                         <li>Color: {{ cart_item.variant.product.color }}</li>
                                                     </ul>
@@ -119,7 +119,7 @@
                                         </td>
 
                                         <td class="text-center">
-                                            <span class="table-p__price">₹ <span class="item-total" data-id="{{ cart_item.cartitem_id }}">{{ cart_item.item_total }}</span></span>
+                                            <span class="table-p__price">₹<span class="item-total" data-id="{{ cart_item.cartitem_id }}">{{ cart_item.item_total }}</span></span>
                                         </td>
 
                                         <!-- <td class="text-center" >

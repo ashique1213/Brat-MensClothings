@@ -185,7 +185,7 @@
                                     {% for variant_size in variant_sizes %}
                                     <tr>
                                         <td>{{ variant_size.variant_id }}</td>
-                                        <td>{{ variant_size.size |title}}</td>
+                                        <td>{{ variant_size.size |upper}}</td>
                                         <td>{{ variant_size.price }}</td>
                                         <td>{{ variant_size.qty }}</td>
                                         <td>
@@ -250,10 +250,6 @@
                                                 </div>
                                             </div>
                                             
-                                            
-                                            
-                                        
-                                           
                                           
                                         </td>
                                     </tr>
