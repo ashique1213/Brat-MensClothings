@@ -110,10 +110,10 @@
         <div id="layoutSidenav_content">
             <main>
                 <div class="container-fluid px-4">
-                    <h1 class="mt-4">Size Variants</h1>
+                    <h3 class="mt-4">Sizes and Stock</h3>
                     <ol class="breadcrumb mb-4">
                         <li class="breadcrumb-item"><a href="">Product</a></li>
-                        <li class="breadcrumb-item active">Size Variants</li>
+                        <li class="breadcrumb-item active">{{product.product_name}}</li>
                     </ol>
 
                     {% if messages %}
@@ -177,7 +177,7 @@
                                         <th>ID</th>
                                         <th>Size</th>
                                         <th>Price</th>
-                                        <th>Quantity</th>
+                                        <th>Stock</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -287,7 +287,7 @@
                         <p id="price_error" class="text-danger"></p> <!-- Error message container -->
                     </div>
                     <div class="mb-3">
-                        <label for="quantity" class="form-label">Quantity</label>
+                        <label for="quantity" class="form-label">Stock</label>
                         <input type="number" name="quantity" class="form-control" required>
                         <p id="quantity_error" class="text-danger"></p> <!-- Error message container -->
                     </div>
@@ -324,8 +324,8 @@
                             <input type="number" name="price" class="form-control" value="{{ variant_size.price }}" step="0.01" required>
                         </div>
                         <div class="mb-3">
-                            <label for="quantity" class="form-label">Quantity</label>
-                            <input type="number" name="quantity" class="form-control" value="{{ variant_size.qty }}" required>
+                            <label for="quantity" class="form-label">Stock</label>
+                            <input type="number" name="quantity" class="form-control" value="0" required>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
