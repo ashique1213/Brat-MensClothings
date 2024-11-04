@@ -3,6 +3,40 @@
 
 {% block content %}   
 {% load static %}
+
+
+<style>
+    .profile-pic-container {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      overflow: hidden;
+      background-color: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .profile-pic-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none; /* Hide initially */
+    }
+
+    .placeholder {
+      font-size: 24px;
+      color: #bbb;
+    }
+    
+    /* Optional hover effect */
+    .profile-pic-container:hover {
+      opacity: 0.8;
+    }
+  </style>
    <!--====== App Content ======-->
    <div class="app-content">
 
@@ -69,8 +103,14 @@
                             <div class="dash__box dash__box--shadow dash__box--radius dash__box--bg-white u-s-m-b-30">
                                 <div class="dash__pad-2">
                                     <h1 class="dash__h1 u-s-m-b-14">My Profile</h1>
+                                    <!-- <span class="dash__text u-s-m-b-30">Look all your info, you could customize your profile.</span> -->
 
-                                    <span class="dash__text u-s-m-b-30">Look all your info, you could customize your profile.</span>
+                                    <div class="profile-pic-container" onclick="document.getElementById('profile-pic-input').click()">
+                                        <span class="placeholder">ADD </span>
+                                        <img id="profile-pic" src="" alt="Profile Picture">
+                                      </div>
+                                      <input type="file" id="profile-pic-input" style="display: none;" accept="image/*" onchange="loadImage(event)">
+
                                   
                                     <div class="row">
                                         <div   div class="col-lg-4 u-s-m-b-30">

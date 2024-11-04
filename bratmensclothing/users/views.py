@@ -25,7 +25,7 @@ def is_staff(user):
 @never_cache
 @user_passes_test(is_staff,'accounts:admin_login')
 def view_user(request):
-    users=Users.objects.filter(is_superuser=False)
+    users=Users.objects.filter(is_superuser=False).order_by('-date_joined')
     paginator=Paginator(users,5)
 
     page_number=request.GET.get('page')
