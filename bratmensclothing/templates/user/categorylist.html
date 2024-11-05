@@ -306,7 +306,8 @@
                                             <a class="fas fa-search" data-modal="modal" data-modal-id="#quick-look" data-tooltip="tooltip" data-placement="top" title="Quick Look"></a></div>
                                         <div class="product-m__add-cart">
 
-                                            <a class="btn--e-brand" data-modal="modal" data-modal-id="#add-to-cart">Add to Wishlist</a></div>
+                                            <a class="btn--e-brand" data-modal="modal" data-modal-id="" href="{% url 'wishlist:add_to_wishlist' product.product_id %}">Add to Wishlist</a>
+                                        </div>
                                     </div>
 
                                     <div class="product-m__content">
@@ -333,7 +334,8 @@
                                                 <span>{{ product.description | capfirst}}</span></div>
                                             <div class="product-m__wishlist">
 
-                                                <a class="far fa-heart" href="#" data-tooltip="tooltip" data-placement="top" title="Add to Wishlist"></a></div>
+                                                <a class="far fa-heart" href="{% url 'wishlist:add_to_wishlist' product.product_id %}" data-tooltip="tooltip" data-placement="top" title="Add to Wishlist"></a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

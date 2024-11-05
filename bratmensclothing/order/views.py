@@ -150,8 +150,6 @@ def place_order(request):
             return redirect('cart:viewcart')
             
 
-        # Calculate total, tax, and grand total
-
         total = sum(items.item_total for items in cart_items)
         tax_rate = Decimal('0.02')
         tax = total * tax_rate
@@ -214,7 +212,6 @@ def place_order(request):
                 item.variant.qty -= item.quantity
                 item.variant.save()
 
-            # Clear cart items after order placement
             cart_items.delete()
 
             return redirect('order:order_success')
@@ -249,12 +246,15 @@ def view_orders(request):
 @never_cache
 def manage_orders(request, orderitem_id):
     if request.user.is_authenticated:
+        
 
         tax_rate = Decimal('0.02')
         delivery_charge = Decimal('50.0')
 
         try:
-            orderitem = OrderItem.objects.get(orderitem_id=orderitem_id)  
+            orderitem = OrderItem.objects.get(orderitem_id=orderitem_id)
+            if request.user.userid != orderitem.order.user.userid:  
+                return redirect('userss:error')
 
 
             item_price = Decimal(orderitem.price)

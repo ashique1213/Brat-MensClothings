@@ -20,6 +20,10 @@ from django.core.paginator import Paginator
 def is_staff(user):
     return user.is_staff
 
+@never_cache
+def error(request):
+    return render(request,'user/404.html')
+    
 
 @login_required(login_url='accounts:admin_login')
 @never_cache
@@ -130,14 +134,50 @@ def product_details(request, product_id):
 @never_cache
 @login_required(login_url='accounts:login_user')
 def account_details(request,userid):
+    if request.user.userid != userid:
+        return redirect('userss:error')
+
     user = get_object_or_404(Users, userid=userid)
  
     return render(request, 'user/accountdetails.html', {'user':user})
 
 
+
+
+
+@never_cache
+@login_required(login_url='accounts:login_user')
+def add_profile(request, userid):
+    user = get_object_or_404(Users, userid=userid)
+
+    if request.user.userid != user.userid:
+        return redirect('userss:error')
+
+    if request.method == 'POST':
+        profile_image = request.FILES.get('profile')
+
+        if profile_image:
+            user.profile = profile_image
+            user.save()
+            return redirect('userss:accountdetails', userid=userid)
+        else:
+            return render(request, 'user/accountdetails.html', {'user': user, 'error': 'No image uploaded.'})
+
+    return render(request, 'user/accountdetails.html', {'user': user})
+
+
+
+
+
+
+
+
 @never_cache
 @login_required(login_url='accounts:login_user')
 def edit_account_details(request, userid):
+    if request.user.userid != userid:
+        return redirect('userss:error')
+
     userdetails = get_object_or_404(Users, userid=userid)
 
     if request.method == 'POST':
@@ -195,6 +235,9 @@ def edit_account_details(request, userid):
 @never_cache
 @login_required(login_url='accounts:login_user')
 def reset_password(request, userid):
+    if request.user.userid != userid:
+        return redirect('userss:error')
+    
     user = get_object_or_404(Users, userid=userid)
 
     if request.method == 'POST':
@@ -240,6 +283,9 @@ def reset_password(request, userid):
 @never_cache
 @login_required(login_url='accounts:login_user')
 def address_details(request, userid):
+    if request.user.userid != userid:
+        return redirect('userss:error')
+    
     user = get_object_or_404(Users, userid=userid)
     addresses = Address.objects.filter(user=user,status=False)
 
@@ -249,6 +295,9 @@ def address_details(request, userid):
 @never_cache
 @login_required(login_url='accounts:login_user')
 def add_address(request,userid):
+    if request.user.userid != userid:
+        return redirect('userss:error')
+    
     user_id=get_object_or_404(Users,userid=userid)
 
     if request.method=='POST':
@@ -326,6 +375,8 @@ def remove_address(request, id):
 @login_required(login_url='accounts:login_user')
 def edit_address(request, id):
     address = get_object_or_404(Address, id=id)
+    if address.user != request.user:
+        return redirect('userss:error')
     user_id = address.user.userid 
 
     if request.method == 'POST':

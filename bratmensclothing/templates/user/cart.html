@@ -190,9 +190,9 @@
                     <!-- Route Box Section -->
                     <div class="col-lg-12 mt-4">
                         <div class="route-box d-flex justify-content-between">
-                            <a class="route-box__link" href=""><i class="fas fa-long-arrow-alt-left"></i> CONTINUE SHOPPING</a>
+                            <a class="route-box__link" href="{% url 'userss:category_details' %}"><i class="fas fa-long-arrow-alt-left"></i> CONTINUE SHOPPING</a>
                             <div>
-                                <a class="route-box__link me-3" href=""><i class="fas fa-trash"></i> CLEAR CART</a>
+                                <!-- <a class="route-box__link me-3" href=""><i class="fas fa-trash"></i> CLEAR CART</a> -->
                                 <a class="route-box__link" href=""><i class="fas fa-sync"></i> UPDATE CART</a>
                             </div>
                         </div>
@@ -208,7 +208,7 @@
 
 {% else %}
 <!--====== App Content ======-->
-   <div class="app-content">
+   <div class="app-content u-s-p-y-60" >
 
     <!--====== Section 1 ======-->
     <div class="u-s-p-y-60">
@@ -225,7 +225,13 @@
 
                                 <span class="empty__text-1">No items found on your cart.</span>
 
-                                <a class="empty__redirect-link btn--e-brand" href="{% url 'userss:category_details' %}">CONTINUE SHOPPING</a></div>
+                                {%if request.user.is_authenticated %}
+                                <a class="empty__redirect-link btn--e-brand" href="{% url 'userss:category_details' %}">CONTINUE SHOPPING</a>
+                                {% else %}
+                                <a class="empty__redirect-link btn--e-brand" href="{% url 'accounts:login_user' %}">PLEASE SIGN IN</a>
+                                {% endif %}
+                            
+                            </div>
                         </div>
                     </div>
                 </div>

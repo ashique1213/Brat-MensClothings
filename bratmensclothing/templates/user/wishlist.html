@@ -1,0 +1,158 @@
+{% extends "user/base.html" %}
+
+{% block content %}
+{% load static %}
+  
+
+{% if Wishlist_items %}
+  
+<!--====== App Content ======-->
+<div class="app-content">
+
+    <!--====== Section 1 ======-->
+    <div class="u-s-p-b-30">
+
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="container">
+                <div class="breadcrumb">
+                    <div class="breadcrumb__wrap">
+                        <ul class="breadcrumb__list">
+                            <li class="has-separator">
+
+                                <a href="">Home</a></li>
+                            <li class="is-marked">
+
+                                <a href="{% url 'accounts:home_user' %}">Wishlist</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--====== End - Section 1 ======-->
+
+
+    <!--====== Section 2 ======-->
+    <div class="u-s-p-b-60">
+
+        <!--====== Section Intro ======-->
+        <div class="section__intro u-s-p-b-30">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="section__text-wrap">
+                            <h1 class="section__heading u-c-secondary">Wishlist</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--====== End - Section Intro ======-->
+
+
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12">
+                        {% for item in Wishlist_items %}
+                        <!--====== Wishlist Product ======-->
+                        <div class="w-r u-s-m-b-30">
+                            <div class="w-r__container">
+                                <div class="w-r__wrap-1">
+                                    <div class="w-r__img-wrap">
+
+                                        <img class="u-img-fluid" src="{{ item.product.product.image1.url }}" alt=""></div>
+                                    <div class="w-r__info">
+
+                                        <span class="w-r__name">
+
+                                            <a href="">{{item.product.product.product_name | capfirst}}</a></span>
+
+                                        <span class="w-r__category">
+
+                                            <a href="">{{item.product.product.brand | capfirst}}</a></span>
+
+                                        <span class="w-r__price">₹{{item.product.price}}
+
+                                            <span class="w-r__discount">₹1600.00</span></span></div>
+                                </div>
+                                <div class="w-r__wrap-2">
+
+                                    <a href="{% url 'cart:addtocart' item.product.variant_id %}" class="w-r__link btn--e-brand-b-2" data-modal="modal" data-modal-id="#add-to-cart">ADD TO CART</a>
+
+                                    <a href="{% url 'userss:product_details' item.product.product.product_id %}" class="w-r__link btn--e-transparent-platinum-b-2">VIEW</a>
+
+                                    <a href="{% url 'wishlist:remove_wishlist' item.product.variant_id %}" class="w-r__link btn--e-transparent-platinum-b-2" >REMOVE</a></div>
+                            </div>
+                        </div>
+                        {% endfor%}
+                        <!--====== End - Wishlist Product ======-->
+
+                       
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="route-box">
+                            <div class="route-box__g">
+
+                                <a class="route-box__link" href="{% url 'userss:category_details' %}"><i class="fas fa-long-arrow-alt-left"></i>
+
+                                    <span>CONTINUE SHOPPING</span></a></div>
+                            <div class="route-box__g">
+
+                                <a class="route-box__link" href="{% url 'wishlist:clear_wishlist'%}"><i class="fas fa-trash"></i>
+
+                                    <span>CLEAR WISHLIST</span></a></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--====== End - Section Content ======-->
+    </div>
+    <!--====== End - Section 2 ======-->
+</div>
+<!--====== End - App Content ======-->
+
+
+{% else %}
+
+   <!--====== App Content ======-->
+   <div class="app-content u-s-p-y-60">
+
+    <!--====== Section 1 ======-->
+    <div class="u-s-p-y-60">
+
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 u-s-m-b-30">
+                        <div class="empty">
+                            <div class="empty__wrap">
+
+                                <span class="empty__big-text">EMPTY</span>
+
+                                <span class="empty__text-1">No items found on your Wishlist.</span>
+
+                                {%if request.user.is_authenticated %}
+                                <a class="empty__redirect-link btn--e-brand" href="{% url 'userss:category_details' %}">CONTINUE SHOPPING</a>
+                                {% else %}
+                                <a class="empty__redirect-link btn--e-brand" href="{% url 'accounts:login_user' %}">PLEASE SIGN IN</a>
+                                {% endif %}
+                            
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--====== End - Section Content ======-->
+    </div>
+    <!--====== End - Section 1 ======-->
+</div>
+<!--====== End - App Content ======-->
+
+{% endif %}
+{% endblock %}
