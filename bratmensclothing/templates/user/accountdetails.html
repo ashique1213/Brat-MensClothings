@@ -150,10 +150,10 @@
                                         
                                         <div class="profile-pic-container">
                                             {% if user.profile %}
-                                            <img id="profile-pic" src="{{ user.profile.url }}" alt="Profile Picture">
+                                            <img id="profile-pic" src="{{ user.profile.url }}" alt="">
                                             {% else %}
                                             <span class="placeholder">Profile</span>
-                                            <img id="profile-pic" src="" alt="Profile Picture" style="display: none;">
+                                            <img id="profile-pic" src="" alt="" style="display: none;">
                                             {% endif %}
                                         </div>
                                         
@@ -162,11 +162,13 @@
                                             <input type="file" id="profile-upload" name="profile" accept="image/*" onchange="previewImage(event)" style="display: none;">
                                             
                                             {% if user.profile %}
-                                            <label for="profile-upload" class="custom-upload-button">Update</label>
+                                            <!-- <label for="profile-upload"  class="custom-upload-button">Update</label> -->
+                                            <a href="{% url 'userss:deleteprofile' user.userid %}" class="custom-upload-button">Remove</a>
                                             {% else %}
                                             <label for="profile-upload" class="custom-upload-button">Choose Profile</label>
                                             {% endif %}
                                             <button type="submit" class="add-button">Upload</button>
+                                            <!-- <button type="" class="add-button">Remove</button> -->
                                         </form>
                                     </div>
                                         

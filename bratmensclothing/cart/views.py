@@ -60,8 +60,16 @@ def add_to_cart(request, variant_id):
         cart, created = Cart.objects.get_or_create(user=request.user)
 
         cart_item, created = CartItem.objects.get_or_create(cart=cart, variant=variant)
-        cart_item.quantity += quantity if not created else quantity
-        cart_item.save()
+        # cart_item.quantity += quantity if not created else quantity
+        # cart_item.save()
+
+        if cart_item.quantity + quantity > 6:
+            cart_item.quantity = 6  
+            messages.error(request, "You already have 6 in your cart")
+            return redirect('userss:product_details',product_id=variant.product.product_id)
+        else:
+            cart_item.quantity += quantity
+            cart_item.save()
 
         messages.success(request, "Item added to cart succesfully")
     else:

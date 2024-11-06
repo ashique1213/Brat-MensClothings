@@ -15,7 +15,8 @@ import re
 from django.db.models import Q, Sum, Min
 from django.views.decorators.cache import cache_control
 from django.core.paginator import Paginator
-
+from coupon.models import Coupon
+import cloudinary.uploader
 
 def is_staff(user):
     return user.is_staff
@@ -123,10 +124,12 @@ def product_details(request, product_id):
         )
 
     )  
+    coupons=Coupon.objects.all()
     return render(request, 'user/productdetails.html', 
         {
             'product': product,
-            'products':products
+            'products':products,
+            'coupons':coupons
          })
 
 
@@ -140,8 +143,6 @@ def account_details(request,userid):
     user = get_object_or_404(Users, userid=userid)
  
     return render(request, 'user/accountdetails.html', {'user':user})
-
-
 
 
 
@@ -166,9 +167,18 @@ def add_profile(request, userid):
     return render(request, 'user/accountdetails.html', {'user': user})
 
 
+@never_cache
+@login_required(login_url='accounts:login_user')
+def delete_profile(request, userid):
+    user = get_object_or_404(Users, userid=userid)
 
-
-
+    if user.profile:
+        public_id = user.profile.public_id 
+        cloudinary.uploader.destroy(public_id)
+        user.profile = None
+        user.save()
+    messages.success(request, 'Profile image has been successfully deleted.')
+    return redirect('userss:accountdetails', userid=userid)
 
 
 

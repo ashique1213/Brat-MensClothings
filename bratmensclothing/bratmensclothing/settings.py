@@ -54,7 +54,10 @@ INSTALLED_APPS = [
     'cart',
     'order',
     'wishlist',
-    # 'storages',
+    'coupon',
+    'cloudinary',
+    'cloudinary_storage',
+
 ]
 
 
@@ -193,17 +196,16 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
+# import cloudinary.uploader
+# from cloudinary.utils import cloudinary_url
+import cloudinary
 
-# AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID') 
-# AWS_SECRET_ACCESS_KEY =os.getenv('AWS_SECRET_ACCESS_KEY')
-# AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
-# AWS_S3_SIGNATURE_NAME =  os.getenv('AWS_S3_SIGNATURE_NAME')
-# AWS_S3_REGION_NAME =  os.getenv('AWS_S3_REGION_NAME')
-# AWS_S3_SIGNATURE_VERSION = 's3v4'
-# AWS_S3_FILE_OVERWRITE = False
-# AWS_DEFAULT_ACL =  None
-# AWS_S3_VERIFY = True
+cloudinary.config( 
+    cloud_name = os.getenv('cloud_name'), 
+    api_key = os.getenv('api_key'), 
+    api_secret = os.getenv('api_secret'),
+    DEFAULT_FOLDER= 'home/profile_pics',
+    secure=True,
+)
 
-# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
-# MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/media/'
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'

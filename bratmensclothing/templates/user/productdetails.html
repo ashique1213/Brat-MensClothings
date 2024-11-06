@@ -217,7 +217,6 @@
                                             <div id="selected-size" class="sele">Selected Size: None</div> 
 
 
-                                            
                                         </span>
                                     </div>
                                 </div>
@@ -305,6 +304,30 @@
 
                                             <span>Returns accepted if product not as described.</span></li>
                                     </ul>
+                                </div>
+
+                                <h1 class="checkout-f__h1">Avialable Coupons</h1>   
+                                
+                                <div class="o-summary__section u-s-m-b-30">
+                                    <div class="o-summary__item-wrap gl-scroll">
+                                        <div class="o-summary__box">
+                                        {% for coupon in coupons %}
+                                        <div class="ship-b">
+                                            <span class="ship-b__text"> to:</span>
+                                            <div class="ship-b__box u-s-m-b-10">
+
+                                                <span>
+                                                    Code: {{ coupon.code|capfirst }} 
+                                                    Discount: {{ coupon.discount_amount|capfirst }}
+                                                    Min Purchase: {{ coupon.min_purchase_amount }}
+                                                </span>
+                                             
+                                            </div>
+                                            
+                                        </div>
+                                        {% endfor %}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
