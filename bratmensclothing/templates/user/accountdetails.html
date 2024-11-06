@@ -167,7 +167,7 @@
                                             {% else %}
                                             <label for="profile-upload" class="custom-upload-button">Choose Profile</label>
                                             {% endif %}
-                                            <button type="submit" class="add-button">Upload</button>
+                                            <button type="submit" id="uploadprofile" class="add-button">Upload</button>
                                             <!-- <button type="" class="add-button">Remove</button> -->
                                         </form>
                                     </div>
@@ -231,5 +231,17 @@
 </div>
 <!--====== End - App Content ======-->
 
+<script>
+    $(document).ready(function() {
+        // Show the preloader when the login button is clicked
+        $('#removeprofile').click(function() {
+            $('.preloader').addClass('is-active');
+        });
+        $('#uploadprofile').click(function() {
+            $('.preloader').addClass('is-active');
+        });
+    });
+</script>
+     
 
 {% endblock %}

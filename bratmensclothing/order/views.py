@@ -1,6 +1,7 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from accounts.models import Users
 from products.models import ProductDetails,Category,Brand,VariantSize
+from coupon.models import Coupon
 from .models import Order,OrderItem
 from cart.models import Cart, CartItem
 from users.models import Address
@@ -52,6 +53,8 @@ def checkout(request):
         tax_rate = Decimal('0.02')
         tax = total * tax_rate
         grand_total = total + tax + delivery_charge
+
+        coupons=Coupon.objects.all()
         
         return render(request,'user/checkout.html',
                 {
@@ -60,7 +63,8 @@ def checkout(request):
                     'cart_items':cart_items,
                     'tax':tax,
                     'delivery_charge':delivery_charge,
-                    'grand_total':grand_total
+                    'grand_total':grand_total,
+                    'coupons':coupons,
 
                 }) 
     return redirect('accounts:login_user') 

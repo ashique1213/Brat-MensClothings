@@ -33,7 +33,6 @@ def add_coupon(request):
         usage_limit = request.POST.get('usage_limit')
         
         if code and discount_amount and min_purchase_amount and start_date and end_date and usage_limit:
-            # Create the coupon if all required fields are present
             Coupon.objects.create(
                 code=code,
                 discount_amount=discount_amount,

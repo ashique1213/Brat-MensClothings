@@ -34,6 +34,61 @@
         font-weight: bold;
         font-size: 14px;
     }
+
+    
+    .o-summary__item-wrap {
+        display: flex;
+        flex-wrap: wrap; /* Allow wrapping of coupon cards to the next row */
+        justify-content: flex-start; /* Align items to the start */
+        gap: 10px; /* Space between cards */
+    }
+    
+    .coupon-card {
+        background-color: #f9f9f9;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #e1e1e1;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 250px; /* Adjust width to fit your layout */
+        max-height: 70px;
+    }
+    
+    .coupon-header {
+        font-size: 16px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 10px;
+    }
+    
+    .coupon-details {
+        font-size: 14px;
+        color: #555;
+    }
+    
+    .coupon-info {
+        margin-bottom: 8px;
+    }
+    
+    .coupon-info__title {
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .coupon-info__value {
+        color: #49c36e;
+        font-size: 14px;
+        font-weight: normal;
+    }
+    
+    .coupon-info__value:hover {
+        text-decoration: underline;
+        cursor: pointer;
+    }
+    
+    .alter-height {
+        height: 100px;
+    }
+    
 </style>
         <!--====== App Content ======-->
         <div class="app-content">
@@ -128,7 +183,8 @@
                             <div class="pd-detail  u-s-m-b-30">
                                 <div>
 
-                                    <span class="pd-detail__name ">{{ product.product_name |title }}</span></div>
+                                    <span class="pd-detail__name ">{{ product.product_name |title }}</span>
+                                </div>
                                 <div>
                                     <div class="pd-detail__inline">
                                         {% if product.variants.all %}
@@ -138,7 +194,8 @@
                                         <!-- <span class="pd-detail__price">₹ {{product.variants.all.price}} </span> -->
 
 
-                                        <span class="pd-detail__discount">(76% OFF)</span><del class="pd-detail__del">₹28.97</del></div>
+                                        <span class="pd-detail__discount">(76% OFF)</span><del class="pd-detail__del">₹28.97</del>
+                                    </div>
                                 </div>
                                 <div class="u-s-m-b-15">
                                     <div class="pd-detail__rating gl-rating-style"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
@@ -220,6 +277,7 @@
                                         </span>
                                     </div>
                                 </div>
+
                                 <div class="u-s-m-b-15">
                                     <ul class="pd-social-list">
                                         <li>
@@ -243,7 +301,7 @@
 
                                 <div class="u-s-m-b-15">
                                     {% if product.variants.all %}
-                                <!-- 
+                                 <!-- 
                                     <form class="pd-detail__form" method="post" action="{% url 'cart:addtocart' 0 %}">
                                         {% csrf_token %}
                                         <div class="pd-detail-inline-2">
@@ -286,12 +344,8 @@
                                     <p>No variants available for this product.</p>
                                     {% endif %}
                                 </div>
-                               
 
-
-
-                                <div class="u-s-m-b-15">
-
+                                <!-- <div class="u-s-m-b-15">
                                     <span class="pd-detail__label u-s-m-b-8">Product Policy:</span>
                                     <ul class="pd-detail__policy-list">
                                         <li><i class="fas fa-check-circle u-s-m-r-8"></i>
@@ -304,31 +358,24 @@
 
                                             <span>Returns accepted if product not as described.</span></li>
                                     </ul>
-                                </div>
+                                </div> -->
 
-                                <h1 class="checkout-f__h1">Avialable Coupons</h1>   
-                                
-                                <div class="o-summary__section u-s-m-b-30">
-                                    <div class="o-summary__item-wrap gl-scroll">
-                                        <div class="o-summary__box">
+                                    <div class="o-summary__item-wrap gl-scroll alter-height">
+                                        <!-- <p>Coupon available</p> -->
                                         {% for coupon in coupons %}
-                                        <div class="ship-b">
-                                            <span class="ship-b__text"> to:</span>
-                                            <div class="ship-b__box u-s-m-b-10">
-
-                                                <span>
-                                                    Code: {{ coupon.code|capfirst }} 
-                                                    Discount: {{ coupon.discount_amount|capfirst }}
-                                                    Min Purchase: {{ coupon.min_purchase_amount }}
-                                                </span>
-                                             
+                                        <div class="coupon-card">
+                                            <div class="coupon-details u-s-m-b-10">
+                                                <div class="coupon-info">
+                                                    <span class="coupon-info__value">THE <strong>{{ coupon.code|upper }}</strong> GET <strong>₹{{ coupon.discount_amount|capfirst |floatformat:0 }}</strong> OFF</span><br>
+                                                    <span>For Minimum purchaase:{{ coupon.min_purchase_amount |floatformat:0 }} </span>
+                                                </div>
                                             </div>
-                                            
                                         </div>
+                                        
                                         {% endfor %}
-                                        </div>
                                     </div>
-                                </div>
+                            
+
                             </div>
 
                             
