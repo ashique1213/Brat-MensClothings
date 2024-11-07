@@ -51,8 +51,8 @@
         }
         
         .coupon-details {
-            font-size: 14px;
-            color: #555;
+            font-size: 13px;
+            color: #000;
         }
         
        
@@ -67,7 +67,7 @@
         
         .coupon-info__value {
             color: #49c36e;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: normal;
         }
         
@@ -155,8 +155,16 @@
                             <div class="coupon-card">
                                 <div class="coupon-details u-s-m-b-10">
                                     <div class="coupon-info">
-                                        <span class="coupon-info__value">THE <strong>{{ coupon.code|upper }}</strong> GET <strong>₹{{ coupon.discount_amount|floatformat:0 }}</strong> OFF</span><br>
-                                        <span>For Minimum purchase: {{ coupon.min_purchase_amount|floatformat:0 }}</span>
+                                        <span class="coupon-info__value">
+                                            THE <strong>{{ coupon.code|upper }}</strong> GET <strong>
+                                                ₹{{ coupon.discount_amount|capfirst |floatformat:0 }}
+                                            </strong> OFF FOR </span><br>
+                                        <span>
+                                            {% if coupon.category != 'None' %}
+                                                <strong>{{ coupon.category | upper }}</strong> 
+                                            {% endif %}
+                                            Minimum Purchase: ₹{{ coupon.min_purchase_amount | floatformat:0 }}
+                                        </span>
                                     </div>
                                 </div>
                             </div>

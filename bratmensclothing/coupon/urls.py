@@ -25,7 +25,10 @@ urlpatterns = [
    
     path('coupon_details/', views.coupon_details, name='coupon_details'),  
     path('add_coupon/', views.add_coupon, name='add_coupon'),  
-    path('delete_coupon/<int:coupon_id>', views.delete_coupon, name='delete_coupon'),  
+    path('edit_coupon/<int:coupon_id>', views.edit_coupon, name='edit_coupon'),  
+    path('delete_coupon/<int:coupon_id>', views.delete_coupon, name='delete_coupon'), 
+    path('soft-delete-coupon/<int:coupon_id>/', views.soft_delete_coupon, name='soft_delete_coupon'),
+    path('restore-coupon/<int:coupon_id>/', views.restore_coupon, name='restore_coupon'), 
 
     path('apply_coupon/',views.apply_coupon,name='apply_coupon'),
     path('remove_coupon/',views.remove_coupon,name='remove_coupon')

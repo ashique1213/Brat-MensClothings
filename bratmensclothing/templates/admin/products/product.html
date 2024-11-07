@@ -401,7 +401,7 @@
                         <select name="category" class="form-control form-select" required>
                             <option value="">Select Category</option>
                             {% for category in categories %}
-                                <option value="{{ category.category_id }}">{{ category.category_type }}-{{ category.category }}</option>
+                                <option value="{{ category.category_id }}">{{ category.category }}</option>
                             {% endfor %}
                         </select>
                     </div>

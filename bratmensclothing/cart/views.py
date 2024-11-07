@@ -91,8 +91,7 @@ def view_cart(request):
         tax = total_after_discount * tax_rate
         grand_total = total_after_discount + tax + delivery_charge
 
-        coupons = Coupon.objects.all()
-
+        coupons=Coupon.objects.filter(is_active=False)
         return render(request, 'user/cart.html', {
             'cart_items': cart_items,
             'grand_total': grand_total,

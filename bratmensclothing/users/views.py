@@ -124,7 +124,7 @@ def product_details(request, product_id):
         )
 
     )  
-    coupons=Coupon.objects.all()
+    coupons=Coupon.objects.filter(is_active=False)
     return render(request, 'user/productdetails.html', 
         {
             'product': product,
