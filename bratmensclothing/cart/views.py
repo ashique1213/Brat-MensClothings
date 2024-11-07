@@ -67,8 +67,11 @@ def view_cart(request):
         cart_items = cart.items.all() if cart else []
 
         try:
-            couponuser = CouponUser.objects.get(user=user)
+            # couponuser = CouponUser.objects.get(user=user)
+            # coupon_discount = couponuser.coupon.discount_amount
+            couponuser = CouponUser.objects.get(user=user, status=True)  # Only get active couponuser
             coupon_discount = couponuser.coupon.discount_amount
+            
         except CouponUser.DoesNotExist:
             couponuser = None
 
