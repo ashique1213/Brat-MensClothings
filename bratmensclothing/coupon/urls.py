@@ -25,7 +25,11 @@ urlpatterns = [
    
     path('coupon_details/', views.coupon_details, name='coupon_details'),  
     path('add_coupon/', views.add_coupon, name='add_coupon'),  
-
     path('delete_coupon/<int:coupon_id>', views.delete_coupon, name='delete_coupon'),  
+
+    path('apply_coupon/',views.apply_coupon,name='apply_coupon'),
+    path('remove_coupon/',views.remove_coupon,name='remove_coupon')
+
+
     
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

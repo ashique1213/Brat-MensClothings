@@ -12,7 +12,43 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 import json
 from .models import CartItem
+from coupon.models import Coupon,CouponUser
 from decimal import Decimal
+
+
+# @never_cache
+# def view_cart(request):
+#     if request.user.is_authenticated:
+#         user=request.user
+#         couponuser=get_object_or_404(CouponUser,user=user)
+
+#         cart_items = []
+#         grand_total = Decimal('0.0')
+#         tax = Decimal('0.0')
+#         delivery_charge = Decimal('50.0')
+
+#         cart = Cart.objects.filter(user=request.user).first()
+#         cart_items = cart.items.all() if cart else []  
+
+#         coupon_discount = couponuser.coupon.discount_amount
+
+#         total = sum(items.item_total for items in cart_items)
+#         total = total-coupon_discount
+#         tax_rate = Decimal('0.02')
+#         tax = total * tax_rate
+#         grand_total = total + tax + delivery_charge
+
+#     else:
+#         cart_items = []
+#     coupons=Coupon.objects.all()
+#     return render(request, 'user/cart.html', {
+#         'cart_items': cart_items,
+#         'grand_total':grand_total,
+#         'tax':tax,
+#         'cart':cart if request.user.is_authenticated else None,
+#         'delivery_charge':delivery_charge,
+#         'coupons':coupons
+#         })
 
 
 @never_cache
@@ -21,26 +57,54 @@ def view_cart(request):
     grand_total = Decimal('0.0')
     tax = Decimal('0.0')
     delivery_charge = Decimal('50.0')
+    coupon_discount = Decimal('0.0')  
+    couponuser = None
 
     if request.user.is_authenticated:
-        cart = Cart.objects.filter(user=request.user).first()
-        cart_items = cart.items.all() if cart else []  
+        user = request.user
 
-        total = sum(items.item_total for items in cart_items)
+        cart = Cart.objects.filter(user=user).first()
+        cart_items = cart.items.all() if cart else []
+
+        try:
+            couponuser = CouponUser.objects.get(user=user)
+            coupon_discount = couponuser.coupon.discount_amount
+        except CouponUser.DoesNotExist:
+            couponuser = None
+
+        total = sum(item.item_total for item in cart_items)
+
+        if couponuser:
+            coupon = couponuser.coupon
+            if total < coupon.min_purchase_amount:
+                couponuser.delete() 
+                messages.info(request, f"Coupon removed !! less than the minimum purchase amount.")
+                coupon_discount = Decimal('0.0')  
+                
+        if total >= (coupon.min_purchase_amount if couponuser else 0):
+            discount = min(total, coupon_discount)
+            total_after_discount = total - discount
+        else:
+            total_after_discount = total
+
         tax_rate = Decimal('0.02')
-        tax = total * tax_rate
-        grand_total = total + tax + delivery_charge
+        tax = total_after_discount * tax_rate
+        grand_total = total_after_discount + tax + delivery_charge
 
-    else:
-        cart_items = []
+        coupons = Coupon.objects.all()
 
-    return render(request, 'user/cart.html', {
-        'cart_items': cart_items,
-        'grand_total':grand_total,
-        'tax':tax,
-        'cart':cart if request.user.is_authenticated else None,
-        'delivery_charge':delivery_charge,
+        return render(request, 'user/cart.html', {
+            'cart_items': cart_items,
+            'grand_total': grand_total,
+            'tax': tax,
+            'cart': cart if request.user.is_authenticated else None,
+            'delivery_charge': delivery_charge,
+            'coupons': coupons,
+            'couponuser': couponuser,
+            'discount':coupon_discount
         })
+
+    return render(request, 'user/cart.html')
 
 
 @never_cache
@@ -84,6 +148,7 @@ def delete_item(request,cartitem_id):
     item.delete()
     messages.success(request, "Item deleted successfully ")
     return redirect('cart:viewcart')
+
 
 @require_POST
 def update_cart_item(request, cart_item_id):

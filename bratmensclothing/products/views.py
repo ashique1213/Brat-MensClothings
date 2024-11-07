@@ -41,9 +41,10 @@ def add_brands(request):
 @user_passes_test(is_staff,'accounts:admin_login')
 def view_brands(request):
     Brands=Brand.objects.all().order_by('is_deleted', '-created_at')
-    paginator = Paginator(Brands, 5)  # Show 10 brands per page
+    paginator = Paginator(Brands, 5)  
 
-    page_number = request.GET.get('page')  # Get the current page number from the URL
+    page_number = request.GET.get('page')  
+    
     Brands = paginator.get_page(page_number) 
 
     return render(request,'admin/brand.html',{'brands':Brands})

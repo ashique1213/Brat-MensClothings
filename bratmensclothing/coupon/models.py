@@ -22,7 +22,6 @@ class Coupon(models.Model):
 
 
 class CouponUser(models.Model):
-    coupon_user_id = models.AutoField(primary_key=True)  
     user = models.ForeignKey(Users, on_delete=models.CASCADE)
     coupon = models.ForeignKey(Coupon, on_delete=models.CASCADE) 
     status = models.BooleanField(default=False)

@@ -24,14 +24,12 @@ app_name = 'order'
 urlpatterns = [
    
     path('checkout/', views.checkout, name='checkout'),  
-    path('checkout/<int:userid>', views.add_address_checkout, name='add_address_checkout'),  
+    path('add_address_checkout/<int:userid>', views.add_address_checkout, name='add_address_checkout'),  
     path('place-order/', views.place_order, name='place_order'),    
     path('order_success/', views.order_success, name='order_success'),    
     path('view_orders/', views.view_orders, name='view_orders'),    
     path('manage_orders/<int:orderitem_id>', views.manage_orders, name='manage_orders'),    
     path('cancel_order/<int:orderitem_id>', views.cancel_order, name='cancel_order'),    
-
-
-    path('order_details/',views.order_details,name='order_details')
+    path('order_details/',views.order_details,name='order_details'),
     
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -17,80 +17,7 @@
         background-color: black; /* Background color when checked */
     }
 
-
-
-
-.o-summary__item-wrap {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Two columns for two items per row */
-    gap: 10px; /* Space between items */
-}
-
-.form-inline {
-    display: flex;
-    gap: 10px;
-}
-
-.coupon-card {
-    background-color: #f9f9f9;
-    padding: 15px;
-    border-radius: 8px;
-    border: 1px solid #e1e1e1;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    max-height: 70px;
-    margin: 5px 0;
-}
-
     
-    .coupon-header {
-        font-size: 16px;
-        font-weight: bold;
-        color: #333;
-        margin-bottom: 10px;
-    }
-    
-    .coupon-details {
-        font-size: 14px;
-        color: #555;
-    }
-    
-   
-    .coupon-info {
-        margin-bottom: 8px;
-    }
-    
-    .coupon-info__title {
-        font-weight: bold;
-        color: #333;
-    }
-    
-    .coupon-info__value {
-        color: #49c36e;
-        font-size: 14px;
-        font-weight: normal;
-    }
-    
-    .coupon-info__value:hover {
-        text-decoration: underline;
-        cursor: pointer;
-    }
-    
-    .alter-height {
-        height: 100px;
-    }
-
-
-    .coupon-card-2{
-        background-color: #f9f9f9;
-        padding: 15px;
-        border-radius: 8px;
-        border: 1px solid #e1e1e1;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        max-height: 70px;
-        width: 500px;
-        margin: 5px 0;
-
-    } 
 </style>
  <!--====== App Content ======-->
  <div class="app-content">
@@ -214,51 +141,6 @@
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <div class="o-summary__item-wrap gl-scroll alter-height">
-                                {% if coupons%}
-                                {% for coupon in coupons %}
-                                <div class="coupon-card">
-                                    <div class="coupon-details u-s-m-b-10">
-                                        <div class="coupon-info">
-                                            <span class="coupon-info__value">THE <strong>{{ coupon.code|upper }}</strong> GET <strong>₹{{ coupon.discount_amount|floatformat:0 }}</strong> OFF</span><br>
-                                            <span>For Minimum purchase: {{ coupon.min_purchase_amount|floatformat:0 }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                {% endfor %}
-                                {% else %}
-                                <div class="coupon-card-2">
-                                        <div class="coupon-info">
-                                            <span class="coupon-info__value"><strong>NO COUPON AVAILABLE</strong> </span>
-                                        </div>
-                                </div>
-                                {% endif %}
-
-                            </div>
-                        </div>
-                    
-                        <div class="col-lg-6">
-                            <div class="msg">
-                                <div class="c-f u-s-m-b-16">
-                                    <span class="gl-text u-s-m-b-16">Enter your coupon code if you have one.</span>
-                                    <form class="c-f__form" style="width: 100%;">
-                                        <div class="u-s-m-b-16">
-                                            <div class="u-s-m-b-15 form-inline">
-                                                <label for="coupon"></label>
-                                                <input class="input-text input-text--primary-style" type="text" id="coupon" placeholder="Coupon Code">
-                                                <button class="btn btn--e-transparent-brand-b-2" type="submit">APPLY</button>
-                                            </div>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    
-
                 </div>
             </div>
         </div>
@@ -354,6 +236,12 @@
                                         <td>SHIPPING</td>
                                         <td>₹{{delivery_charge|floatformat:2}}</td>
                                     </tr>
+                                    {% if discount %}
+                                    <tr>
+                                        <td style="color: #49c36e; font-weight: bold;">DISCOUNT</td>
+                                        <td>₹{{ discount }}</td>
+                                    </tr>
+                                    {% endif %}
                                     <tr>
                                         <td>TAX</td>
                                         <td>₹{{ tax|floatformat:2 }}</td>

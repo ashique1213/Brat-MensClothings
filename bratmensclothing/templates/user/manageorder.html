@@ -191,7 +191,12 @@
                                         <div>
                                             <div class="manage-o__text-2 u-c-silver">Total:
 
-                                                <span class="manage-o__text-2 u-c-secondary"></span> ₹{{orderitem.order.total_price}}</div>
+                                                <span class="manage-o__text-2 u-c-secondary">₹{{orderitem.order.total_price}}</span> 
+                                            </div>
+                                            <div class="manage-o__text-2 u-c-silver">Coupon Applied:<br>
+
+                                                <span class="manage-o__text-2 u-c-secondary">{{orderitem.order.coupon_code | upper}}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

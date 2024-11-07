@@ -16,6 +16,7 @@ from django.core.validators import RegexValidator
 from decimal import Decimal
 from django.core.paginator import Paginator
 from django.urls import reverse
+from coupon.models import Coupon,CouponUser
 
 
 @never_cache
@@ -26,7 +27,7 @@ def checkout(request):
         delivery_charge = Decimal('50.0')
 
         user=request.user
-        addresses=Address.objects.filter(user=user)
+        addresses=Address.objects.filter(user=user,status=False)
         cart=get_object_or_404(Cart,user=user)
         cart_items=CartItem.objects.filter(cart=cart)
 
@@ -49,10 +50,23 @@ def checkout(request):
                 return redirect('cart:viewcart')
 
 
-        total = sum(items.item_total for items in cart_items)
+        # total = sum(items.item_total for items in cart_items)
+        # tax_rate = Decimal('0.02')
+        # tax = total * tax_rate
+        # grand_total = total + tax + delivery_charge
+
+        try:
+            couponuser = CouponUser.objects.get(user=user)
+            coupon_discount = couponuser.coupon.discount_amount
+        
+        except CouponUser.DoesNotExist:
+            pass  
+
+        total = sum(item.item_total for item in cart_items)
+        total_after_discount = total - min(total, coupon_discount)
         tax_rate = Decimal('0.02')
-        tax = total * tax_rate
-        grand_total = total + tax + delivery_charge
+        tax = total_after_discount * tax_rate
+        grand_total = total_after_discount + tax + delivery_charge
 
         coupons=Coupon.objects.all()
         
@@ -65,10 +79,10 @@ def checkout(request):
                     'delivery_charge':delivery_charge,
                     'grand_total':grand_total,
                     'coupons':coupons,
+                    'discount':coupon_discount
 
                 }) 
     return redirect('accounts:login_user') 
-
 
 @never_cache
 @login_required(login_url='accounts:login_user')
@@ -86,7 +100,6 @@ def add_address_checkout(request, userid):
         
         errors = {}
 
-        # Validation logic
         if not address:
             errors['address_error'] = 'Address is required.'
         elif len(address) < 10:
@@ -136,7 +149,6 @@ def add_address_checkout(request, userid):
     return render(request, 'user/checkout.html', {'user': user_id})
 
 
-
 @never_cache
 def place_order(request):
     if request.user.is_authenticated:
@@ -152,12 +164,24 @@ def place_order(request):
 
         if not cart_items.exists():
             return redirect('cart:viewcart')
-            
+        
+        # total = sum(items.item_total for items in cart_items)
+        # tax_rate = Decimal('0.02')
+        # tax = total * tax_rate
+        # grand_total = total + tax + delivery_charge
 
-        total = sum(items.item_total for items in cart_items)
+        try:
+            couponuser = CouponUser.objects.get(user=user)
+            coupon_discount = couponuser.coupon.discount_amount
+        
+        except CouponUser.DoesNotExist:
+            pass  
+
+        total = sum(item.item_total for item in cart_items)
+        total_after_discount = total - min(total, coupon_discount)
         tax_rate = Decimal('0.02')
-        tax = total * tax_rate
-        grand_total = total + tax + delivery_charge
+        tax = total_after_discount * tax_rate
+        grand_total = total_after_discount + tax + delivery_charge
 
         if request.method == 'POST':
             selected_address_id = request.POST.get('address')
@@ -199,6 +223,7 @@ def place_order(request):
                 payment_type=payment_type,
                 payment_status=payment_status,
                 total_price=grand_total,
+                coupon_code=couponuser.coupon.code
             )
 
             # Create order items and update stock
@@ -259,7 +284,7 @@ def manage_orders(request, orderitem_id):
             orderitem = OrderItem.objects.get(orderitem_id=orderitem_id)
             if request.user.userid != orderitem.order.user.userid:  
                 return redirect('userss:error')
-
+            
 
             item_price = Decimal(orderitem.price)
             item_quantity = Decimal(orderitem.quantity)  
