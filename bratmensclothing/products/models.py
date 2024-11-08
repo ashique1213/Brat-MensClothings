@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
+from cloudinary.models import CloudinaryField
+
 
 class Category(models.Model):
     CATEGORY_CHOICES = [
@@ -36,10 +38,14 @@ class ProductDetails(models.Model):
     product_id = models.AutoField(primary_key=True)  
     product_name = models.CharField(max_length=100)
     description = models.TextField()
-    image1 = models.ImageField(upload_to='products/', null=False, blank=False)
-    image2 = models.ImageField(upload_to='products/', null=False, blank=False) 
-    image3 = models.ImageField(upload_to='products/', null=False, blank=False)  
-    image4 = models.ImageField(upload_to='products/', null=False, blank=False)  
+    # image1 = models.ImageField(upload_to='products/', null=False, blank=False)
+    image1 = CloudinaryField('image', folder='home/products',null=True, blank=True)
+    # image2 = models.ImageField(upload_to='products/', null=False, blank=False) 
+    image2 = CloudinaryField('image', folder='home/products',null=True, blank=True)
+    # image3 = models.ImageField(upload_to='products/', null=False, blank=False)  
+    image3 = CloudinaryField('image', folder='home/products',null=True, blank=True)
+    # image4 = models.ImageField(upload_to='products/', null=False, blank=False)  
+    image4 = CloudinaryField('image', folder='home/products',null=True, blank=True)
     color = models.CharField(max_length=30) 
     occasion = models.CharField(max_length=30) 
     fit = models.CharField(max_length=30)
