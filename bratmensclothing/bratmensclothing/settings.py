@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'order',
     'wishlist',
     'coupon',
+    'offer',
     'cloudinary',
     'cloudinary_storage',
 

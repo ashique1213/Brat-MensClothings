@@ -14,23 +14,24 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path,include
+from django.urls import path
+from . import views
 from django.conf import settings
 from django.conf.urls.static import static
 
+app_name = 'offer'
+
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('',include('accounts.urls')),
-    path('accounts/', include('allauth.urls')),
-    path('products/', include('products.urls')),
-    path('user/',include('users.urls')),
-    path('dashboard/',include('dashboard.urls')),
-    path('cart/',include('cart.urls')),
-    path('order/',include('order.urls')),
-    path('wishlist/',include('wishlist.urls')),
-    path('coupon/',include('coupon.urls')),
-    path('offer/',include('offer.urls')),
-]
-if settings.DEBUG: 
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+   
+    path('offer/', views.view_offer, name='view_offer'),  
+    path('view_brand_offer/', views.view_brand_offer, name='view_brand_offer'),  
+    path('add_brand_offer   /', views.add_brand_offer, name='add_brand_offer'),  
+    path('edit_brand_offer/<int:offer_id>/', views.edit_brand_offer, name='edit_brand_offer'),
+
+
+    path('view_product_offer/', views.view_product_offer, name='view_product_offer'),  
+    path('add_product_offer/', views.add_product_offer, name='add_product_offer'), 
+    path('edit_product_offer/<int:offer_id>/', views.edit_product_offer, name='edit_product_offer'),
+ 
+    
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
