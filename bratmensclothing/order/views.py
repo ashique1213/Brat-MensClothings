@@ -459,7 +459,6 @@ def cancel_order(request, orderitem_id):
 
     item.status = 'Cancelled'
     item.save() 
-
     messages.success(request, 'Your order has been cancelled successfully.')
 
     return redirect('order:view_orders')

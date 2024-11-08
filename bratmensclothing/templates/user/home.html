@@ -163,7 +163,7 @@
         <!--====== End - Section Intro ======-->
 
         <!--====== Section Content ======-->
-        <div class="section__content">
+        <!-- <div class="section__content">
             <div class="container">
                 <div class="row">
                     <div class="col-lg-12">
@@ -203,7 +203,6 @@
                                             <a href="">{{ product.product_name }}</a></span>
                                         <div class="product-o__rating gl-rating-style"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
 
-                                            <!-- <span class="product-o__review">(23)</span> -->
                                         </div>
                                         {% if product.variants.all %}
                                         <span class="product-o__price">₹{{product.variants.all.0.price}}
@@ -219,18 +218,81 @@
 
                 </div>
             </div>
+        </div> -->
+
+
+          <!--====== Section Content ======-->
+          <div class="section__content">
+            <div class="container">
+                <div class="slider-fouc">
+                    <div class="owl-carousel product-slider" data-item="4">
+                        {% for product in products %}
+
+                        <div class="u-s-m-b-30">
+
+                            <div class="product-o product-o--hover-on">
+
+                                <div class="product-o__wrap">
+
+                                    <a class="aspect aspect--bg-grey aspect--square u-d-block" href="{% url 'userss:product_details' product.product_id %}">
+
+                                        <img class="aspect__img" src="{{ product.image1.url }}" alt=""></a>
+                                    <div class="product-o__action-wrap">
+                                        <ul class="product-o__action-list">
+                                            <li>
+
+                                                <a data-modal="modal" data-modal-id="#quick-look" data-tooltip="tooltip" data-placement="top" title="Quick View"><i class="fas fa-search-plus"></i></a></li>
+                                            <li>
+
+                                                <a data-modal="modal" data-modal-id="#add-to-cart" data-tooltip="tooltip" data-placement="top" title="Add to Cart"><i class="fas fa-plus-circle"></i></a></li>
+                                            <li>
+
+                                                <a href="" data-tooltip="tooltip" data-placement="top" title="Add to Wishlist"><i class="fas fa-heart"></i></a></li>
+                                            <!-- <li>
+
+                                                <a href="" data-tooltip="tooltip" data-placement="top" title="Email me When the price drops"><i class="fas fa-envelope"></i></a>
+                                            </li> -->
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <span class="product-o__category">
+
+                                    <a href="{% url 'userss:product_details' product.product_id %}">{{ product.brand.brandname }}</a></span>
+
+                                <span class="product-o__name">
+
+                                    <a href="{% url 'userss:product_details' product.product_id %}">{{ product.product_name }}</a></span>
+                                <div class="product-o__rating gl-rating-style"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+
+                                    <span class="product-o__review">(20)</span></div>
+                                {% if product.variants.all %}
+                                <span class="product-o__price">₹{{product.variants.all.0.price}}
+                                <span class="product-o__discount">₹160.00</span></span>
+                                {% endif %}
+                            </div>
+
+                        </div>
+                        {% endfor %}
+
+                    </div>
+                </div>
+            </div>
         </div>
+        <!--====== End - Section Content ======-->
+
+        
         <!--====== End - Section Content ======-->
     </div>
     <!--====== End - Section 2 ======-->
 
 
     <!--====== Section 3 ======-->
-    <div class="u-s-p-b-60" id="offers">
+    <!-- <div class="u-s-p-b-60" id="offers">
 
 
 
-    </div>
+    </div> -->
     <!--====== End - Section 3 ======-->
 
 
