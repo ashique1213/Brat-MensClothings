@@ -30,7 +30,6 @@ urlpatterns = [
     path('productdetails/<int:product_id>/',views.product_details,name='product_details'),
     
     
-    
     path('addprofile/<int:userid>',views.add_profile,name='addprofile'),
     path('deleteprofile/<int:userid>',views.delete_profile,name='deleteprofile'),
     path('accountdetails/<int:userid>',views.account_details,name='accountdetails'),

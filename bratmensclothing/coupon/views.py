@@ -147,9 +147,6 @@ def delete_coupon(request,coupon_id):
 
 
 
-
-
-
 @never_cache
 def apply_coupon(request):
     if request.user.is_authenticated:
@@ -164,18 +161,16 @@ def apply_coupon(request):
             try:
                 coupon = Coupon.objects.get(code__iexact=code)
 
-                # Check if the user has already applied this coupon
-                # if CouponUser.objects.filter(user=user, coupon=coupon, status=True).exists():
-                #     messages.error(request, "You have already applied this coupon.")
                 if CouponUser.objects.filter(user=user, coupon=coupon, status=False).exists():
                     messages.error(request, "You have already applied this coupon.")
                 else:
                     coupon_category = coupon.category
 
-                    # Check if the coupon applies to the products' categories
+                    # Check if the coupon applicable to all products
                     if coupon_category != 'None':
                         all_same_category = all(
-                            cart_item.variant.product.category == coupon_category
+                            # cart_item.variant.product.category == coupon_category
+                            cart_item.variant.product.category.filter(category=coupon_category).exists()
                             for cart_item in cart_items
                         )
                         if not all_same_category:
@@ -185,7 +180,7 @@ def apply_coupon(request):
                     total = sum(item.item_total for item in cart_items)
                     
                     if total >= coupon.min_purchase_amount:
-                        # Create the CouponUser record to track the coupon application
+                        # Create the CouponUser 
                         CouponUser.objects.create(user=user, coupon=coupon, status=True)
                         discount = min(total, coupon.discount_amount)
                         messages.success(request, f"Coupon applied! You saved {discount}.")
@@ -197,28 +192,16 @@ def apply_coupon(request):
         return redirect('cart:viewcart')
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 @never_cache
-def remove_coupon(request):
+def remove_coupon(request, id):
     if request.user.is_authenticated:
         user = request.user
+
         try:
-            couponuser = CouponUser.objects.get(user=user)
+            couponuser = CouponUser.objects.get(id=id, user=user)
             couponuser.delete()  
             messages.success(request, "Coupon removed successfully.")
+            return redirect('cart:viewcart')
         except CouponUser.DoesNotExist:
-            messages.error(request, "No coupon applied to remove.")
-
+            messages.error(request, "Coupon not found")
     return redirect('cart:viewcart')

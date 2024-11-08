@@ -108,7 +108,7 @@ def checkout(request):
         # grand_total = total + tax + delivery_charge
         coupon_discount = Decimal('0.0')
         try:
-            couponuser = CouponUser.objects.get(user=user)
+            couponuser = CouponUser.objects.get(user=user,status=True)
             coupon_discount = couponuser.coupon.discount_amount
         
         except CouponUser.DoesNotExist:
@@ -484,9 +484,14 @@ def order_details(request):
         if order_id and action:
             order = get_object_or_404(OrderItem, orderitem_id=order_id)  
             order.status = action  
-            order.variants.qty += order.quantity 
+            if action == 'Cancelled':
+               
+                variant = order.variants  
+                variant.qty += order.quantity  
+                variant.save()  
+            
             order.save() 
-
+            messages.success(request, f"Order status updated to {action}.")
             return redirect('order:order_details') 
 
     return render(request, 'admin/orders.html', {'orders': orders}) 

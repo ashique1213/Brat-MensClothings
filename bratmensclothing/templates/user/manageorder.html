@@ -189,13 +189,13 @@
                                         {% endif %}
 
                                         <div>
-                                            <div class="manage-o__text-2 u-c-silver">Total:
+                                            <div class="manage-o__text-2 u-c-silver">AMOUNT PAID
 
                                                 <span class="manage-o__text-2 u-c-secondary">₹{{orderitem.order.total_price}}</span> 
                                             </div>
-                                            <div class="manage-o__text-2 u-c-silver">Coupon Applied:<br>
+                                            <div class="manage-o__text-2 u-c-silver" style="font-size: 12px;">Coupon Applied:<br>
 
-                                                <span class="manage-o__text-2 u-c-secondary">{{orderitem.order.coupon_code | upper}}</span>
+                                                <span class="manage-o__text-2 u-c-secondary" style="font-size: 12px;" >{{orderitem.order.coupon_code | upper}}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -263,9 +263,9 @@
                                                         <span class="manage-o__text-2 u-c-secondary">{{ orderitem.quantity}}</span></span></div>
                                                 <div>
 
-                                                    <span class="manage-o__text-2 u-c-silver">Total:
+                                                    <span class="manage-o__text-2 u-c-silver">Item Price:
 
-                                                        <span class="manage-o__text-2 u-c-secondary">₹{{ orderitem.subtotal_price}}</span></span></div>
+                                                        <span class="manage-o__text-2 u-c-secondary">₹{{ orderitem.price}}</span></span></div>
                                             </div>
                                         </div>
                                     </div>
@@ -308,7 +308,7 @@
                                                 <div class="manage-o__text-2 u-c-secondary">₹{{tax |floatformat:2}}</div>
                                             </div>
                                             <div class="dash-l-r u-s-m-b-8">
-                                                <div class="manage-o__text-2 u-c-secondary">Total</div>
+                                                <div class="manage-o__text-2 u-c-secondary">Item total</div>
                                                 <div class="manage-o__text-2 u-c-secondary">₹{{ orderitem.subtotal_price}}</div>
                                             </div>
 

@@ -263,7 +263,7 @@ def restoreproduct(request, product_id):
 @user_passes_test(is_staff,'accounts:admin_login')
 def view_sizevariants(request, product_id):
     product = get_object_or_404(ProductDetails, product_id=product_id)
-    variant_sizes = VariantSize.objects.filter(product=product).order_by('size')
+    variant_sizes = VariantSize.objects.filter(product=product).order_by('-size')
     
     return render(request, 'admin/products/variantsize.html', {
         'product': product,
