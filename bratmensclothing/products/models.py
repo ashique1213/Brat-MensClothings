@@ -46,6 +46,7 @@ class ProductDetails(models.Model):
     image3 = CloudinaryField('image', folder='home/products',null=True, blank=True)
     # image4 = models.ImageField(upload_to='products/', null=False, blank=False)  
     image4 = CloudinaryField('image', folder='home/products',null=True, blank=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     color = models.CharField(max_length=30) 
     occasion = models.CharField(max_length=30) 
     fit = models.CharField(max_length=30)
@@ -57,12 +58,11 @@ class ProductDetails(models.Model):
     def __str__(self):
         return self.product_name
 
-
 class VariantSize(models.Model):  
     variant_id = models.AutoField(primary_key=True)  
     size = models.CharField(max_length=10)
     qty = models.IntegerField()
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    # price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     is_deleted = models.BooleanField(default=False)
     product = models.ForeignKey(ProductDetails, related_name='variants', on_delete=models.CASCADE)
 

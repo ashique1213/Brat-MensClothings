@@ -12,11 +12,15 @@ from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.contrib.auth.hashers import check_password
 import re
+from datetime import timezone   
+from offer.models import Brand_Offers,Product_Offers
+from django.utils import timezone
 from django.db.models import Q, Sum, Min
 from django.views.decorators.cache import cache_control
 from django.core.paginator import Paginator
 from coupon.models import Coupon
 import cloudinary.uploader
+from decimal import Decimal
 
 def is_staff(user):
     return user.is_staff
@@ -69,6 +73,7 @@ def category_details(request):
         )
         .annotate(total_quantity=Sum('variants__qty'))
     ) 
+   
     if query:
         query_terms = query.split()
         q_filter = Q()
@@ -96,7 +101,44 @@ def category_details(request):
         products = products.annotate(lowest_price=Min('variants__price')).order_by('-lowest_price')
     else: 
         products = products.order_by('created_at')
-   
+    
+
+    for product in products:
+        product_offer = Product_Offers.objects.filter(
+            product_id=product,
+            status=True,
+            started_date__lte=timezone.now(),
+            end_date__gte=timezone.now()
+        ).first()
+        
+        brand_offer = Brand_Offers.objects.filter(
+            brand_id=product.brand,
+            status=True,
+            started_date__lte=timezone.now(),
+            end_date__gte=timezone.now()
+        ).first()
+        
+        final_price = product.price
+        discount_percentage = 0
+
+        # Determine the highest applicable offer
+        if product_offer and brand_offer:
+            if product_offer.offer_price > brand_offer.offer_price:
+                final_price = product.price - product_offer.offer_price
+                discount_percentage = (product_offer.offer_price / product.price) * Decimal(100)
+            else:
+                final_price = product.price - brand_offer.offer_price
+                discount_percentage = (brand_offer.offer_price / product.price) * Decimal(100)
+        elif product_offer:
+            final_price = product.price - product_offer.offer_price
+            discount_percentage = (product_offer.offer_price / product.price) * Decimal(100)
+        elif brand_offer:
+            final_price = product.price - brand_offer.offer_price
+            discount_percentage = (brand_offer.offer_price / product.price) * Decimal(100)
+
+        product.final_price = final_price
+        product.discount_percentage = discount_percentage
+
     categories=Category.objects.all()
     Brands=Brand.objects.all()
     Variants = VariantSize.objects.values('size').distinct().order_by('size')
@@ -111,26 +153,91 @@ def category_details(request):
                 })
 
 
+# @cache_control(private=True, no_cache=True)
+# def product_details(request, product_id):
+#     product = get_object_or_404(ProductDetails, product_id=product_id, is_deleted=False)
+#     products=(
+#         ProductDetails.objects.select_related('brand')
+#         .prefetch_related('category','variants')
+#         .filter(
+#             Q(is_deleted=False),
+#             Q(brand__is_deleted=False),
+#             Q(category__is_deleted=False)
+#         )
+
+#     )  
+#     coupons=Coupon.objects.filter(is_active=False)
+#     return render(request, 'user/productdetails.html', 
+#         {
+#             'product': product,
+#             'products':products,
+#             'coupons':coupons
+#          })
+
+
+
 @cache_control(private=True, no_cache=True)
 def product_details(request, product_id):
     product = get_object_or_404(ProductDetails, product_id=product_id, is_deleted=False)
-    products=(
+    
+    # product offer
+    product_offer = Product_Offers.objects.filter(
+        product_id=product,
+        status=True,
+        started_date__lte=timezone.now(),
+        end_date__gte=timezone.now()
+    ).first()
+    
+    # brand offer
+    brand_offer = Brand_Offers.objects.filter(
+        brand_id=product.brand,
+        status=True,
+        started_date__lte=timezone.now(),
+        end_date__gte=timezone.now()
+    ).first()
+    
+
+    if product_offer and product_offer.offer_price > 0 and brand_offer and brand_offer.offer_price > 0:
+         
+        if product_offer.offer_price > brand_offer.offer_price:
+            final_price = product.price - product_offer.offer_price
+            discount_percentage = (product_offer.offer_price / product.price) * 100
+        
+        else:
+            final_price = product.price - brand_offer.offer_price
+            discount_percentage = (brand_offer.offer_price / product.price) * 100
+
+    elif product_offer and product_offer.offer_price > 0:
+        
+        final_price = product.price - product_offer.offer_price
+        discount_percentage = (product_offer.offer_price / product.price) * 100
+    
+    elif brand_offer and brand_offer.offer_price > 0:
+        final_price = product.price - brand_offer.offer_price
+        discount_percentage = (brand_offer.offer_price / product.price) * 100
+    
+    else:
+        final_price = product.price
+        discount_percentage = 0
+
+    products = (
         ProductDetails.objects.select_related('brand')
-        .prefetch_related('category','variants')
+        .prefetch_related('category', 'variants')
         .filter(
             Q(is_deleted=False),
             Q(brand__is_deleted=False),
             Q(category__is_deleted=False)
         )
-
-    )  
-    coupons=Coupon.objects.filter(is_active=False)
-    return render(request, 'user/productdetails.html', 
-        {
-            'product': product,
-            'products':products,
-            'coupons':coupons
-         })
+    )
+    
+    coupons = Coupon.objects.filter(is_active=False)
+    return render(request, 'user/productdetails.html', {
+        'product': product,
+        'products': products,
+        'coupons': coupons,
+        'final_price': final_price,
+        'discount_percentage': discount_percentage
+    })
 
 
 

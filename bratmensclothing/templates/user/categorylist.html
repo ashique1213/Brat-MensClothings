@@ -297,43 +297,59 @@
                             <div class="col-lg-4 col-md-6 col-sm-6">
                                 <div class="product-m" >
                                     <div class="product-m__thumb">
-
+                                        
                                         <a class="aspect aspect--bg-grey aspect--square u-d-block" href="{% url 'userss:product_details' product.product_id %}">
                                             <img class="aspect__img" src="{{ product.image1.url }}" alt="" >
                                         </a>
                                         <div class="product-m__quick-look">
-
+                                            
                                             <a class="fas fa-search" data-modal="modal" data-modal-id="#quick-look" data-tooltip="tooltip" data-placement="top" title="Quick Look"></a></div>
-                                        <div class="product-m__add-cart">
-
-                                            <a class="btn--e-brand" data-modal="modal" data-modal-id="" href="{% url 'wishlist:add_to_wishlist' product.product_id %}">Add to Wishlist</a>
-                                        </div>
+                                            <div class="product-m__add-cart">
+                                                
+                                                <a class="btn--e-brand" data-modal="modal" data-modal-id="" href="{% url 'wishlist:add_to_wishlist' product.product_id %}">Add to Wishlist</a>
+                                            </div>
                                     </div>
-
+                                    
                                     <div class="product-m__content">
                                         <div class="product-m__category">
-
+                                            
                                             <a href="{% url 'userss:product_details' product.product_id %}">{{ product.brand.brandname |title}}</a>
                                         </div>
                                         <div class="product-m__name">
-                                        
+                                            
                                             <a href="{% url 'userss:product_details' product.product_id %}">{{ product.product_name |title}}</a></div>
+                                            
+                                            
+                                            <div class="product">
+                                                
+                                                <div class="product-m__price">
+                                                    {% if product.discount_percentage > 0 %}
+                                                        <!-- Display discounted price if there's a discount -->
+                                                        <span class="product-m__price--discounted">₹{{ product.final_price }}</span>
+                                                        <span class="pd-detail__discount">{{ product.discount_percentage|floatformat:0 }}% Off</span>
+                                                        <del class="pd-detail__del">₹{{ product.price }}</del>
+                                                        {% else %}
+                                                        <!-- Display original price if no discount is available -->
+                                                        ₹{{ product.price }}
+                                                        <del class="pd-detail__del">NO OFFERS</del>
+                                                    {% endif %}
+                                                </div>
 
-                                            <div style="background-color: rgba(210, 220, 210, 0.804); color: black; padding: 0px 10px; width: 85px; font-weight: bold; border-radius: 50px; font-size: 12px; ">
-                                                {{ product.total_quantity }} in stock
                                             </div>
-                                        <div class="product-m__rating gl-rating-style"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i><i class="far fa-star"></i><i class="far fa-star"></i>
-
-                                            <span class="product-m__review">()</span></div>
-                                        {% if product.variants.all %}
-                                        <div class="product-m__price">₹{{ product.variants.all.0.price}}</div>
-                                        {% endif %}
-                                        <div class="product-m__hover">
-                                            <div class="product-m__preview-description">
-
-                                                <span>{{ product.description | capfirst}}</span></div>
+                                            <div style=>
+                                                
+                                            </div>
+                                            <div class="product-m__rating gl-rating-style"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+    
+                                                <span style="background-color: rgba(210, 220, 210, 0.804); color: black; padding: 0px 10px; width: 85px; font-weight: bold; border-radius: 50px; font-size: 11px; ">{{ product.total_quantity }} in stock</span>
+                                            </div>
+                                    
+                                    <div class="product-m__hover">
+                                        <div class="product-m__preview-description">
+                                            
+                                            <span>{{ product.description | capfirst}}</span></div>
                                             <div class="product-m__wishlist">
-
+                                                
                                                 <a class="far fa-heart" href="{% url 'wishlist:add_to_wishlist' product.product_id %}" data-tooltip="tooltip" data-placement="top" title="Add to Wishlist"></a>
                                             </div>
                                         </div>

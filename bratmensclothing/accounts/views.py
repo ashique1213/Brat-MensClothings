@@ -16,7 +16,9 @@ from datetime import timedelta
 from django.conf import settings
 import datetime
 import time
+from offer.models import Brand_Offers,Product_Offers
 from django.db.models import Q
+from decimal import Decimal
 from django.views.decorators.cache import never_cache
 
         
@@ -240,6 +242,40 @@ def home_user(request):
         )
 
     )
+    for product in products:
+        product_offer = Product_Offers.objects.filter(
+            product_id=product,
+            status=True,
+            started_date__lte=timezone.now(),
+            end_date__gte=timezone.now()
+        ).first()
+        
+        brand_offer = Brand_Offers.objects.filter(
+            brand_id=product.brand,
+            status=True,
+            started_date__lte=timezone.now(),
+            end_date__gte=timezone.now()
+        ).first()
+        
+        final_price = product.price
+        discount_percentage = 0
+
+        if product_offer and brand_offer:
+            if product_offer.offer_price > brand_offer.offer_price:
+                final_price = product.price - product_offer.offer_price
+                discount_percentage = (product_offer.offer_price / product.price) * Decimal(100)
+            else:
+                final_price = product.price - brand_offer.offer_price
+                discount_percentage = (brand_offer.offer_price / product.price) * Decimal(100)
+        elif product_offer:
+            final_price = product.price - product_offer.offer_price
+            discount_percentage = (product_offer.offer_price / product.price) * Decimal(100)
+        elif brand_offer:
+            final_price = product.price - brand_offer.offer_price
+            discount_percentage = (brand_offer.offer_price / product.price) * Decimal(100)
+
+        product.final_price = final_price
+        product.discount_percentage = discount_percentage
     return render(request,'user/home.html',{'products':products})
 
 

@@ -187,11 +187,14 @@
                                 <form class="c-f__form" style="width: 100%;" method="post" action="{% url 'coupon:apply_coupon' %}">
                                     {% csrf_token %}
                                     <div class="u-s-m-b-16">
+                                        
                                         {% if couponuser and couponuser.status %}
                                             <div class="u-s-m-b-15 form-inline">
                                                 <label for="coupon"></label>
                                                 <input class="input-text input-text--primary-style" name="couponcode" type="text" id="coupon" required value="{{ couponuser.coupon.code }}">
-                                                <a href="{% url 'coupon:remove_coupon' couponuser.id %}" class="btn btn--e-transparent-brand-b-2">REMOVE</a>                                            </div>
+                                                {% if couponuser.id %}
+                                                <a href="{% url 'coupon:remove_coupon' couponuser.id %}" class="btn btn--e-transparent-brand-b-2">REMOVE</a>
+                                                {% endif %}
                                         {% else %}
                                             <div class="u-s-m-b-15 form-inline">
                                                 <label for="coupon"></label>

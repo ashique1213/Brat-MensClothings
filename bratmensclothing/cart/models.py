@@ -21,7 +21,8 @@ class CartItem(models.Model):
 
     @property
     def item_total(self):
-        return self.quantity * self.variant.price
+        # return self.quantity * self.variant.price
+        return self.quantity * self.variant.product.price
     
     def __str__(self):
         return f"{self.quantity} x {self.variant} in {self.cart}"

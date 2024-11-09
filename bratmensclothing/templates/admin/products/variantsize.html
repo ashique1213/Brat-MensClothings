@@ -176,7 +176,7 @@
                                     <tr>
                                         <th>ID</th>
                                         <th>Size</th>
-                                        <th>Price</th>
+                                        <!-- <th>Price</th> -->
                                         <th>Stock</th>
                                         <th>Action</th>
                                     </tr>
@@ -186,7 +186,7 @@
                                     <tr>
                                         <td>{{ variant_size.variant_id }}</td>
                                         <td>{{ variant_size.size |upper}}</td>
-                                        <td>{{ variant_size.price }}</td>
+                                        <!-- <td>{{ variant_size.price }}</td> -->
                                         <td>{{ variant_size.qty }}</td>
                                         <td>
                                             <button type="button" class="btn btn-primary btn-sm me-3" data-bs-toggle="modal" data-bs-target="#editVariantModal{{ variant_size.variant_id }}">
@@ -281,11 +281,13 @@
                         <input type="text" name="size" class="form-control" required>
                         <p id="variant_error" class="text-danger"></p> <!-- Error message container -->
                     </div>
-                    <div class="mb-3">
+
+                    <!-- <div class="mb-3">
                         <label for="price" class="form-label">Price</label>
                         <input type="number" name="price" class="form-control" step="0.01" required>
-                        <p id="price_error" class="text-danger"></p> <!-- Error message container -->
-                    </div>
+                        <p id="price_error" class="text-danger"></p>
+                    </div> -->
+                    
                     <div class="mb-3">
                         <label for="quantity" class="form-label">Stock</label>
                         <input type="number" name="quantity" class="form-control" required>
@@ -319,10 +321,12 @@
                             <label for="size" class="form-label">Size</label>
                             <input type="text" name="size" class="form-control" value="{{ variant_size.size }}" required>
                         </div>
-                        <div class="mb-3">
+
+                        <!-- <div class="mb-3">
                             <label for="price" class="form-label">Price</label>
                             <input type="number" name="price" class="form-control" value="{{ variant_size.price }}" step="0.01" required>
-                        </div>
+                        </div> -->
+
                         <div class="mb-3">
                             <label for="quantity" class="form-label">Stock</label>
                             <input type="number" name="quantity" class="form-control" value="0" required>

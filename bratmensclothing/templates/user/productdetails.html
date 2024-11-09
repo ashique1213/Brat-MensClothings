@@ -193,16 +193,35 @@
                                     <span class="pd-detail__name ">{{ product.product_name |title }}</span>
                                 </div>
                                 <div>
-                                    <div class="pd-detail__inline">
+                                    <!-- <div class="pd-detail__inline">
                                         {% if product.variants.all %}
                                         <span class="pd-detail__price" id="product-price">₹ {{ product.variants.all.0.price }} </span>
                                         {% endif %}
 
-                                        <!-- <span class="pd-detail__price">₹ {{product.variants.all.price}} </span> -->
+                                        <span class="pd-detail__discount">(76% OFF)</span><del class="pd-detail__del">₹28.97</del>
+                                        
+                                    </div> -->
 
+                                    <!-- <div class="pd-detail__inline">
+                                        <span class="pd-detail__price" id="product-price">₹ {{ product.price }} </span>
 
                                         <span class="pd-detail__discount">(76% OFF)</span><del class="pd-detail__del">₹28.97</del>
+                                        
+                                    </div> -->
+
+                                    <div class="pd-detail__inline">
+                                        {% if discount_percentage > 0 %}
+                                        <!-- Show the discounted price and the original price with a strike-through -->
+                                        <span class="pd-detail__price" id="product-price">₹{{ final_price }}</span>
+                                        <span class="pd-detail__discount">({{ discount_percentage|floatformat:0 }}% OFF)</span>
+                                        <del class="pd-detail__del">₹{{ product.price }}</del>
+                                        {% else %}
+                                        <!-- No discount: Show only the original price -->
+                                        <span class="pd-detail__price" id="product-price">₹{{ product.price }}</span>
+                                        <span class="pd-detail__discount">(NO OFFERS )</span>
+                                        {% endif %}
                                     </div>
+                                    
                                 </div>
                                 <div class="u-s-m-b-15">
                                     <div class="pd-detail__rating gl-rating-style"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
@@ -795,7 +814,8 @@
                 const qty = button.getAttribute('data-qty');
             
                 // Update the displayed price
-                document.getElementById('product-price').innerText = '₹ ' + price;
+               // <!-- document.getElementById('product-price').innerText = '₹ ' + price; -->
+                
                 const stockText = qty > 0 ? qty + ' in stock' : 'Out of stock';
                 document.getElementById('product-stock').innerText = stockText;
             

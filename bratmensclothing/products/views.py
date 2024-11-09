@@ -164,6 +164,7 @@ def addproducts(request):
         description = request.POST.get('description')
         brand_name = request.POST.get('brandname')
         category_ids = request.POST.getlist('category')
+        price = request.POST.getlist('price')
         color = request.POST.get('color')
         occasion = request.POST.get('occasion')
         fit = request.POST.get('fit')
@@ -219,6 +220,7 @@ def editproduct(request, product_id):
         category_ids = request.POST.getlist('category')
         product.category.set(category_ids)
         product.color = request.POST.get('color')
+        product.price = request.POST.get('price')
         product.occasion = request.POST.get('occasion')
         product.fit = request.POST.get('fit')
 
@@ -276,7 +278,6 @@ def add_sizevariants(request, product_id):
 
     if request.method == 'POST':
         size = request.POST.get('size').strip()
-        price = request.POST.get('price').strip()
         quantity = request.POST.get('quantity').strip()
 
         errors={}
@@ -290,14 +291,6 @@ def add_sizevariants(request, product_id):
             errors['variant_error'] = 'This size variant already exists for this product.'
         
         try:
-            price = float(price) if price else None
-            if price is None or price <= 0:
-                errors['price_error'] = 'Price must be a positive number.'
-        
-        except (ValueError, TypeError):
-            errors['price_error'] = 'Invalid price format.'
-
-        try:
             quantity = int(quantity) if quantity else None
             if quantity is None or quantity <= 0:
                 errors['quantity_error'] = 'Quantity must be a positive integer.'
@@ -308,11 +301,10 @@ def add_sizevariants(request, product_id):
         if errors:
             return JsonResponse({'success': False, 'errors': errors})
         
-        if size and price and quantity:
+        if size and quantity:
             VariantSize.objects.create(
                 product=product,  
                 size=size,
-                price=price,
                 qty=quantity
             )
             # messages.success(request, 'Size variant added successfully!')
@@ -329,12 +321,10 @@ def edit_sizevariants(request, variant_id):
 
     if request.method == 'POST':
         size = request.POST.get('size').strip()
-        price = request.POST.get('price').strip()
         quantity = request.POST.get('quantity').strip()
 
-        if size and price and quantity:
+        if size and quantity:
             variant.size = size
-            variant.price = price
             # variant.qty = quantity
             variant.qty = F('qty') + quantity
             variant.save() 

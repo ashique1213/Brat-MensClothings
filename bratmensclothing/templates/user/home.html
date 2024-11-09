@@ -265,11 +265,18 @@
                                     <a href="{% url 'userss:product_details' product.product_id %}">{{ product.product_name }}</a></span>
                                 <div class="product-o__rating gl-rating-style"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
 
-                                    <span class="product-o__review">(20)</span></div>
-                                {% if product.variants.all %}
-                                <span class="product-o__price">₹{{product.variants.all.0.price}}
-                                <span class="product-o__discount">₹160.00</span></span>
+                                    <span class="product-o__review">(20)</span>
+                                </div>
+                               
+                                {% if product.discount_percentage > 0 %}
+                                    <!-- Show the discounted price and the original price with a strike-through -->
+                                    <span class="product-o__price" id="product-price">₹{{ product.final_price }} <del class="pd-detail__del">₹{{ product.price }}</del> ({{ product.discount_percentage|floatformat:0 }}% OFF)</span>
+                                    
+                                {% else %}
+                                    <!-- No discount: Show only the original price -->
+                                    <span class="product-o__price" id="product-price">₹{{ product.price }} (NO OFFERS)</span>
                                 {% endif %}
+
                             </div>
 
                         </div>

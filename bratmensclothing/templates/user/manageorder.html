@@ -251,8 +251,10 @@
                                                 <div class="description__img-wrap">
 
                                                     <img class="u-img-fluid" src="{{ orderitem.variants.product.image1.url }}" alt=""></div>
-                                                <div class="description-title">{{orderitem.variants.product.product_name |title}}</div>
-                                                <div class="description-title">- {{orderitem.variants.size}}</div>
+                                                <div class="description-title">{{orderitem.variants.product.product_name |title}}
+                                                    <br> {{orderitem.variants.product.brand}} 
+                                                    <br>Size - {{orderitem.variants.size}}
+                                                </div>
                                             </div>
                                             
                                             <div class="description__info-wrap">
@@ -263,9 +265,9 @@
                                                         <span class="manage-o__text-2 u-c-secondary">{{ orderitem.quantity}}</span></span></div>
                                                 <div>
 
-                                                    <span class="manage-o__text-2 u-c-silver">Item Price:
+                                                    <span class="manage-o__text-2 u-c-silver">MRP:
 
-                                                        <span class="manage-o__text-2 u-c-secondary">₹{{ orderitem.price}}</span></span></div>
+                                                        <span class="manage-o__text-2 u-c-secondary">₹{{ orderitem.variants.product.price}}</span></span></div>
                                             </div>
                                         </div>
                                     </div>
@@ -305,7 +307,7 @@
                                             </div>
                                             <div class="dash-l-r u-s-m-b-8">
                                                 <div class="manage-o__text-2 u-c-secondary">Tax</div>
-                                                <div class="manage-o__text-2 u-c-secondary">₹{{tax |floatformat:2}}</div>
+                                                <div class="manage-o__text-2 u-c-secondary">₹{{ tax |floatformat:2}}</div>
                                             </div>
                                             <div class="dash-l-r u-s-m-b-8">
                                                 <div class="manage-o__text-2 u-c-secondary">Item total</div>

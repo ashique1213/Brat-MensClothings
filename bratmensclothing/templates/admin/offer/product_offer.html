@@ -181,7 +181,7 @@
                                         <th style="width: 10%;">Offer Name</th>
                                         <th style="width: 10%;">Product Name</th>
                                         <th style="width: 30%;">Description</th>
-                                        <th style="width: 8%;">Offer Price</th>
+                                        <th style="width: 8%;">Discount Amount</th>
                                         <th style="width: 10%;">Started Date</th>
                                         <th style="width: 10%;">End Date</th>
                                         <th style="width: 5%;">Edit</th>
@@ -193,7 +193,7 @@
                                     <tr>
                                         <td>{{offer.id}}</td>
                                         <td>{{offer.offer_name}}</td>
-                                        <td>{{offer.product_id.product_name}}</td>
+                                        <td>{{offer.product.product_name}}</td>
                                         <td>{{offer.offer_details}}</td>
                                         <td>{{offer.offer_price }}</td>
                                         <td>{{offer.started_date | date:"Y-m-d"}}</td>

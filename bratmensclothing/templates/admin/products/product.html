@@ -207,10 +207,11 @@
                                         <th>ID</th>
                                         <th>Images</th>
                                         <th>Name</th>
-                                        <th>Description</th>
+                                        <th style="width: 25%;">Description</th>
                                         <th>Brand</th>
                                         <th>Category</th>
                                         <th>Color</th>
+                                        <th>Price</th>
                                         <th>Occasion</th>
                                         <th>Fit</th>
                                         <th>Variant</th>
@@ -230,7 +231,7 @@
                                         {% endif %}
                                         </td>
                                         <td>{{ product.product_name |title}}</td>
-                                        <td>{{ product.description |capfirst }}</td>
+                                        <td style="font-size: 10px;" class="product-description">{{ product.description |capfirst }}</td>
                                         <td>{{ product.brand.brandname |title }}</td>
                                         <td>
                                             {% for category in product.category.all %}
@@ -238,6 +239,7 @@
                                             {% endfor %}
                                         </td>
                                         <td>{{ product.color |title }}</td>
+                                        <td>{{ product.price |title }}</td>
                                         <td>{{ product.occasion |title }}</td>
                                         <td>{{ product.fit |title }}</td>
                                         
@@ -410,6 +412,10 @@
                         <input type="text" name="color" class="form-control" value="{{ product.color }}" required>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label">Price</label>
+                        <input type="text" name="price" class="form-control" value="{{ product.price }}" required>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label">Occasion</label>
                         <select name="occasion" class="form-control" required>
                             <option value="" disabled selected>Select an occasion</option>
@@ -534,6 +540,10 @@
                     <div class="mb-3">
                         <label class="form-label">Color</label>
                         <input type="text" name="color" class="form-control" value="{{ product.color |title }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Price</label>
+                        <input type="text" name="price" class="form-control" value="{{ product.price  }}" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Occasion</label>

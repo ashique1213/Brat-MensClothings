@@ -17,58 +17,9 @@ from decimal import Decimal
 from django.core.paginator import Paginator
 from django.urls import reverse
 from coupon.models import Coupon,CouponUser
+from offer.models import Product_Offers,Brand_Offers
+from django.utils import timezone
 
-
-# @never_cache
-# def checkout(request):
-#     if request.user.is_authenticated:
-#         grand_total = Decimal('0.0')
-#         tax = Decimal('0.0')
-#         delivery_charge = Decimal('50.0')
-
-#         user=request.user
-#         addresses=Address.objects.filter(user=user,status=False)
-#         cart=get_object_or_404(Cart,user=user)
-#         cart_items=CartItem.objects.filter(cart=cart)
-
-#         total_quantity=sum(items.quantity for items in cart_items )
-#         if total_quantity > 10:
-#             messages.error(request, 'You have exceeded the limit of 10 items in your cart!!')
-#             return redirect('cart:viewcart')
-        
-#         for item in cart_items:
-#             if item.quantity > item.variant.qty:  
-#                 messages.error(request, f"'{item.variant.product.product_name}' exceeds available stock.")
-#                 return redirect('cart:viewcart')
-
-        
-#         for cart_item in cart_items:
-#             variant = get_object_or_404(VariantSize, variant_id=cart_item.variant.variant_id)
-
-#             if variant.qty == 0:
-#                 messages.error(request, 'Please remove out of stock product')
-#                 return redirect('cart:viewcart')
-
-
-#         total = sum(items.item_total for items in cart_items)
-#         tax_rate = Decimal('0.02')
-#         tax = total * tax_rate
-#         grand_total = total + tax + delivery_charge
-
-#         coupons=Coupon.objects.all()
-        
-#         return render(request,'user/checkout.html',
-#                 {
-#                     'user':user,
-#                     'addresses':addresses,
-#                     'cart_items':cart_items,
-#                     'tax':tax,
-#                     'delivery_charge':delivery_charge,
-#                     'grand_total':grand_total,
-#                     'coupons':coupons,
-
-#                 }) 
-#     return redirect('accounts:login_user') 
 
 
 @never_cache
@@ -82,6 +33,37 @@ def checkout(request):
         addresses=Address.objects.filter(user=user,status=False)
         cart=get_object_or_404(Cart,user=user)
         cart_items=CartItem.objects.filter(cart=cart)
+
+        for cart_item in cart_items:
+            variant = cart_item.variant
+            product = variant.product
+
+
+            product_offer = Product_Offers.objects.filter(
+                product_id=product,
+                status=True,
+                started_date__lte=timezone.now(),
+                end_date__gte=timezone.now()
+            ).first()
+
+            brand_offer = Brand_Offers.objects.filter(
+                brand_id=product.brand,
+                status=True,
+                started_date__lte=timezone.now(),
+                end_date__gte=timezone.now()
+            ).first()
+
+            discounted_price = product.price
+
+            if product_offer:
+                discounted_price = product.price - product_offer.offer_price
+
+            if brand_offer:
+                brand_discounted_price = product.price - brand_offer.offer_price
+
+                discounted_price = min(discounted_price, brand_discounted_price)
+
+            cart_item.variant.product.price = discounted_price
 
         total_quantity=sum(items.quantity for items in cart_items )
         if total_quantity > 10:
@@ -204,91 +186,6 @@ def add_address_checkout(request, userid):
     return render(request, 'user/checkout.html', {'user': user_id})
 
 
-# @never_cache
-# def place_order(request):
-#     if request.user.is_authenticated:
-#         grand_total = Decimal('0.0')
-#         tax = Decimal('0.0')
-#         delivery_charge = Decimal('50.0')
-
-#         user = request.user
-#         addresses = Address.objects.filter(user=user)
-#         cart = get_object_or_404(Cart, user=user)
-#         cart_items = CartItem.objects.filter(cart=cart)
-
-
-#         if not cart_items.exists():
-#             return redirect('cart:viewcart')
-            
-#         total = sum(items.item_total for items in cart_items)
-#         tax_rate = Decimal('0.02')
-#         tax = total * tax_rate
-#         grand_total = total + tax + delivery_charge
-
-#         if request.method == 'POST':
-#             selected_address_id = request.POST.get('address')
-#             payment_type = request.POST.get('optradio')
-
-#             # Check if address or payment type is missing
-#             if not selected_address_id or not payment_type:
-#                 messages.error(request, 'Please select an address and payment method.')
-#                 return render(request, 'user/checkout.html', {
-#                     'user': user,
-#                     'addresses': addresses,
-#                     'cart_items': cart_items,
-#                     'tax': tax,
-#                     'delivery_charge': delivery_charge,
-#                     'grand_total': grand_total,
-#                 })
-
-#             selected_address = Address.objects.get(id=selected_address_id)
-
-#             # Handle Cash on Delivery COD limit
-#             if payment_type == 'COD' and grand_total > Decimal('1500.00'):
-#                 messages.error(request, 'Cash on Delivery is not available for orders above ₹1000.')
-#                 return render(request, 'user/checkout.html', {
-#                     'user': user,
-#                     'addresses': addresses,
-#                     'cart_items': cart_items,
-#                     'tax': tax,
-#                     'delivery_charge': delivery_charge,
-#                     'grand_total': grand_total,
-#                 })
-
-#             # Set payment status based on payment type
-#             payment_status = 'Pending' if payment_type == 'COD' else 'Success'
-
-#             # Create new order
-#             new_order = Order.objects.create(
-#                 user=user,
-#                 shipping_address=selected_address,
-#                 payment_type=payment_type,
-#                 payment_status=payment_status,
-#                 total_price=grand_total,
-#             )
-
-#             # Create order items and update stock
-#             for item in cart_items:
-#                 item_total_price = item.quantity * item.variant.price
-#                 OrderItem.objects.create(
-#                     order=new_order,
-#                     variants=item.variant,
-#                     quantity=item.quantity,
-#                     price=item.variant.price,
-#                     subtotal_price=item_total_price
-#                 )
-
-#                 # Deduct stock if payment successful or COD
-#                 item.variant.qty -= item.quantity
-#                 item.variant.save()
-
-#             cart_items.delete()
-
-#             return redirect('order:order_success')
-
-#     return redirect('accounts:login_user')
-
-
 @never_cache
 def place_order(request):
     if request.user.is_authenticated:
@@ -303,6 +200,37 @@ def place_order(request):
 
         if not cart_items.exists():
             return redirect('cart:viewcart')
+        
+        for cart_item in cart_items:
+            variant = cart_item.variant
+            product = variant.product
+
+
+            product_offer = Product_Offers.objects.filter(
+                product_id=product,
+                status=True,
+                started_date__lte=timezone.now(),
+                end_date__gte=timezone.now()
+            ).first()
+
+            brand_offer = Brand_Offers.objects.filter(
+                brand_id=product.brand,
+                status=True,
+                started_date__lte=timezone.now(),
+                end_date__gte=timezone.now()
+            ).first()
+
+            discounted_price = product.price
+
+            if product_offer:
+                discounted_price = product.price - product_offer.offer_price
+
+            if brand_offer:
+                brand_discounted_price = product.price - brand_offer.offer_price
+
+                discounted_price = min(discounted_price, brand_discounted_price)
+
+            cart_item.variant.product.price = discounted_price
         
         # Initialize coupon variables
         couponuser = None
@@ -374,12 +302,12 @@ def place_order(request):
 
             # Create order items and update stock
             for item in cart_items:
-                item_total_price = item.quantity * item.variant.price
+                item_total_price = item.quantity * item.variant.product.price
                 OrderItem.objects.create(
                     order=new_order,
                     variants=item.variant,
                     quantity=item.quantity,
-                    price=item.variant.price,
+                    price=item.variant.product.price,
                     subtotal_price=item_total_price
                 )
 
@@ -408,7 +336,7 @@ def view_orders(request):
     if request.user.is_authenticated:
         user=request.user
         orders=Order.objects.filter(user=user)
-        order_items=OrderItem.objects.filter(order__in=orders)
+        order_items=OrderItem.objects.filter(order__in=orders).order_by('-order')
 
         return render(request,'user/order_details.html',
                       {
@@ -434,7 +362,7 @@ def manage_orders(request, orderitem_id):
                 return redirect('userss:error')
 
 
-            item_price = Decimal(orderitem.price)
+            item_price = Decimal(orderitem.variants.product.price)
             item_quantity = Decimal(orderitem.quantity)  
             item_tax = item_price * tax_rate * item_quantity 
 
