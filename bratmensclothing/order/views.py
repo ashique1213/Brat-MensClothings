@@ -25,6 +25,8 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
 from wallet.models import Wallet,Transaction
+from django.db.models import Sum, F
+
 
 
 @never_cache
@@ -503,32 +505,40 @@ def manage_orders(request, orderitem_id):
 
     return redirect('accounts:login_user')
 
+
 def cancel_order(request, orderitem_id):
-    item = get_object_or_404(OrderItem, orderitem_id=orderitem_id) 
-    user = item.order.user  
+    item = get_object_or_404(OrderItem, orderitem_id=orderitem_id)
+    user = item.order.user
+    order = item.order 
+    
+    total_quantity = OrderItem.objects.filter(order=order).aggregate(total_qty=Sum('quantity'))['total_qty']
+    new_price = Decimal(item.price)  
+
+    if order.coupon_amount and total_quantity:
+        new_price -= Decimal(order.coupon_amount) / Decimal(total_quantity)
     
     user_wallet, created = Wallet.objects.get_or_create(user_id=user)
-    
-    user_wallet.balance += Decimal(item.price)
+
+    user_wallet.balance += Decimal(new_price)
     user_wallet.save()
     
-    details_text = f"Tracking: {item.order.tracking_number}, Product: {item.variants.product.product_name}"
-    user_transaction = Transaction.objects.create(
+    details_text = f"Tracking: {order.tracking_number}, Product: {item.variants.product.product_name}"
+    Transaction.objects.create(
         wallet_id=user_wallet,
         transaction_type='Order Cancellation',
-        amount=Decimal(item.price),
+        amount=new_price,
         details=details_text
     )
-
-    if item.variants:  
-        item.variants.qty += item.quantity 
-        item.variants.save() 
-
+    
+    if item.variants:
+        item.variants.qty += item.quantity
+        item.variants.save()
+    
     item.status = 'Cancelled'
-    item.save() 
+    item.save()
+    
     messages.success(request, 'Your order has been cancelled successfully.')
     return redirect('order:view_orders')
-
 
 
 

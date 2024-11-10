@@ -278,8 +278,20 @@
                     {% csrf_token %}
                     <div class="mb-3">
                         <label for="size" class="form-label">Size</label>
-                        <input type="text" name="size" class="form-control" required>
-                        <p id="variant_error" class="text-danger"></p> <!-- Error message container -->
+                        <!-- <input type="text" name="size" class="form-control" required> -->
+                        <select name="size" id="size" class="form-control" required>
+                            <option value="" disabled selected>Select Size</option>
+                            <option value="S">S</option>
+                            <option value="M">M</option>
+                            <option value="L">L</option>
+                            <option value="XL">XL</option>
+                            <option value="30">30</option>
+                            <option value="32">32</option>
+                            <option value="34">34</option>
+                            <option value="36">36</option>
+                            <option value="38">38</option>
+                        </select>
+                        <p id="variant_error" class="text-danger"></p> 
                     </div>
 
                     <!-- <div class="mb-3">
