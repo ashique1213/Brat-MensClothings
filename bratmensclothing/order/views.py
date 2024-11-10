@@ -24,6 +24,7 @@ from django.conf import settings
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
+from wallet.models import Wallet,Transaction
 
 
 @never_cache
@@ -295,8 +296,8 @@ def place_order(request):
                     "shipping_address": selected_address.id,
                     "payment_type": payment_type,
                     "total_price":float(grand_total), 
-                    "coupon_code": couponuser.coupon.code, 
-                    "coupon_amount":int(float(couponuser.coupon.discount_amount)) 
+                    "coupon_code": couponuser.coupon.code if couponuser else None, 
+                    "coupon_amount":int(float(couponuser.coupon.discount_amount)) if couponuser else None
                     
 
                 }
@@ -502,9 +503,22 @@ def manage_orders(request, orderitem_id):
 
     return redirect('accounts:login_user')
 
-
 def cancel_order(request, orderitem_id):
     item = get_object_or_404(OrderItem, orderitem_id=orderitem_id) 
+    user = item.order.user  
+    
+    user_wallet, created = Wallet.objects.get_or_create(user_id=user)
+    
+    user_wallet.balance += Decimal(item.price)
+    user_wallet.save()
+    
+    details_text = f"Tracking: {item.order.tracking_number}, Product: {item.variants.product.product_name}"
+    user_transaction = Transaction.objects.create(
+        wallet_id=user_wallet,
+        transaction_type='Order Cancellation',
+        amount=Decimal(item.price),
+        details=details_text
+    )
 
     if item.variants:  
         item.variants.qty += item.quantity 
@@ -513,8 +527,9 @@ def cancel_order(request, orderitem_id):
     item.status = 'Cancelled'
     item.save() 
     messages.success(request, 'Your order has been cancelled successfully.')
-
     return redirect('order:view_orders')
+
+
 
 
 def is_staff(user):

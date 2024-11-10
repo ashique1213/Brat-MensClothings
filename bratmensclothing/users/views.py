@@ -58,6 +58,7 @@ def unblock_user(request,userid):
     return redirect('userss:view_user')
 
  
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
 @never_cache
 def category_details(request):
@@ -142,9 +143,20 @@ def category_details(request):
     categories=Category.objects.all()
     Brands=Brand.objects.all()
     Variants = VariantSize.objects.values('size').distinct().order_by('size')
+
+    items_per_page = 9    
+    paginator = Paginator(products, items_per_page)
+    page_number = request.GET.get('page', 1)
+    try:
+        paginated_products = paginator.page(page_number)
+    except PageNotAnInteger:
+        paginated_products = paginator.page(1)
+    except EmptyPage:
+        paginated_products = paginator.page(paginator.num_pages)
+
     return render(request,'user/categorylist.html',
                   {
-                      'products':products,
+                      'products':paginated_products,
                       'categories':categories,
                       'Brands':Brands,
                       'Variants':Variants,

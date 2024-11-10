@@ -14,24 +14,16 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path,include
+from django.urls import path
+from . import views
 from django.conf import settings
 from django.conf.urls.static import static
 
+app_name = 'wallet'
+
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('',include('accounts.urls')),
-    path('accounts/', include('allauth.urls')),
-    path('products/', include('products.urls')),
-    path('user/',include('users.urls')),
-    path('dashboard/',include('dashboard.urls')),
-    path('cart/',include('cart.urls')),
-    path('order/',include('order.urls')),
-    path('wishlist/',include('wishlist.urls')),
-    path('coupon/',include('coupon.urls')),
-    path('offer/',include('offer.urls')),
-    path('wallet/',include('wallet.urls')),
-]
-if settings.DEBUG: 
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+   
+    path('view_wallet/', views.view_wallet, name='view_wallet'),  
+    
+    
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
