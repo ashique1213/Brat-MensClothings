@@ -295,20 +295,18 @@ def place_order(request):
                     "shipping_address": selected_address.id,
                     "payment_type": payment_type,
                     "total_price":float(grand_total), 
-                    "coupon_code": request.session.get('coupon_code')  
+                    "coupon_code": couponuser.coupon.code, 
+                    "coupon_amount":int(float(couponuser.coupon.discount_amount)) 
+                    
+
                 }
 
-                return render(request, 'user/checkout.html', {
+                return render(request, 'user/payment.html', {
                     "razorpay_order_id": razorpay_order['id'],
                     "razorpay_key_id": settings.RAZORPAY_KEY_ID,
                     "amount": payment_data["amount"]
                 })
-
-
-                           
-               
-
-
+          
             # Handle Cash on Delivery 
             if payment_type == 'COD' and grand_total > Decimal('1500.00'):
                 messages.error(request, 'Cash on Delivery is not available for orders above ₹1500.')
@@ -339,7 +337,8 @@ def place_order(request):
                 payment_type=payment_type,
                 payment_status=payment_status,
                 total_price=grand_total,
-                coupon_code=couponuser.coupon.code if couponuser else None
+                coupon_code=couponuser.coupon.code if couponuser else None,
+                coupon_amount=couponuser.coupon.discount_amount if couponuser else None
             )
 
             # Create order items and update stock
@@ -365,97 +364,88 @@ def place_order(request):
 
     return redirect('accounts:login_user')
 
-# @csrf_exempt
-# def verify_payment(request):
-
-#     client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-#     params_dict = request.POST
-    
-#     try:
-#         client.utility.verify_payment_signature(params_dict)
-#         # Payment verification succeeded
-#         return JsonResponse({'status': 'Payment Verified!'})
-#     except razorpay.errors.SignatureVerificationError:
-#         # Payment verification failed
-#         return JsonResponse({'status': 'Verification Failed'}, status=400)
-
 
 @csrf_exempt
+@never_cache
 def verify_payment(request):
-    if request.method == "POST":
-        payment_data = json.loads(request.body.decode('utf-8'))
-        params_dict = {
-            'razorpay_order_id': payment_data.get('razorpay_order_id'),
-            'razorpay_payment_id': payment_data.get('razorpay_payment_id'),
-            'razorpay_signature': payment_data.get('razorpay_signature')
-        }
-        
-        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+    if request.user.is_authenticated:
 
-        try:
-            # Verify the payment signature
-            client.utility.verify_payment_signature(params_dict)
+        if request.method == "POST":
+            payment_data = json.loads(request.body.decode('utf-8'))
+            params_dict = {
+                'razorpay_order_id': payment_data.get('razorpay_order_id'),
+                'razorpay_payment_id': payment_data.get('razorpay_payment_id'),
+                'razorpay_signature': payment_data.get('razorpay_signature')
+            }
+            
+            client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
-            # Retrieve pending order details from session, with a check
-            order_data = request.session.get('pending_order_details')
-            if not order_data:
-                return JsonResponse({'error': 'Order details not found in session.'}, status=400)
+            try:
+                # Verify the payment signature
+                client.utility.verify_payment_signature(params_dict)
 
-            user_id = order_data.get("user")
-            shipping_address_id = order_data.get("shipping_address")
-            total_price = order_data.get("total_price")
-            coupon_code = order_data.get("coupon_code")
+                # Retrieve pending order details from session, with a check
+                order_data = request.session.get('pending_order_details')
+                if not order_data:
+                    return JsonResponse({'error': 'Order details not found in session.'}, status=400)
 
-            # Get related objects with error handling
-            user = get_object_or_404(Users, userid=user_id)
-            shipping_address = get_object_or_404(Address, id=shipping_address_id)
+                user_id = order_data.get("user")
+                shipping_address_id = order_data.get("shipping_address")
+                total_price = order_data.get("total_price")
+                coupon_code = order_data.get("coupon_code")
+                coupon_amount = order_data.get("coupon_amount")
+               
+                # Get related objects with error handling
+                user = get_object_or_404(Users, userid=user_id)
+                shipping_address = get_object_or_404(Address, id=shipping_address_id)
 
-            # Use an atomic transaction for order and stock updates
-            with transaction.atomic():
-                # Create and save the order
-                new_order = Order.objects.create(
-                    user=user,
-                    shipping_address=shipping_address,
-                    payment_type='Razorpay',
-                    payment_status='Success',
-                    total_price=total_price,
-                    coupon_code=coupon_code
-                )
-
-                # Retrieve cart and create order items
-                cart = get_object_or_404(Cart, user=user)
-                cart_items = CartItem.objects.filter(cart=cart)
-
-                for item in cart_items:
-                    OrderItem.objects.create(
-                        order=new_order,
-                        variants=item.variant,
-                        quantity=item.quantity,
-                        price=item.variant.product.price,
-                        subtotal_price=item.quantity * item.variant.product.price
+                # Use an atomic transaction for order and stock updates
+                with transaction.atomic():
+                    # Create and save the order
+                    new_order = Order.objects.create(
+                        user=user,
+                        shipping_address=shipping_address,
+                        payment_type='Razorpay',
+                        payment_status='Success',
+                        total_price=total_price,
+                        coupon_code=coupon_code,
+                        coupon_amount=coupon_amount
+                        
                     )
 
-                    # Deduct stock
-                    item.variant.qty -= item.quantity
-                    item.variant.save()
+                    # Retrieve cart and create order items
+                    cart = get_object_or_404(Cart, user=user)
+                    cart_items = CartItem.objects.filter(cart=cart)
 
-                # Clear the cart and session
-                cart_items.delete()
-                del request.session['pending_order_details']
+                    for item in cart_items:
+                        OrderItem.objects.create(
+                            order=new_order,
+                            variants=item.variant,
+                            quantity=item.quantity,
+                            price=item.variant.product.price,
+                            subtotal_price=item.quantity * item.variant.product.price
+                        )
 
-            return JsonResponse({'message': 'Order placed successfully!'})
+                        # Deduct stock
+                        item.variant.qty -= item.quantity
+                        item.variant.save()
 
-        except razorpay.errors.SignatureVerificationError:
-            return JsonResponse({'error': 'Payment verification failed.'}, status=400)
-        except Exception as e:
-            # Log exception and return error
-            print(f"Order creation failed: {e}")
-            return JsonResponse({'error': 'An error occurred while placing the order.'}, status=500)
+                    # Clear the cart and session
+                    cart_items.delete()
+                    del request.session['pending_order_details']
 
-    return JsonResponse({'error': 'Invalid request method.'}, status=405)
+                return JsonResponse({'message': 'Order placed successfully!'})
 
+            except razorpay.errors.SignatureVerificationError:
+                return JsonResponse({'error': 'Payment verification failed.'}, status=400)
+            except Exception as e:
+                # Log exception and return error
+                print(f"Order creation failed: {e}")
+                return JsonResponse({'error': 'An error occurred while placing the order.'}, status=500)
 
+        return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
+    return redirect('accounts:login_user')
 
 
 

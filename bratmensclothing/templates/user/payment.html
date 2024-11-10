@@ -1,12 +1,49 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Payment</title>
+{% extends "user/base.html" %}
+
+
+{% block content %}  
+
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</head>
-<body>
-    <button id="rzp-button">Pay with Razorpay</button>
+
+ <!--====== App Content ======-->
+ <div class="app-content u-s-p-y-60">
+
+    <!--====== Section 1 ======-->
+    <div class="u-s-p-y-60">
+
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 u-s-m-b-30">
+                        <div class="empty">
+                            <div class="empty__wrap">
+
+                                <span class="empty__big-text">EMPTY</span>
+
+                                <span class="empty__text-1">Payment Cancelled!!.</span>
+
+                                {%if request.user.is_authenticated %}
+                                <a class="empty__redirect-link btn--e-brand" href="{% url 'userss:category_details' %}">CONTINUE SHOPPING</a>
+                                {% else %}
+                                <a class="empty__redirect-link btn--e-brand" href="{% url 'accounts:login_user' %}">PLEASE SIGN IN</a>
+                                {% endif %}
+                            
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--====== End - Section Content ======-->
+    </div>
+    <!--====== End - Section 1 ======-->
+</div>
+<!--====== End - App Content ======-->
+
+    <!-- Button can be hidden if you don't need it on the page -->
+    <button id="rzp-button" style="display:none;">Pay with Razorpay</button>
 
     <script>
         var options = {
@@ -15,16 +52,11 @@
             "currency": "INR",
             "order_id": "{{ razorpay_order_id }}",
             "handler": function(response) {
-                // Prepare CSRF token
                 const csrfToken = '{{ csrf_token }}';
-                
-                // Send payment success data back to the server to verify
                 $.ajax({
                     type: "POST",
                     url: "{% url 'order:verify_payment' %}",
-                    headers: {
-                        'X-CSRFToken': csrfToken
-                    },
+                    headers: { 'X-CSRFToken': csrfToken },
                     data: JSON.stringify({
                         razorpay_payment_id: response.razorpay_payment_id,
                         razorpay_order_id: response.razorpay_order_id,
@@ -32,30 +64,65 @@
                     }),
                     contentType: "application/json",
                     success: function(data) {
-                        alert('Payment Successful');
-                        // Redirect to order confirmation page
-                        window.location.href = "{% url 'order:order_success' %}";
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Payment Successful',
+                            text: 'Your payment has been successfully processed.',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#000',
+                            customClass: { icon: 'black-icon' }
+                        }).then(function() {
+                            window.location.href = "{% url 'order:order_success' %}";
+                        });
                     },
                     error: function() {
-                        alert('Payment verification failed.');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Payment Verification Failed',
+                            text: 'There was an issue verifying your payment.',
+                            confirmButtonText: 'Retry',
+                            confirmButtonColor: '#000',
+                            customClass: { icon: 'black-icon' }
+                        });
                     }
                 });
             },
             "prefill": {
-                "name": "{{ user.username }}", 
+                "name": "{{ user.username }}",
                 "email": "{{ user.email }}"
             },
-            "theme": {
-                "color": "#3399cc"
+            "theme": { "color": "#3399cc" },
+            "modal": {
+                "ondismiss": function() {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Payment Incomplete',
+                        text: 'You closed the payment window. Please complete your payment to proceed.',
+                        showCancelButton: true,
+                        confirmButtonText: 'Retry Payment',
+                        cancelButtonText: 'Cancel',
+                        confirmButtonColor: '#000',
+                        cancelButtonColor: '#d33',
+                        customClass: { icon: 'black-icon' }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // User chose "Retry Payment," reopen Razorpay modal
+                            rzp.open();
+                        } 
+                    });
+                }
             }
         };
-
+    
         var rzp = new Razorpay(options);
-
-        document.getElementById('rzp-button').onclick = function(e) {
+    
+        // Automatically open Razorpay payment modal when the page is loaded
+        window.onload = function() {
             rzp.open();
-            e.preventDefault();
-        }
+        };
     </script>
-</body>
-</html>
+    
+    
+
+
+{% endblock %}
