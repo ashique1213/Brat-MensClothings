@@ -18,65 +18,6 @@ from offer.models import Product_Offers,Brand_Offers
 from django.utils import timezone
 
 
-# @never_cache
-# def view_cart(request):
-#     cart_items = []
-#     grand_total = Decimal('0.0')
-#     tax = Decimal('0.0')
-#     delivery_charge = Decimal('50.0')
-#     coupon_discount = Decimal('0.0')  
-#     couponuser = None
-
-#     if request.user.is_authenticated:
-#         user = request.user
-
-#         cart = Cart.objects.filter(user=user).first()
-#         cart_items = cart.items.all() if cart else []
-
-#         try:
-#             # couponuser = CouponUser.objects.get(user=user)
-#             # coupon_discount = couponuser.coupon.discount_amount
-#             couponuser = CouponUser.objects.get(user=user, status=True)  # Only get active couponuser
-#             coupon_discount = couponuser.coupon.discount_amount
-            
-#         except CouponUser.DoesNotExist:
-#             couponuser = None
-
-#         total = sum(item.item_total for item in cart_items)
-
-#         if couponuser:
-#             coupon = couponuser.coupon
-#             if total < coupon.min_purchase_amount:
-#                 couponuser.delete() 
-#                 messages.info(request, f"Coupon removed !! less than the minimum purchase amount.")
-#                 coupon_discount = Decimal('0.0')  
-                
-#         if total >= (coupon.min_purchase_amount if couponuser else 0):
-#             discount = min(total, coupon_discount)
-#             total_after_discount = total - discount
-#         else:
-#             total_after_discount = total
-
-#         tax_rate = Decimal('0.02')
-#         tax = total_after_discount * tax_rate
-#         grand_total = total_after_discount + tax + delivery_charge
-
-#         coupons=Coupon.objects.filter(is_active=False)
-#         return render(request, 'user/cart.html', {
-#             'cart_items': cart_items,
-#             'grand_total': grand_total,
-#             'tax': tax,
-#             'cart': cart if request.user.is_authenticated else None,
-#             'delivery_charge': delivery_charge,
-#             'coupons': coupons,
-#             'couponuser': couponuser,
-#             'discount':coupon_discount
-#         })
-
-#     return render(request, 'user/cart.html')
-
-
-
 @never_cache
 def view_cart(request):
     cart_items = []
@@ -90,7 +31,11 @@ def view_cart(request):
         user = request.user
 
         cart = Cart.objects.filter(user=user).first()
-        cart_items = cart.items.all() if cart else []
+        cart_items = cart.items.filter(
+            variant__product__is_deleted=False,
+            variant__product__category__is_deleted=False,  
+            variant__product__brand__is_deleted=False  
+            ) if cart else []
 
         for cart_item in cart_items:
             variant = cart_item.variant
@@ -150,7 +95,7 @@ def view_cart(request):
         tax = total_after_discount * tax_rate
         grand_total = total_after_discount + tax + delivery_charge
 
-        coupons=Coupon.objects.filter(is_active=False)
+        coupons = Coupon.objects.filter(is_active=False,usage_limit__gt=0)
         return render(request, 'user/cart.html', {
             'cart_items': cart_items,
             'grand_total': grand_total,

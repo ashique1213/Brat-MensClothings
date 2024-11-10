@@ -153,29 +153,6 @@ def category_details(request):
                 })
 
 
-# @cache_control(private=True, no_cache=True)
-# def product_details(request, product_id):
-#     product = get_object_or_404(ProductDetails, product_id=product_id, is_deleted=False)
-#     products=(
-#         ProductDetails.objects.select_related('brand')
-#         .prefetch_related('category','variants')
-#         .filter(
-#             Q(is_deleted=False),
-#             Q(brand__is_deleted=False),
-#             Q(category__is_deleted=False)
-#         )
-
-#     )  
-#     coupons=Coupon.objects.filter(is_active=False)
-#     return render(request, 'user/productdetails.html', 
-#         {
-#             'product': product,
-#             'products':products,
-#             'coupons':coupons
-#          })
-
-
-
 @cache_control(private=True, no_cache=True)
 def product_details(request, product_id):
     product = get_object_or_404(ProductDetails, product_id=product_id, is_deleted=False)
@@ -230,7 +207,7 @@ def product_details(request, product_id):
         )
     )
     
-    coupons = Coupon.objects.filter(is_active=False)
+    coupons = Coupon.objects.filter(is_active=False,usage_limit__gt=0)
     return render(request, 'user/productdetails.html', {
         'product': product,
         'products': products,

@@ -29,8 +29,11 @@ class Order(models.Model):
     payment_status = models.CharField(max_length=10, choices=PAYMENT_STATUS_CHOICES, default='Pending')
     estimated_delivery_date = models.DateField(blank=True, null=True)
     coupon_code = models.CharField(max_length=50, blank=True, null=True)
+    coupon_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=0.00)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    razorpay_order_id=models.CharField(default='0',null=True, blank=True)
+
 
     def __str__(self):
         return f'Order {self.id} by {self.user.username}'

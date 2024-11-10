@@ -19,7 +19,11 @@ from django.urls import reverse
 from coupon.models import Coupon,CouponUser
 from offer.models import Product_Offers,Brand_Offers
 from django.utils import timezone
-
+import razorpay
+from django.conf import settings
+import json
+from django.views.decorators.csrf import csrf_exempt
+from django.db import transaction
 
 
 @never_cache
@@ -267,7 +271,45 @@ def place_order(request):
 
             selected_address = Address.objects.get(id=selected_address_id)
 
-            # Handle Cash on Delivery limit
+
+
+
+            if payment_type == 'Razorpay':
+                client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+                
+                # Convert Decimal to float and multiply by 100 for paise
+                payment_data = {
+                    "amount": int(float(grand_total) * 100),  # Razorpay expects amount in paise (1 INR = 100 paise)
+                    "currency": "INR", 
+                    "payment_capture": 1
+                }
+                
+                try:
+                    razorpay_order = client.order.create(data=payment_data)
+                except razorpay.errors.BadRequestError:
+                    messages.error(request, 'Error creating Razorpay order. Please try again.')
+                    return redirect('order:checkout')
+
+                request.session['pending_order_details'] = {
+                    "user": user.userid,
+                    "shipping_address": selected_address.id,
+                    "payment_type": payment_type,
+                    "total_price":float(grand_total), 
+                    "coupon_code": request.session.get('coupon_code')  
+                }
+
+                return render(request, 'user/checkout.html', {
+                    "razorpay_order_id": razorpay_order['id'],
+                    "razorpay_key_id": settings.RAZORPAY_KEY_ID,
+                    "amount": payment_data["amount"]
+                })
+
+
+                           
+               
+
+
+            # Handle Cash on Delivery 
             if payment_type == 'COD' and grand_total > Decimal('1500.00'):
                 messages.error(request, 'Cash on Delivery is not available for orders above ₹1500.')
                 return render(request, 'user/checkout.html', {
@@ -322,6 +364,99 @@ def place_order(request):
             return redirect('order:order_success')
 
     return redirect('accounts:login_user')
+
+# @csrf_exempt
+# def verify_payment(request):
+
+#     client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+#     params_dict = request.POST
+    
+#     try:
+#         client.utility.verify_payment_signature(params_dict)
+#         # Payment verification succeeded
+#         return JsonResponse({'status': 'Payment Verified!'})
+#     except razorpay.errors.SignatureVerificationError:
+#         # Payment verification failed
+#         return JsonResponse({'status': 'Verification Failed'}, status=400)
+
+
+@csrf_exempt
+def verify_payment(request):
+    if request.method == "POST":
+        payment_data = json.loads(request.body.decode('utf-8'))
+        params_dict = {
+            'razorpay_order_id': payment_data.get('razorpay_order_id'),
+            'razorpay_payment_id': payment_data.get('razorpay_payment_id'),
+            'razorpay_signature': payment_data.get('razorpay_signature')
+        }
+        
+        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+
+        try:
+            # Verify the payment signature
+            client.utility.verify_payment_signature(params_dict)
+
+            # Retrieve pending order details from session, with a check
+            order_data = request.session.get('pending_order_details')
+            if not order_data:
+                return JsonResponse({'error': 'Order details not found in session.'}, status=400)
+
+            user_id = order_data.get("user")
+            shipping_address_id = order_data.get("shipping_address")
+            total_price = order_data.get("total_price")
+            coupon_code = order_data.get("coupon_code")
+
+            # Get related objects with error handling
+            user = get_object_or_404(Users, userid=user_id)
+            shipping_address = get_object_or_404(Address, id=shipping_address_id)
+
+            # Use an atomic transaction for order and stock updates
+            with transaction.atomic():
+                # Create and save the order
+                new_order = Order.objects.create(
+                    user=user,
+                    shipping_address=shipping_address,
+                    payment_type='Razorpay',
+                    payment_status='Success',
+                    total_price=total_price,
+                    coupon_code=coupon_code
+                )
+
+                # Retrieve cart and create order items
+                cart = get_object_or_404(Cart, user=user)
+                cart_items = CartItem.objects.filter(cart=cart)
+
+                for item in cart_items:
+                    OrderItem.objects.create(
+                        order=new_order,
+                        variants=item.variant,
+                        quantity=item.quantity,
+                        price=item.variant.product.price,
+                        subtotal_price=item.quantity * item.variant.product.price
+                    )
+
+                    # Deduct stock
+                    item.variant.qty -= item.quantity
+                    item.variant.save()
+
+                # Clear the cart and session
+                cart_items.delete()
+                del request.session['pending_order_details']
+
+            return JsonResponse({'message': 'Order placed successfully!'})
+
+        except razorpay.errors.SignatureVerificationError:
+            return JsonResponse({'error': 'Payment verification failed.'}, status=400)
+        except Exception as e:
+            # Log exception and return error
+            print(f"Order creation failed: {e}")
+            return JsonResponse({'error': 'An error occurred while placing the order.'}, status=500)
+
+    return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
+
+
+
 
 
 @never_cache
