@@ -13,7 +13,7 @@ class Transaction(models.Model):
     transaction_id = models.AutoField(primary_key=True)  
     wallet_id = models.ForeignKey(Wallet,on_delete=models.CASCADE)
     details = models.CharField( max_length=256)
-    amount = models.IntegerField(null=True,blank=True) 
+    amount = models.DecimalField(decimal_places=2, default=0.00,max_digits=30)
     transaction_type = models.CharField(max_length=50) 
     created_at = models.DateTimeField(auto_now_add=True)
     

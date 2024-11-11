@@ -540,18 +540,18 @@ def cancel_order(request, orderitem_id):
     if item.order.payment_status=='Success':
         order = item.order 
         
-        total_quantity = OrderItem.objects.filter(order=order).aggregate(total_qty=Sum('quantity'))['total_qty']
-        item_quantity = item.quantity  
+        total_quantity = Decimal(OrderItem.objects.filter(order=order).aggregate(total_qty=Sum('quantity'))['total_qty'] or 0)
+        item_quantity = Decimal(item.quantity)  
 
 
-        new_price = Decimal(str(item.price)) * Decimal(item_quantity)
+        new_price = Decimal(item.price) * Decimal(item_quantity)
 
         if order.coupon_amount and total_quantity:
             new_price -= Decimal(order.coupon_amount) / Decimal(total_quantity)
         
         user_wallet, created = Wallet.objects.get_or_create(user_id=user)
 
-        user_wallet.balance += new_price
+        user_wallet.balance = Decimal(user_wallet.balance or 0) + new_price
         user_wallet.save()
         
         details_text = f"Tracking: {order.tracking_number}, Product: {item.variants.product.product_name}"
