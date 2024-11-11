@@ -306,32 +306,32 @@
                                         <td style="font-weight: bold;">{{order.status}}</td>
 
                                         {% if order.status != 'Cancelled' %}
-                                                <td style="width: 10%;">
-                                                    <form action="" method="post" class="status-form" id="statusForm{{ order.orderitem_id }}">
-                                                        {% csrf_token %}
-                                                        <input type="hidden" name="order_id" value="{{ order.orderitem_id }}">
-                                                        <select name="status" class="status-dropdown" onchange="showConfirmationModal(this)">
-                                                            <option value="">{{ order.status }}</option>
-                                                            <option value="Order Pending" {% if order.status == 'Order Pending' %}selected{% endif %}>Order Pending</option>
-                                                            <option value="Order confirmed" {% if order.status == 'Order confirmed' %}selected{% endif %}>Order Confirmed</option>
-                                                            <option value="Shipped" {% if order.status == 'Shipped' %}selected{% endif %}>Shipped</option>
-                                                            <option value="Delivered" {% if order.status == 'Delivered' %}selected{% endif %}>Delivered</option>
-                                                            <option value="Cancelled" {% if order.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
-                                                        </select>
-                                                    </form>
-                                                </td>
-                                            {% else %}
-                                                <td style="width: 10%; font-weight: bold; color: red; text-align: center;">
-                                                    Cancelled
-                                                </td>
-                                            {% endif %}
+                                            <td style="width: 10%;">
+                                                <form action="" method="post" class="status-form" id="statusForm{{ order.orderitem_id }}">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="order_id" value="{{ order.orderitem_id }}">
+                                                    <select name="status" class="status-dropdown" onchange="showConfirmationModal(this)">
+                                                        <option value="" disabled selected>{{ order.status }}</option>
+                                                        <option value="Order Pending" {% if order.status == 'Order Pending' %}selected{% endif %}>Order Pending</option>
+                                                        <option value="Order Confirmed" {% if order.status == 'Order Confirmed' %}selected{% endif %}>Order Confirmed</option>
+                                                        <option value="Shipped" {% if order.status == 'Shipped' %}selected{% endif %}>Shipped</option>
+                                                        <option value="Out For Delivery" {% if order.status == 'Out For Delivery' %}selected{% endif %}>Out For Delivery</option>
+                                                        <option value="Delivered" {% if order.status == 'Delivered' %}selected{% endif %}>Delivered</option>
+                                                        <option value="Cancelled" {% if order.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                                                        <!-- <option value="Requested Return">Requested Return</option> -->
+                                                        <option value="Approve Returned" {% if order.status == 'Approve Returned' %}selected{% endif %}>Approve Returned</option>
+                                                        <option value="Reject Returned" {% if order.status == 'Reject Returned' %}selected{% endif %}>Reject Returned</option>
+                                                    </select>
+                                                </form>
+                                            </td>
+                                        {% else %}
+                                            <td style="width: 10%; font-weight: bold; color: red; text-align: center;">
+                                                Cancelled
+                                            </td>
+                                        {% endif %}
 
 
 
-                                          <!-- <option value="Out For Delivery" {% if order.status == 'Out For Delivery' %}selected{% endif %}>Out For Delivery</option> -->
-                                        <!-- <option value="Requested Return" {% if order.status == 'Requested Return' %}selected{% endif %}>Requested Return</option> -->
-                                            <!-- <option value="Approve Returned" {% if order.status == 'Approve Returned' %}selected{% endif %}>Approve Returned</option> -->
-                                        <!-- <option value="Reject Returned" {% if order.status == 'Reject Returned' %}selected{% endif %}>Reject Returned</option> -->
                                     </tr>
                                     {% endfor %}
                                    
@@ -414,25 +414,31 @@
 
         function showConfirmationModal(selectElement) {
             const status = selectElement.value;
+            console.log("fgd",selectElement.value)
             const orderId = selectElement.previousElementSibling.value; // Get the order ID
             
-            // Set confirmation message
+            // Set the confirmation message
             document.getElementById('confirmationMessage').innerText = `Are you sure you want to change the order status to "${status}"?`;
-
+        
             // Save the form ID to submit later
             selectedFormId = `statusForm${orderId}`;
-
-            // Show the modal
-            $('#confirmationModal').modal('show');
+        
+            // Show the modal using Bootstrap 5's JavaScript API
+            const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+            confirmationModal.show();
         }
-
+        
         // Handle confirmation button click
         document.getElementById('confirmActionButton').addEventListener('click', function() {
-            // Submit the form
-            document.getElementById(selectedFormId).submit();
+            // Submit the selected form
+            if (selectedFormId) {
+                document.getElementById(selectedFormId).submit();
+            }
+            // Hide the modal after confirmation
+            const confirmationModal = bootstrap.Modal.getInstance(document.getElementById('confirmationModal'));
+            confirmationModal.hide();
         });
-
-
+        
     </script>
 </body>
 </html>

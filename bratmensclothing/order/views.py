@@ -280,9 +280,8 @@ def place_order(request):
             if payment_type == 'Razorpay':
                 client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
                 
-                # Convert Decimal to float and multiply by 100 for paise
                 payment_data = {
-                    "amount": int(float(grand_total) * 100),  # Razorpay expects amount in paise (1 INR = 100 paise)
+                    "amount": int(float(grand_total) * 100), 
                     "currency": "INR", 
                     "payment_capture": 1
                 }
@@ -384,10 +383,8 @@ def verify_payment(request):
             client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
             try:
-                # Verify the payment signature
                 client.utility.verify_payment_signature(params_dict)
 
-                # Retrieve pending order details from session, with a check
                 order_data = request.session.get('pending_order_details')
                 if not order_data:
                     return JsonResponse({'error': 'Order details not found in session.'}, status=400)
@@ -398,7 +395,6 @@ def verify_payment(request):
                 coupon_code = order_data.get("coupon_code")
                 coupon_amount = order_data.get("coupon_amount")
                
-                # Get related objects with error handling
                 user = get_object_or_404(Users, userid=user_id)
                 shipping_address = get_object_or_404(Address, id=shipping_address_id)
 
@@ -419,6 +415,37 @@ def verify_payment(request):
                     # Retrieve cart and create order items
                     cart = get_object_or_404(Cart, user=user)
                     cart_items = CartItem.objects.filter(cart=cart)
+                   
+                    for cart_item in cart_items:
+                        variant = cart_item.variant
+                        product = variant.product
+
+
+                        product_offer = Product_Offers.objects.filter(
+                            product_id=product,
+                            status=True,
+                            started_date__lte=timezone.now(),
+                            end_date__gte=timezone.now()
+                        ).first()
+
+                        brand_offer = Brand_Offers.objects.filter(
+                            brand_id=product.brand,
+                            status=True,
+                            started_date__lte=timezone.now(),
+                            end_date__gte=timezone.now()
+                        ).first()
+
+                        discounted_price = product.price
+
+                        if product_offer:
+                            discounted_price = product.price - product_offer.offer_price
+
+                        if brand_offer:
+                            brand_discounted_price = product.price - brand_offer.offer_price
+
+                            discounted_price = min(discounted_price, brand_discounted_price)
+
+                        cart_item.variant.product.price = discounted_price
 
                     for item in cart_items:
                         OrderItem.objects.create(
@@ -433,7 +460,7 @@ def verify_payment(request):
                         item.variant.qty -= item.quantity
                         item.variant.save()
 
-                    # Clear the cart and session
+                    # Clear the cart
                     cart_items.delete()
                     del request.session['pending_order_details']
 
@@ -509,26 +536,31 @@ def manage_orders(request, orderitem_id):
 def cancel_order(request, orderitem_id):
     item = get_object_or_404(OrderItem, orderitem_id=orderitem_id)
     user = item.order.user
-    order = item.order 
-    
-    total_quantity = OrderItem.objects.filter(order=order).aggregate(total_qty=Sum('quantity'))['total_qty']
-    new_price = Decimal(item.price)  
 
-    if order.coupon_amount and total_quantity:
-        new_price -= Decimal(order.coupon_amount) / Decimal(total_quantity)
-    
-    user_wallet, created = Wallet.objects.get_or_create(user_id=user)
+    if item.order.payment_status=='Success':
+        order = item.order 
+        
+        total_quantity = OrderItem.objects.filter(order=order).aggregate(total_qty=Sum('quantity'))['total_qty']
+        item_quantity = item.quantity  
 
-    user_wallet.balance += Decimal(new_price)
-    user_wallet.save()
-    
-    details_text = f"Tracking: {order.tracking_number}, Product: {item.variants.product.product_name}"
-    Transaction.objects.create(
-        wallet_id=user_wallet,
-        transaction_type='Order Cancellation',
-        amount=new_price,
-        details=details_text
-    )
+
+        new_price = Decimal(str(item.price)) * Decimal(item_quantity)
+
+        if order.coupon_amount and total_quantity:
+            new_price -= Decimal(order.coupon_amount) / Decimal(total_quantity)
+        
+        user_wallet, created = Wallet.objects.get_or_create(user_id=user)
+
+        user_wallet.balance += new_price
+        user_wallet.save()
+        
+        details_text = f"Tracking: {order.tracking_number}, Product: {item.variants.product.product_name}"
+        Transaction.objects.create(
+            wallet_id=user_wallet,
+            transaction_type='Order Cancellation',
+            amount=new_price,
+            details=details_text
+        )
     
     if item.variants:
         item.variants.qty += item.quantity
@@ -545,6 +577,7 @@ def cancel_order(request, orderitem_id):
 def is_staff(user):
     return user.is_staff
 
+
 @login_required(login_url='accounts:admin_login')
 @never_cache
 @user_passes_test(is_staff, login_url='accounts:admin_login')
@@ -556,20 +589,48 @@ def order_details(request):
     orders = paginator.get_page(page_number)  
 
     if request.method == 'POST':
+        ALLOWED_TRANSITIONS = {
+            "Order Pending": ["Order Confirmed", "Cancelled"],
+            "Order Confirmed": ["Shipped", "Cancelled"],
+            "Shipped": ["Out For Delivery", "Cancelled"],
+            "Out For Delivery": ["Delivered"],
+            "Delivered": ["Requested Return"],
+            "Requested Return": ["Approve Returned", "Reject Returned"],
+            "Approve Returned": [],
+            "Reject Returned": [],
+            "Cancelled": [],
+        }
         order_id = request.POST.get('order_id')  
         action = request.POST.get('status')
 
         if order_id and action:
             order = get_object_or_404(OrderItem, orderitem_id=order_id)  
-            order.status = action  
-            if action == 'Cancelled':
-               
-                variant = order.variants  
-                variant.qty += order.quantity  
-                variant.save()  
-            
-            order.save() 
-            messages.success(request, f"Order status updated to {action}.")
-            return redirect('order:order_details') 
+            current_status = order.status
+            print(F'{current_status}')
+            if action in ALLOWED_TRANSITIONS.get(current_status, []):
+                order.status = action 
+                if action == 'Cancelled':
+                
+                    variant = order.variants  
+                    variant.qty += order.quantity  
+                    variant.save()  
+                
+                order.save() 
+                messages.success(request, f"Order status updated to {action}.")
+                return redirect('order:order_details') 
+            else:
+                messages.error(request, f"Invalid status transition from {current_status} to {action}.")
+
+            return redirect('order:order_details')
 
     return render(request, 'admin/orders.html', {'orders': orders}) 
+
+
+
+def return_order(request, orderitem_id):
+    item = get_object_or_404(OrderItem, orderitem_id=orderitem_id) 
+    item.status = 'Requested Return'
+    item.save()
+    
+    messages.success(request, 'Your order has been returned successfully.')
+    return redirect('order:view_orders')

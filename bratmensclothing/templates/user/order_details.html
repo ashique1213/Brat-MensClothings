@@ -148,47 +148,20 @@
 
                                                         <div>
 
-                                                            {% if item.status == 'Order Pending' %}
-                                                                <div>
-                                                                    <span class="manage-o__badge badge--processing">Processing</span>
-                                                                </div>
-                                                            {% elif item.status == 'Order confirmed' %}
-                                                                <div>
-                                                                    <span class="manage-o__badge badge--processing">Confirmed</span>
-                                                                </div>
-                                                            {% elif item.status == 'Shipped' %}
-                                                                <div>
-                                                                    <span class="manage-o__badge badge--processing">Shipped</span>
-                                                                </div>
-                                                            {% elif item.status == 'Out For Delivery' %}
-                                                                <div>
-                                                                    <span class="manage-o__badge badge--out-for-processing">Out for Delivery</span>
-                                                                </div>
-                                                            {% elif item.status == 'Delivered' %}
-                                                                <div>
-                                                                    <span class="manage-o__badge badge--shipped">Delivered</span>
-                                                                </div>
+                                                            {% if item.status == 'Delivered' %}
+                                                            <div>
+                                                                <span class="manage-o__badge badge--shipped">Delivered</span>
+                                                            </div>
                                                             {% elif item.status == 'Cancelled' %}
-                                                                <div>
-                                                                    <span class="manage-o__badge badge--delivered">Cancelled</span>
-                                                                </div>
-                                                            {% elif item.status == 'Requested Return' %}
-                                                                <div>
-                                                                    <span class="manage-o__badge badge--requested-processing">Return Requested</span>
-                                                                </div>
-                                                            {% elif item.status == 'Approve Returned' %}
-                                                                <div>
-                                                                    <span class="manage-o__badge badge--approve-processing">Return Approved</span>
-                                                                </div>
-                                                            {% elif item.status == 'Reject Returned' %}
-                                                                <div>
-                                                                    <span class="manage-o__badge badge--reject-delivered">Return Rejected</span>
-                                                                </div>
+                                                            <div>
+                                                                <span class="manage-o__badge badge--delivered">Cancelled</span>
+                                                            </div>
                                                             {% else %}
-                                                                <div>
-                                                                    <span class="manage-o__badge badge--delivered">Unknown Status</span>
-                                                                </div>
+                                                            <div>
+                                                                <span class="manage-o__badge badge--processing">{{item.status}}</span>
+                                                            </div>
                                                             {% endif %}
+
 
                            
                                                         <span class="manage-o__text-2 u-c-silver">Quantity:

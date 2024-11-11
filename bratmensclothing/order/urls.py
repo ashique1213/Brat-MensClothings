@@ -32,5 +32,6 @@ urlpatterns = [
     path('manage_orders/<int:orderitem_id>', views.manage_orders, name='manage_orders'),    
     path('cancel_order/<int:orderitem_id>', views.cancel_order, name='cancel_order'),    
     path('order_details/',views.order_details,name='order_details'),
+    path('return_order/<int:orderitem_id>',views.return_order,name='return_order'),
     
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

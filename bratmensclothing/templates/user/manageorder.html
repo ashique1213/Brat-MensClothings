@@ -178,16 +178,22 @@
                                             <div class="manage-o__text-2 u-c-secondary">Order #{{orderitem.order.tracking_number}}</div>
                                             <div class="manage-o__text u-c-silver">Placed on {{orderitem.order.created_at}}</div>
                                         </div>
-                                        {% if orderitem.status != 'Cancelled' %}
+
+                                        {% if orderitem.status == 'Order Pending' %}
                                         <div style="background-color: rgb(231, 180, 180); padding: 9px; border-radius: 20px;">
                                             <a href="#" onclick="openConfirmCancelModal({{ orderitem.orderitem_id }})" style="font-weight: bold; font-size: 13px; color: rgb(197, 34, 34);">Cancel Order</a>
                                         </div>
+                                        {% elif orderitem.status == 'Delivered' %}
+                                        <div style="background-color: rgb(197, 233, 207); padding: 9px; border-radius: 20px;">
+                                            <a href="#" onclick="openConfirmReturnModal({{ orderitem.orderitem_id }})" style="font-weight: bold; font-size: 13px; color: rgb(87, 159, 87);">Return Order</a>
+                                        </div>
                                         {% else %}
-                                        <div style="background-color: rgb(231, 180, 180); padding: 9px; border-radius: 20px;">
-                                            <a href="" style="font-weight: bold; font-size: 13px; color: rgb(197, 34, 34);">Order Cancelled</a>
+                                        <div style="background-color: #b6d1e8; padding: 9px; border-radius: 20px;">
+                                            <a href="" style="font-weight: bold; font-size: 13px; color: rgb(9, 63, 128);">{{orderitem.status}}</a>
                                         </div>
                                         {% endif %}
-
+                                        
+                                    
                                         <div>
                                             <div class="manage-o__text-2 u-c-silver">AMOUNT PAID
 
@@ -348,6 +354,23 @@
     </div>
 </div>
 
+<div id="returnConfirmationModal" class="custom-modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5>Confirm Return</h5>
+            <span class="close" onclick="closeReturnConfirmationModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            Are you sure you want to return this order?
+        </div>
+        <div class="modal-footer">
+            <button class="btn cancel-btn" onclick="closeReturnConfirmationModal()">No</button>
+            <button class="btn delete-btn" id="confirmReturnButton">Yes, Return Order</button>
+        </div>
+    </div>
+</div>
+
+
 
 <script>
     let orderIdToCancel; // Declare a variable to hold the order ID for cancellation
@@ -368,6 +391,26 @@
         // Redirect to the cancel order URL
         window.location.href = "{% url 'order:cancel_order' 0 %}".replace('0', orderIdToCancel);
     };
+      
+    let orderIdToReturn; // Declare a variable to hold the order ID for return
+
+    // Function to open the confirmation modal
+    function openConfirmReturnModal(orderId) {
+        orderIdToReturn = orderId; // Store the order ID for return
+        document.getElementById('returnConfirmationModal').style.display = 'block'; // Show the modal
+    }
+
+    // Function to close the confirmation modal
+    function closeReturnConfirmationModal() {
+        document.getElementById('returnConfirmationModal').style.display = 'none'; // Hide the modal
+    }
+
+    // Add an event listener to the confirm button
+    document.getElementById('confirmReturnButton').onclick = function () {
+        // Redirect to the return order URL
+        window.location.href = "{% url 'order:return_order' 0 %}".replace('0', orderIdToReturn);
+    };
+
 </script>
 
 

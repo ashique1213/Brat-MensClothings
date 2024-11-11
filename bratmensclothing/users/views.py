@@ -97,9 +97,9 @@ def category_details(request):
     elif sort_option == 'ztoa':
         products = products.order_by('-product_name')  
     elif sort_option == 'lowest_price':
-        products = products.annotate(lowest_price=Min('variants__price')).order_by('lowest_price') 
+        products = products.annotate(lowest_price=Min('price')).order_by('lowest_price') 
     elif sort_option == 'highest_price':
-        products = products.annotate(lowest_price=Min('variants__price')).order_by('-lowest_price')
+        products = products.annotate(lowest_price=Min('price')).order_by('-lowest_price')
     else: 
         products = products.order_by('created_at')
     
@@ -256,6 +256,7 @@ def add_profile(request, userid):
         if profile_image:
             user.profile = profile_image
             user.save()
+            messages.success(request, 'Profile image has been successfully added.')
             return redirect('userss:accountdetails', userid=userid)
         else:
             return render(request, 'user/accountdetails.html', {'user': user, 'error': 'No image uploaded.'})
