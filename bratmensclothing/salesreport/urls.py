@@ -25,7 +25,7 @@ urlpatterns = [
    
     path('view_salesreport/', views.view_salesreport, name='view_salesreport'),  
     path('download_pdf/', views.download_pdf, name='download_pdf'),  
-    path('download_to_excel/', views.download_to_excel, name='download_to_excel'),  
+    path('download_excel/', views.download_excel, name='download_excel'),  
    
  
     

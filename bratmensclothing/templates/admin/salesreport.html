@@ -174,41 +174,36 @@
 
 
                     <form method="get" action="{% url 'salesreport:view_salesreport' %}">
+
                         <div class="d-flex justify-content-between mb-3">
-                            <!-- Sort Option with Icon -->
                             <div class="input-group ms-1">
                                 <span class="input-group-text">
-                                    <i class="fas fa-filter"></i> <!-- FontAwesome filter icon -->
+                                    <i class="fas fa-filter"></i>
                                 </span>
                                 <select id="sortOption" name="sortOption" class="form-select">
-                                    <option value="">Sort by</option>
-                                    <option value="day" {% if request.GET.sortOption == 'day' %}selected{% endif %}>Day</option>
-                                    <option value="week" {% if request.GET.sortOption == 'week' %}selected{% endif %}>Week</option>
-                                    <option value="month" {% if request.GET.sortOption == 'month' %}selected{% endif %}>Month</option>
-                                    <option value="year" {% if request.GET.sortOption == 'year' %}selected{% endif %}>Year</option>
+                                    <option value="" {% if not sortOption %}selected{% endif %}>Sort by</option>
+                                    <option value="day" {% if sortOption == 'day' %}selected{% endif %}>Day</option>
+                                    <option value="week" {% if sortOption == 'week' %}selected{% endif %}>Week</option>
+                                    <option value="month" {% if sortOption == 'month' %}selected{% endif %}>Month</option>
+                                    <option value="year" {% if sortOption == 'year' %}selected{% endif %}>Year</option>
                                 </select>
                             </div>
-                            
-                            <!-- Start Date Filter -->
                             <div class="input-group ms-1">
                                 <label for="startDate" class="input-group-text">Start Date</label>
-                                <input type="date" name="startdate" class="form-control" value="{{ request.GET.startdate }}">
+                                <input type="date" id="start_date" name="startdate" class="form-control" value="{{ startdate|date:'Y-m-d' }}" />
                             </div>
-                    
-                            <!-- End Date Filter -->
                             <div class="input-group ms-1">
                                 <label for="endDate" class="input-group-text">End Date</label>
-                                <input type="date" name="enddate" class="form-control" value="{{ request.GET.enddate }}">
+                                <input type="date" id="end_date" name="enddate" class="form-control" value="{{ enddate|date:'Y-m-d' }}" />
                             </div>
-                    
-                            <!-- Filter Button -->
                             <div class="ms-1">
                                 <button class="btn btn-dark" type="submit" id="applyDateFilter">Apply</button>
                             </div>
+                           
                         </div>
                     </form>
-                    
-                    
+
+
 
                     <div class="card mb-4">
                         <div class="card-header d-flex justify-content-between align-items-center">
@@ -218,10 +213,10 @@
                             </div>
 
                             <div class="d-flex">
-                                <a href="{% url 'salesreport:download_pdf' %}" class="btn btn-outline-dark btn-sm me-2 " id="downloadPDF" title="Download PDF">
+                                <a href="?download_pdf=true&startdate={{ startdate }}&enddate={{ enddate }}&sortOption={{ sortOption }}" class="btn btn-outline-dark btn-sm me-2" title="Download PDF">
                                     <i class="fas fa-file-pdf"></i> PDF
                                 </a> 
-                                <a href="{% url 'salesreport:download_to_excel' %}" class="btn btn-outline-dark btn-sm" id="downloadExcel" title="Download Excel">
+                                <a href="?download_excel=true&startdate={{ startdate }}&enddate={{ enddate }}&sortOption={{ sortOption }}" class="btn btn-outline-dark btn-sm" title="Download Excel">
                                     <i class="fas fa-file-excel"></i> Excel
                                 </a>
                             </div>

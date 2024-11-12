@@ -21,6 +21,8 @@ from django.core.paginator import Paginator
 from coupon.models import Coupon
 import cloudinary.uploader
 from decimal import Decimal
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+
 
 def is_staff(user):
     return user.is_staff
@@ -59,7 +61,6 @@ def unblock_user(request,userid):
     return redirect('userss:view_user')
 
  
-from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
 @never_cache
 def category_details(request):
@@ -140,7 +141,20 @@ def category_details(request):
 
         product.final_price = final_price
         product.discount_percentage = discount_percentage
-
+    
+    # if sort_option == 'newly_added':
+    #     products = products.order_by('-created_at')
+    # elif sort_option == 'atoz':
+    #     products = products.order_by('product_name')
+    # elif sort_option == 'ztoa':
+    #     products = products.order_by('-product_name')
+    # elif sort_option == 'lowest_price':
+    #     products = sorted(products, key=lambda x: x.final_price)
+    # elif sort_option == 'highest_price':
+    #     products = sorted(products, key=lambda x: x.final_price, reverse=True)
+    # else:
+    #     products = products.order_by('created_at')
+        
     categories=Category.objects.all()
     Brands=Brand.objects.all()
     Variants = VariantSize.objects.values('size').distinct().order_by('size')
