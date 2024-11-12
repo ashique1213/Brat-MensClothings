@@ -310,7 +310,7 @@
             <label for="brand-id{{ offer.id }}" class="col-form-label">Brand</label>
             <select name="brand_id" class="form-select" id="brand-id{{ offer.id }}"  required>
               {% for brand in brands %}
-                <option value="{{ brand.brand_id }}" {% if brand.brand_id == offer.brand_id.brand_id %} selected {% endif %}>{{ offer.brand.brandname }}</option>
+                <option value="{{ brand.brand_id }}" {% if brand.brand_id == offer.brand_id %} selected {% endif %}>{{ brand.brandname }}</option>
               {% endfor %}
             </select>
           </div>

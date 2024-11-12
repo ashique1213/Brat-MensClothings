@@ -311,7 +311,7 @@
             <label for="product-id{{ offer.id }}" class="col-form-label">Product</label>
             <select name="product_id" class="form-select" id="product-id{{ offer.id }}" required>
               {% for product in products %}
-                <option value="{{ product.product_id }}" {% if product.product_id == offer.product_id.product_id %} selected {% endif %}>{{ offer.product.product_name }}</option>
+                <option value="{{ product.product_id }}" {% if product.product_id == offer.product_id %} selected {% endif %}>{{ product.product_name }}</option>
               {% endfor %}
             </select>
           </div>
