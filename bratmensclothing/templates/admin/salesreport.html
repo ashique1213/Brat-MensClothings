@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,8 +9,9 @@
     <meta name="author" content="" />
     <title>Admin Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
-    <link href="css/styles.css" rel="stylesheet" />
+    <link href="{% static 'admin/css/styles.css' %}" rel="stylesheet" />
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+    
     <style>
         table {
             width: 100%;
@@ -28,11 +30,39 @@
             height: 50px;
             object-fit: cover;
         }
+
+        p.text-danger {
+            font-size: 10px;
+            margin-left: 5px;
+            color: red; /* Set the text color to red for error messages */
+          }
+          
+        /* Custom styling for cards and metrics */
+        .metric-card {
+            background-color: #f8f9fa;
+            padding: 1px;
+            border-radius: 10px;
+            text-align: center;
+            color: #333;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .metric-card h5 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+        .metric-card p {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+          
+           
+        
     </style>
 </head>
 <body class="sb-nav-fixed">
     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-        <a class="navbar-brand ps-3" href="">B.R.A.T</a>
+        <a class="navbar-brand " href="" style="padding-left: 5%;" >B.R.A.T</a>
         <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!">
             <i class="fas fa-bars"></i>
         </button>
@@ -45,48 +75,50 @@
                     <li><a class="dropdown-item" href="#!">Settings</a></li>
                     <li><a class="dropdown-item" href="#!">Profile</a></li>
                     <li><hr class="dropdown-divider" /></li>
-                    <li><a class="dropdown-item" href="#!">Logout</a></li>
+                    <li><a class="dropdown-item" href="{% url 'accounts:admin_logout' %}">Logout</a></li>
                 </ul>
             </li>
-        </ul>
+        </ul> 
     </nav>
-
-
 
     <div id="layoutSidenav">
         <div id="layoutSidenav_nav">
             <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
-                <div class="sb-sidenav-menu">
+                <div class="sb-sidenav-menu p-5">
                     <div class="nav">
-                        <a class="nav-link" href="">
+                        <a class="nav-link " href="{% url 'admin_dashboard' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                             Dashboard
                         </a>
-                        <a class="nav-link" href="customers.html">
+                        <a class="nav-link" href="{% url 'userss:view_user' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
-                            Customers
+                            Users
                         </a>
-                        <a class="nav-link" href="category.html">
+                        <a class="nav-link " href="{% url 'products:view_brands' %}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-flag"></i></div>
+                            Brands
+                        </a>
+                        <a class="nav-link" href="{% url 'products:view_category' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-list"></i></div>
                             Category
                         </a>
-                        <a class="nav-link" href="orders.html">
-                            <div class="sb-nav-link-icon"><i class="fas fa-shopping-cart"></i></div>
-                            Orders
-                        </a>
-                        <a class="nav-link" href="product.html">
+                        <a class="nav-link " href="{% url 'products:viewproducts' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-box-open"></i></div>
                             Products
                         </a>
-                        <a class="nav-link" href="coupon.html">
+                        <a class="nav-link" href="{% url 'order:order_details' %}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-shopping-cart"></i></div>
+                            Orders
+                        </a>
+                        <a class="nav-link" href="{% url 'coupon:coupon_details'%}">
                             <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
                             Coupons
                         </a>
-                        <a class="nav-link" href="offers.html">
+                        <a class="nav-link" href="{% url 'offer:view_offer'%}">
                             <div class="sb-nav-link-icon"><i class="fas fa-gift"></i></div>
                             Offers
                         </a>
-                        <a class="nav-link" href="salesreport.html">
+                        <a class="nav-link active" href="{% url 'salesreport:view_salesreport' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-chart-line"></i></div>
                             Sales Report
                         </a>
@@ -97,54 +129,86 @@
 
 
 
+
         <div id="layoutSidenav_content">
             <main>
                 <div class="container-fluid px-4">
-                    <h1 class="mt-4">Sales Report</h1>
+                    <h4 class="mt-4">Sales Report</h4>
                     <ol class="breadcrumb mb-4">
                         <li class="breadcrumb-item"><a href="">Dashboard</a></li>
                         <li class="breadcrumb-item active">Sales Report</li>
                     </ol>
 
-
-
-                    <div class="d-flex justify-content-between mb-3">
-                        <div class="input-group ms-1">
-                            <span class="input-group-text">
-                                <i class="fas fa-search"></i> <!-- Search Icon -->
-                            </span>
-                            <input type="text" id="" class="form-control" placeholder="Search Orders..." />
+                    <div class="row text-center">
+                        <div class="col-md-2 mb-3">
+                            <div class="metric-card">
+                                <h5>Total Revenue</h5>
+                                <p>₹{{total_sales_price}}</p>
+                            </div>
                         </div>
-                        <!-- Sort Option on the Right with Icon -->
-                        <div class="input-group ms-1">
-                            <span class="input-group-text">
-                                <i class="fas fa-filter"></i> <!-- FontAwesome filter icon -->
-                            </span>
-                            <select id="sortOption" class="form-select">
-                                <option value="">Sort by</option>
-                                <option value="name">Name</option>
-                                <option value="age">Age</option>
-                                <option value="date">Start Date</option>
-                            </select>
+                        <div class="col-md-2 mb-3">
+                            <div class="metric-card">
+                                <h5>Total Units Sold</h5>
+                                <p>{{total_unit_sold}}</p>
+                            </div>
                         </div>
-                        <div class="input-group ms-1">
-                            <label for="startDate" class="input-group-text">Start Date</label>
-                            <input type="date" id="startDate" class="form-control" />
+                        <div class="col-md-2 mb-3">
+                            <div class="metric-card">
+                                <h5>Total Orders</h5>
+                                <p>{{total_order}}</p>
+                            </div>
                         </div>
-                    
-                        <!-- End Date Filter -->
-                        <div class="input-group ms-1">
-                            <label for="endDate" class="input-group-text">End Date</label>
-                            <input type="date" id="endDate" class="form-control" />
+                        <div class="col-md-3 mb-3">
+                            <div class="metric-card">
+                                <h5>Overall Order Amount</h5>
+                                <p>₹{{total_order_amount}}</p>
+                            </div>
                         </div>
-                    
-                        <!-- Filter Button -->
-                        <div class="ms-1">
-                            <button class="btn btn-primary" id="applyDateFilter">Apply</button>
+                        <div class="col-md-3 mb-3">
+                            <div class="metric-card">
+                                <h5>Overall Discout Amount</h5>
+                                <p>₹{{total_discount_amount}}</p>
+                            </div>
                         </div>
                     </div>
 
 
+                    <form method="get" action="{% url 'salesreport:view_salesreport' %}">
+                        <div class="d-flex justify-content-between mb-3">
+                            <!-- Sort Option with Icon -->
+                            <div class="input-group ms-1">
+                                <span class="input-group-text">
+                                    <i class="fas fa-filter"></i> <!-- FontAwesome filter icon -->
+                                </span>
+                                <select id="sortOption" name="sortOption" class="form-select">
+                                    <option value="">Sort by</option>
+                                    <option value="day" {% if request.GET.sortOption == 'day' %}selected{% endif %}>Day</option>
+                                    <option value="week" {% if request.GET.sortOption == 'week' %}selected{% endif %}>Week</option>
+                                    <option value="month" {% if request.GET.sortOption == 'month' %}selected{% endif %}>Month</option>
+                                    <option value="year" {% if request.GET.sortOption == 'year' %}selected{% endif %}>Year</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Start Date Filter -->
+                            <div class="input-group ms-1">
+                                <label for="startDate" class="input-group-text">Start Date</label>
+                                <input type="date" name="startdate" class="form-control" value="{{ request.GET.startdate }}">
+                            </div>
+                    
+                            <!-- End Date Filter -->
+                            <div class="input-group ms-1">
+                                <label for="endDate" class="input-group-text">End Date</label>
+                                <input type="date" name="enddate" class="form-control" value="{{ request.GET.enddate }}">
+                            </div>
+                    
+                            <!-- Filter Button -->
+                            <div class="ms-1">
+                                <button class="btn btn-dark" type="submit" id="applyDateFilter">Apply</button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    
 
                     <div class="card mb-4">
                         <div class="card-header d-flex justify-content-between align-items-center">
@@ -154,42 +218,41 @@
                             </div>
 
                             <div class="d-flex">
-                                <button class="btn btn-outline-danger btn-sm me-2" id="downloadPDF" title="Download PDF">
+                                <a href="{% url 'salesreport:download_pdf' %}" class="btn btn-outline-dark btn-sm me-2 " id="downloadPDF" title="Download PDF">
                                     <i class="fas fa-file-pdf"></i> PDF
-                                </button>
-                                <button class="btn btn-outline-success btn-sm" id="downloadExcel" title="Download Excel">
+                                </a> 
+                                <a href="{% url 'salesreport:download_to_excel' %}" class="btn btn-outline-dark btn-sm" id="downloadExcel" title="Download Excel">
                                     <i class="fas fa-file-excel"></i> Excel
-                                </button>
+                                </a>
                             </div>
                         </div>
 
                         <div class="card-body">
-                            <table id="productsTable">
+                            <table id="productsTable" style="font-size: 14px;">
                                 <thead>
                                     <tr>
-                                        <th>User id</th>
-                                        <th>Name</th>
-                                        <th>Order id</th>
-                                        <th>Product</th>
-                                        <th>Quantity</th>
-                                        <th>Price</th>
-                                        <th>Payment Method</th>
-                                        <th>Order Date</th>
-                                        <th>Delivery Status</th>
+                                        <th>Date</th>
+                                        <th>Total Sales Revenue</th>
+                                        <th>Coupon Discout</th>
+                                        <th>Offer Discout</th>
+                                        <th>Net Sales</th>
+                                        <th>Number Of Orders</th>
+                                        <th>Total Items Sold</th>
+                                    
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    {% for report in sales_report %}
                                     <tr>
-                                        <td>133</td>
-                                        <td>Amal</td>
-                                        <td>#3456789</td>
-                                        <td>Shirt</td>
-                                        <td>1</td>
-                                        <td>$120</td>
-                                        <td>Cash On Delivery</td>
-                                        <td>10-10-2024</td>
-                                        <td>Delivered</td>
+                                        <td>{{report.date}}</td>
+                                        <td>{{report.total_sales_revenue}}</td>
+                                        <td>{{report.coupon_applied}}</td>
+                                        <td>{{report.offer_applied}}</td>
+                                        <td>{{report.net_sales}}</td>
+                                        <td>{{report.number_of_orders}}</td>
+                                        <td>{{report.total_items_sold}}</td>
                                     </tr>
+                                    {%endfor%}
                                    
                                     <!-- Additional product rows here -->
                                 </tbody>
@@ -206,8 +269,35 @@
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-    <script src="js/scripts.js"></script>
+    <script src="{% static 'admin/js/scripts.js' %}"></script>
     <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
-   
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const toasts = document.querySelectorAll('.toast');
+            toasts.forEach(toast => {
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000); // Change this to adjust how long the toast is displayed
+            });
+        }); 
+
+    
+     
+    
+    </script>
+</body>
 </body>
 </html>

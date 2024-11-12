@@ -1,9 +1,7 @@
 from django.shortcuts import render,redirect
 from .models import Wallet,Transaction
-from products.models import ProductDetails
 from django.contrib import messages
 from django.http import JsonResponse
-from django.contrib.auth import authenticate,login,logout
 from django.views.decorators.cache import never_cache
 
 

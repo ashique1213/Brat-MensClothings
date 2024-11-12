@@ -41,11 +41,10 @@ def add_brands(request):
 @user_passes_test(is_staff,'accounts:admin_login')
 def view_brands(request):
     Brands=Brand.objects.all().order_by('is_deleted', '-created_at')
-    paginator = Paginator(Brands, 5)  
 
-    page_number = request.GET.get('page')  
-    
-    Brands = paginator.get_page(page_number) 
+    # paginator = Paginator(Brands, 5)  
+    # page_number = request.GET.get('page') 
+    # Brands = paginator.get_page(page_number) 
 
     return render(request,'admin/brand.html',{'brands':Brands})
 
@@ -150,10 +149,10 @@ def viewproducts(request):
     products = ProductDetails.objects.all().order_by('-created_at')
     brands = Brand.objects.filter(is_deleted=False)
     categories = Category.objects.filter(is_deleted=False)
-    paginator=Paginator(products,3)
-
-    page_number = request.GET.get('page')  # Get the current page number from the URL
-    products = paginator.get_page(page_number) 
+    
+    # paginator=Paginator(products,3)
+    # page_number = request.GET.get('page')  
+    # products = paginator.get_page(page_number) 
 
     return render(request, 'admin/products/product.html', {'products': products,'brands': brands,'categories': categories})
 

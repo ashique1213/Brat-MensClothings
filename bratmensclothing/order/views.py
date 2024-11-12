@@ -207,11 +207,11 @@ def place_order(request):
 
         if not cart_items.exists():
             return redirect('cart:viewcart')
-        
+
+        total_offer_discount=0
         for cart_item in cart_items:
             variant = cart_item.variant
             product = variant.product
-
 
             product_offer = Product_Offers.objects.filter(
                 product_id=product,
@@ -231,9 +231,11 @@ def place_order(request):
 
             if product_offer:
                 discounted_price = product.price - product_offer.offer_price
-
+                total_offer_discount+=product_offer.offer_price
             if brand_offer:
                 brand_discounted_price = product.price - brand_offer.offer_price
+                total_offer_discount+=brand_offer.offer_price
+
 
                 discounted_price = min(discounted_price, brand_discounted_price)
 
@@ -297,8 +299,9 @@ def place_order(request):
                     "shipping_address": selected_address.id,
                     "payment_type": payment_type,
                     "total_price":float(grand_total), 
-                    "coupon_code": couponuser.coupon.code if couponuser else None, 
-                    "coupon_amount":int(float(couponuser.coupon.discount_amount)) if couponuser else None
+                    "coupon_code": couponuser.coupon.code if couponuser else 0, 
+                    "coupon_amount":int(float(couponuser.coupon.discount_amount)) if couponuser else 0,
+                    "total_offer_discount":total_offer_discount if total_offer_discount else 0
                     
 
                 }
@@ -339,8 +342,10 @@ def place_order(request):
                 payment_type=payment_type,
                 payment_status=payment_status,
                 total_price=grand_total,
-                coupon_code=couponuser.coupon.code if couponuser else None,
-                coupon_amount=couponuser.coupon.discount_amount if couponuser else None
+                coupon_code=couponuser.coupon.code if couponuser else 0,
+                coupon_amount=couponuser.coupon.discount_amount if couponuser else 0,
+                total_offer_discount=total_offer_discount if total_offer_discount else 0
+
             )
 
             # Create order items and update stock
@@ -394,6 +399,8 @@ def verify_payment(request):
                 total_price = order_data.get("total_price")
                 coupon_code = order_data.get("coupon_code")
                 coupon_amount = order_data.get("coupon_amount")
+                total_offer_discount = order_data.get("total_offer_discount")
+
                
                 user = get_object_or_404(Users, userid=user_id)
                 shipping_address = get_object_or_404(Address, id=shipping_address_id)
@@ -408,7 +415,8 @@ def verify_payment(request):
                         payment_status='Success',
                         total_price=total_price,
                         coupon_code=coupon_code,
-                        coupon_amount=coupon_amount
+                        coupon_amount=coupon_amount,
+                        total_offer_discount=total_offer_discount
                         
                     )
 
@@ -583,10 +591,10 @@ def is_staff(user):
 @user_passes_test(is_staff, login_url='accounts:admin_login')
 def order_details(request):
     orders = OrderItem.objects.all().order_by('-orderitem_id')
-    paginator = Paginator(orders, 4)  
-
-    page_number = request.GET.get('page') 
-    orders = paginator.get_page(page_number)  
+    
+    # paginator = Paginator(orders, 4)  
+    # page_number = request.GET.get('page') 
+    # orders = paginator.get_page(page_number)  
 
     if request.method == 'POST':
         ALLOWED_TRANSITIONS = {

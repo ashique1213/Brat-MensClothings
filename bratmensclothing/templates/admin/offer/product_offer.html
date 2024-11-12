@@ -97,7 +97,7 @@
                             <div class="sb-nav-link-icon"><i class="fas fa-gift"></i></div>
                             Offers
                         </a>
-                        <a class="nav-link" href="">
+                        <a class="nav-link" href="{% url 'salesreport:view_salesreport' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-chart-line"></i></div>
                             Sales Report
                         </a>
@@ -134,10 +134,10 @@
         <div id="layoutSidenav_content">
             <main>
                 <div class="container-fluid px-4">
-                    <h1 class="mt-4">Offers</h1>
+                    <h4 class="mt-4">Offers</h4>
                     <ol class="breadcrumb mb-4">
                         <li class="breadcrumb-item"><a href="">Dashboard</a></li>
-                        <li class="breadcrumb-item"><a href="">Offers</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'offer:view_offer'%}">Offers</a></li>
                         <li class="breadcrumb-item active">Product Offers</li>
                     </ol>
 

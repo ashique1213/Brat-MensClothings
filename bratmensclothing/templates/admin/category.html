@@ -97,7 +97,7 @@
                             <div class="sb-nav-link-icon"><i class="fas fa-gift"></i></div>
                             Offers
                         </a>
-                        <a class="nav-link" href="">
+                        <a class="nav-link" href="{% url 'salesreport:view_salesreport' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-chart-line"></i></div>
                             Sales Report
                         </a>
@@ -110,31 +110,30 @@
         <div id="layoutSidenav_content">
             <main>
                 <div class="container-fluid px-4">
-                    <h3 class="mt-4">Category</h3>
+                    <h4 class="mt-4">Category</h4>
                     <ol class="breadcrumb mb-4">
                         <li class="breadcrumb-item"><a href="">Dashboard</a></li>
                         <li class="breadcrumb-item active">Category</li>
                     </ol>
 
-                    <div class="d-flex justify-content-between mb-3">
+                    <!-- <div class="d-flex justify-content-between mb-3">
                         <div class="input-group ms-1">
                             <span class="input-group-text">
-                                <i class="fas fa-search"></i> <!-- Search Icon -->
+                                <i class="fas fa-search"></i> 
                             </span>
                             <input type="text" id="searchProduct" class="form-control" placeholder="Search Category..." />
                         </div>
-                        <!-- Sort Option on the Right with Icon -->
                         <div class="input-group ms-1">
                             <span class="input-group-text">
-                                <i class="fas fa-filter"></i> <!-- FontAwesome filter icon -->
+                                <i class="fas fa-filter"></i> 
                             </span>
                             <select id="sortOption" class="form-select">
                                 <option value="">Sort by</option>
-                                <!-- <option value="name">Name</option> -->
-                                <!-- <option value="date">Start Date</option> -->
+                                <option value="name">Name</option>
+                                <option value="date">Start Date</option>
                             </select>
                         </div>
-                    </div>
+                    </div> -->
 
                     
                     <div class="card mb-4">

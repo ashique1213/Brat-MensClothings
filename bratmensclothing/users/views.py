@@ -35,10 +35,11 @@ def error(request):
 @user_passes_test(is_staff,'accounts:admin_login')
 def view_user(request):
     users=Users.objects.filter(is_superuser=False).order_by('-date_joined')
-    paginator=Paginator(users,5)
+    
+    # paginator=Paginator(users,5)
+    # page_number=request.GET.get('page')
+    # users=paginator.get_page(page_number)
 
-    page_number=request.GET.get('page')
-    users=paginator.get_page(page_number)
     return render(request,'admin/users.html',{'users':users})
 
 
