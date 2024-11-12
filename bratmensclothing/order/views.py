@@ -277,8 +277,6 @@ def place_order(request):
             selected_address = Address.objects.get(id=selected_address_id)
 
 
-
-
             if payment_type == 'Razorpay':
                 client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
                 
@@ -293,7 +291,6 @@ def place_order(request):
                 except razorpay.errors.BadRequestError:
                     messages.error(request, 'Error creating Razorpay order. Please try again.')
                     return redirect('order:checkout')
-
                 request.session['pending_order_details'] = {
                     "user": user.userid,
                     "shipping_address": selected_address.id,
@@ -301,7 +298,7 @@ def place_order(request):
                     "total_price":float(grand_total), 
                     "coupon_code": couponuser.coupon.code if couponuser else 0, 
                     "coupon_amount":int(float(couponuser.coupon.discount_amount)) if couponuser else 0,
-                    "total_offer_discount":total_offer_discount if total_offer_discount else 0
+                    "total_offer_discount":float(total_offer_discount) if total_offer_discount else 0
                     
 
                 }
@@ -404,6 +401,17 @@ def verify_payment(request):
                
                 user = get_object_or_404(Users, userid=user_id)
                 shipping_address = get_object_or_404(Address, id=shipping_address_id)
+                
+                couponuser = None
+                # Check for active coupon
+                couponuser = CouponUser.objects.get(user=user, status=True)
+            
+                if couponuser:
+                    coupon = couponuser.coupon
+                    coupon.usage_limit -= 1
+                    coupon.save()  # Save the coupon 
+                    couponuser.status = False  
+                    couponuser.save() 
 
                 # Use an atomic transaction for order and stock updates
                 with transaction.atomic():
