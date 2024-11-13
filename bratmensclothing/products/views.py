@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required,user_passes_test
 from django.views.decorators.cache import never_cache
 from django.db.models import F
 from django.http import JsonResponse
+from decimal import Decimal
 from django.core.paginator import Paginator
 
 
@@ -163,7 +164,7 @@ def addproducts(request):
         description = request.POST.get('description')
         brand_name = request.POST.get('brandname')
         category_ids = request.POST.getlist('category')
-        price = request.POST.getlist('price')
+        price = Decimal(request.POST.get('price', '0'))
         color = request.POST.get('color')
         occasion = request.POST.get('occasion')
         fit = request.POST.get('fit')
@@ -182,6 +183,7 @@ def addproducts(request):
             product_name=productname,
             description=description,
             brand=brand,
+            price=price,
             color=color,
             occasion=occasion,
             fit=fit,

@@ -125,7 +125,7 @@ def category_details(request):
     elif sort_option == 'highest_price':
         products = products.annotate(lowest_price=Min('price')).order_by('-lowest_price')
     else: 
-        products = products.order_by('created_at')
+        products = products.order_by('updated_at')
     
 
     for product in products:

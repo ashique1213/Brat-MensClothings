@@ -71,7 +71,7 @@ class VariantSize(models.Model):
         return f"Variant of {self.product.product_name} - Size: {self.size}"
     
     class Meta:
-        ordering = ['-size'] 
+        ordering = ['size'] 
     
     
     
