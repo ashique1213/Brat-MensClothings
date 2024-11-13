@@ -66,6 +66,13 @@ def unblock_user(request,userid):
 def category_details(request):
     sort_option=request.GET.get('sort','')
     query = request.GET.get('search', '')
+
+
+    selected_categories = request.GET.getlist('category')
+    selected_brands = request.GET.getlist('brand')
+    selected_colors = request.GET.getlist('color')
+    selected_sizes = request.GET.getlist('size')
+
     products=(
         ProductDetails.objects.select_related('brand')
         .prefetch_related('category','variants')
@@ -75,7 +82,22 @@ def category_details(request):
             Q(category__is_deleted=False)
         )
         .annotate(total_quantity=Sum('variants__qty'))
-    ) 
+    )
+
+    if selected_categories:
+        products = products.filter(category__category_id__in=selected_categories)
+    
+    # Filter by brands
+    if selected_brands:
+        products = products.filter(brand__brand_id__in=selected_brands)
+    
+    # Filter by colors
+    if selected_colors:
+        products = products.filter(color__in=selected_colors)
+    
+    # Filter by sizes
+    if selected_sizes:
+        products = products.filter(variants__size__in=selected_sizes)
    
     if query:
         query_terms = query.split()
@@ -141,23 +163,12 @@ def category_details(request):
 
         product.final_price = final_price
         product.discount_percentage = discount_percentage
-    
-    # if sort_option == 'newly_added':
-    #     products = products.order_by('-created_at')
-    # elif sort_option == 'atoz':
-    #     products = products.order_by('product_name')
-    # elif sort_option == 'ztoa':
-    #     products = products.order_by('-product_name')
-    # elif sort_option == 'lowest_price':
-    #     products = sorted(products, key=lambda x: x.final_price)
-    # elif sort_option == 'highest_price':
-    #     products = sorted(products, key=lambda x: x.final_price, reverse=True)
-    # else:
-    #     products = products.order_by('created_at')
+
         
     categories=Category.objects.all()
     Brands=Brand.objects.all()
     Variants = VariantSize.objects.values('size').distinct().order_by('size')
+    colors = ProductDetails.objects.values_list('color', flat=True).distinct()
 
     items_per_page = 9    
     paginator = Paginator(products, items_per_page)
@@ -176,7 +187,12 @@ def category_details(request):
                       'Brands':Brands,
                       'Variants':Variants,
                       'sort':sort_option,
-                      'query':query
+                      'query':query,
+                      'colors':colors,
+                      'selected_categories': selected_categories,
+                      'selected_brands': selected_brands,
+                      'selected_colors': selected_colors,
+                      'selected_sizes': selected_sizes,
                 })
 
 
