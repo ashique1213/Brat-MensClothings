@@ -213,10 +213,10 @@
                             </div>
 
                             <div class="d-flex">
-                                <a href="?download_pdf=true&startdate={{ startdate }}&enddate={{ enddate }}&sortOption={{ sortOption }}" class="btn btn-outline-dark btn-sm me-2" title="Download PDF">
+                                <a href="?download_pdf=true&startdate={{ startdate|date:'Y-m-d' }}&enddate={{ enddate|date:'Y-m-d' }}&sortOption={{ sortOption }}" class="btn btn-outline-dark btn-sm me-2" title="Download PDF">
                                     <i class="fas fa-file-pdf"></i> PDF
                                 </a> 
-                                <a href="?download_excel=true&startdate={{ startdate }}&enddate={{ enddate }}&sortOption={{ sortOption }}" class="btn btn-outline-dark btn-sm" title="Download Excel">
+                                <a href="?download_excel=true&startdate={{ startdate|date:'Y-m-d' }}&enddate={{ enddate|date:'Y-m-d' }}&sortOption={{ sortOption }}" class="btn btn-outline-dark btn-sm" title="Download Excel">
                                     <i class="fas fa-file-excel"></i> Excel
                                 </a>
                             </div>

@@ -4,23 +4,27 @@ from django.views.decorators.cache import never_cache
 from order.models import Order,OrderItem
 from django.db.models import Sum, Count,F
 from django.db.models.functions import TruncDate
-from django.http import FileResponse
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph,Spacer
 from reportlab.lib.styles import getSampleStyleSheet,ParagraphStyle
+from django.http import HttpResponse
+import openpyxl
+from django.http import HttpResponse
 from openpyxl.styles import Font
+from openpyxl.utils import get_column_letter
 from datetime import datetime, timedelta,date
 from django.http import HttpResponse
 from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 from openpyxl import Workbook
 import io
 
 
 def is_staff(user):
     return user.is_staff
-
+    
 @login_required(login_url='accounts:admin_login')
 @never_cache
 @user_passes_test(is_staff,'accounts:admin_login')
