@@ -404,7 +404,9 @@ def verify_payment(request):
                 
                 couponuser = None
                 # Check for active coupon
-                couponuser = CouponUser.objects.get(user=user, status=True)
+                # couponuser = CouponUser.objects.get(user=user, status=True)
+                if coupon_code:
+                    couponuser = CouponUser.objects.filter(user=user, coupon__code=coupon_code, status=True).first()
             
                 if couponuser:
                     coupon = couponuser.coupon
