@@ -20,7 +20,10 @@
                         <div class="empty">
                             <div class="empty__wrap">
 
-                                <span class="empty__big-text">EMPTY</span>
+                                <div class="u-s-p-y-60">
+                                </div>
+                                
+                                <!-- <span class="empty__big-text">EMPTY</span>
 
                                 <span class="empty__text-1">Payment Cancelled!!.</span>
 
@@ -28,7 +31,7 @@
                                 <a class="empty__redirect-link btn--e-brand" href="{% url 'userss:category_details' %}">CONTINUE SHOPPING</a>
                                 {% else %}
                                 <a class="empty__redirect-link btn--e-brand" href="{% url 'accounts:login_user' %}">PLEASE SIGN IN</a>
-                                {% endif %}
+                                {% endif %} -->
                             
                             </div>
                         </div>
@@ -103,11 +106,13 @@
                         cancelButtonText: 'Cancel',
                         confirmButtonColor: '#000',
                         cancelButtonColor: '#d33',
-                        customClass: { icon: 'black-icon' }
+                        customClass: { icon: 'black-icon' },
                     }).then((result) => {
                         if (result.isConfirmed) {
                             // User chose "Retry Payment," reopen Razorpay modal
                             rzp.open();
+                        }else{
+                            window.location.href = "{% url 'order:payment_cancelled' %}";
                         } 
                     });
                 }

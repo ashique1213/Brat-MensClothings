@@ -50,6 +50,11 @@
             background-color: #f2f2f2;
         }
       
+        p.text-danger {
+            font-size: 10px;
+            margin-left: 5px;
+            color: red; /* Set the text color to red for error messages */
+          }
     </style>
 </head>
 <body class="sb-nav-fixed">
@@ -204,7 +209,7 @@
                                         <th style="width: 14%;">End Date</th>
                                         <th style="width: 6%;">Limit</th>
                                         <th style="width: 8%;">Edit</th>
-                                        <th style="width: 8%;">Delete</th>
+                                        <!-- <th style="width: 8%;">Delete</th>  -->
                                         <th style="width: 10%;">Action</th>
                                     </tr>
                                 </thead>
@@ -224,9 +229,9 @@
                                                 Edit
                                             </button>
                                         </td>
-                                        <td>
+                                        <!-- <td>
                                             <a href="{% url 'coupon:delete_coupon' coupon.coupon_id %}" class="btn btn-danger btn-sm">Delete</a>
-                                        </td>
+                                        </td> -->
                                         <td>
                                             {% if not coupon.is_active %}
                                                 <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#confirmDeleteModal{{ coupon.coupon_id }}" 
@@ -313,11 +318,12 @@
                     {% csrf_token %}
                     <div class="mb-3">
                         <label for="coupon-code" class="col-form-label">Coupon Code</label>
-                        <input type="text" class="form-control" id="coupon-code" name="code">
+                        <input type="text" class="form-control" id="coupon-code" name="code" required>
+                        <p id="code_error" class="text-danger"></p> <!-- Error message container -->
                     </div>
                     <div class="mb-3">
                         <label for="coupon-category" class="col-form-label">Category if Any</label>
-                        <select class="form-control form-select" id="coupon-category" name="category">
+                        <select class="form-control form-select" id="coupon-category" name="category" required>
                             <option value="" {% if not coupon.category %}selected{% endif %}>-- Select Category --</option>
                             <option value="None" {% if coupon.category == "None" %}selected{% endif %}>None</option>
                             {% for category in categories %}
@@ -327,23 +333,24 @@
                     </div>
                     <div class="mb-3">
                         <label for="coupon-discount" class="col-form-label">Discount Amount</label>
-                        <input type="text" class="form-control" id="coupon-discount" name="discount_amount">
+                        <input type="number" class="form-control" id="coupon-discount" name="discount_amount" required> 
+                        <p id="discount_error" class="text-danger"></p> 
                     </div>
                     <div class="mb-3">
                         <label for="min-purchase" class="col-form-label">Minimum Purchase Amount</label>
-                        <input type="text" class="form-control" id="min-purchase" name="min_purchase_amount">
+                        <input type="number" class="form-control" id="min-purchase" name="min_purchase_amount" required>
                     </div>
                     <div class="mb-3">
                         <label for="start-date" class="col-form-label">Start Date</label>
-                        <input type="date" class="form-control" id="start-date" name="start_date">
+                        <input type="date" class="form-control" id="start-date" name="start_date" required>
                     </div>
                     <div class="mb-3">
                         <label for="end-date" class="col-form-label">End Date</label>
-                        <input type="date" class="form-control" id="end-date" name="end_date">
+                        <input type="date" class="form-control" id="end-date" name="end_date" required>
                     </div>
                     <div class="mb-3">
                         <label for="usage-limit" class="col-form-label">Usage Limit</label>
-                        <input type="number" class="form-control" id="usage-limit" name="usage_limit">
+                        <input type="number" class="form-control" id="usage-limit" name="usage_limit" required>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -366,11 +373,12 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="editCouponForm{{ coupon.coupon_id }}" method="POST" action="{% url 'coupon:edit_coupon' coupon.coupon_id %}">
+                <form id="editCouponForm{{ coupon.coupon_id }}" data-coupon_id="{{ coupon.coupon_id }}"  method="POST" action="{% url 'coupon:edit_coupon' coupon.coupon_id %}">
                     {% csrf_token %}
                     <div class="mb-3">
                         <label for="edit-coupon-code{{ coupon.coupon_id }}" class="col-form-label">Coupon Code</label>
                         <input type="text" class="form-control" id="edit-coupon-code{{ coupon.coupon_id }}" name="code" value="{{ coupon.code }}" required>
+                        <p id="code_error" class="text-danger"></p> <!-- Error message container -->
                     </div>
                     <div class="mb-3">
                         <label for="edit-coupon-category{{ coupon.coupon_id }}" class="col-form-label">Category</label>
@@ -387,6 +395,8 @@
                     <div class="mb-3">
                         <label for="edit-coupon-discount{{ coupon.coupon_id }}" class="col-form-label">Discount Amount</label>
                         <input type="text" class="form-control" id="edit-coupon-discount{{ coupon.coupon_id }}" name="discount_amount" value="{{ coupon.discount_amount }}" required>
+                        <p id="discount_error" class="text-danger"></p> 
+
                     </div>
                     <div class="mb-3">
                         <label for="edit-min-purchase{{ coupon.coupon_id }}" class="col-form-label">Minimum Purchase</label>
@@ -443,7 +453,66 @@
               });
           });
         
+
+          $('#addCouponForm').submit(function(e) {
+            e.preventDefault(); // Prevent default form submission
+
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'coupon:add_coupon' %}",
+                data: $(this).serialize(), // Serialize form data
+                success: function(response) {
+                    if (response.success) {
+                        // Close the modal and reload the page
+                        alert(response.message);
+                        $('#addCouponModal').modal('hide');
+                        location.reload();
+                    } else {
+                        // Display validation errors in the form
+                        $.each(response.errors, function(key, value) {
+                            $('#' + key).text(value).show(); // Show each error
+                        });
+                    }
+                }
+            });
+        });
+
+
+        $(document).on('submit', 'form[id^="editCouponForm"]', function(e) {
+            e.preventDefault(); // Prevent default form submission
+        
+            const form = $(this); // Capture the specific form
+            const couponID = form.data('coupon_id'); // Get coupon ID from data attribute
+            const modalId = `#editCouponModal${couponID}`; // Construct modal ID for the current coupon
+        
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'coupon:edit_coupon' 0 %}".replace('0', couponID), // Replace '0' with the actual coupon ID
+                data: form.serialize(), // Serialize form data
+                success: function(response) {
+                    if (response.success) {
+                        // Close the modal for the current coupon and reload the page if needed
+                        alert(response.message);
+                        $(modalId).modal('hide');
+                        location.reload(); // Optionally reload or update content dynamically
+                    } else {
+                        // Clear any previous errors
+                        form.find('.text-danger').text('');
+        
+                        // Display validation errors within the form
+                        $.each(response.errors, function(key, value) {
+                            form.find(`#${key}`).text(value).show(); // Show each error within form context
+                        });
+                    }
+                },
+
+            });
+        });
+        
+        
+        
         </script>
     
+
 </body>
 </html>

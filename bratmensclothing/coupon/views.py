@@ -31,14 +31,33 @@ def add_coupon(request):
     categories = Category.objects.filter(is_deleted=False)
 
     if request.method == 'POST':
-        code = request.POST.get('code')
+        code = request.POST.get('code').strip()
         category = request.POST.get('category')
-        discount_amount = request.POST.get('discount_amount')
+        discount_amount = request.POST.get('discount_amount').strip()
         min_purchase_amount = request.POST.get('min_purchase_amount')
         start_date = request.POST.get('start_date')
         end_date = request.POST.get('end_date')
         usage_limit = request.POST.get('usage_limit')
+
+        errors={}
+        if not code:
+            errors['code_error']='Coupon Code required'
+        elif len(code)<4:
+            errors['code_error']='Coupon code contain atleast 4 charecter'
+        elif Coupon.objects.filter(code__iexact=code).exists():
+            errors['code_error']='Coupon code already exits'
         
+        try:
+            discount_amount = Decimal(discount_amount) 
+            if discount_amount >= 200:
+                errors['discount_error'] = 'Discount amount must be less than 200'
+        except ValueError:
+            errors['discount_error'] = 'Discount amount must be a valid number'
+
+        if errors:
+            return JsonResponse({'success': False, 'errors': errors})
+        
+
         if code and discount_amount and min_purchase_amount and start_date and end_date and usage_limit:
             Coupon.objects.create(
                 code=code,
@@ -49,11 +68,8 @@ def add_coupon(request):
                 valid_to=end_date,
                 usage_limit=usage_limit
             )
-            messages.success(request, "Coupon added successfully!")
-        else:
-            messages.error(request, "Failed to add coupon. Please ensure all fields are filled.")
-        
-        return redirect('coupon:coupon_details')
+        return JsonResponse({'success': True, 'message': 'Brand added successfully!'})
+        # return redirect('coupon:coupon_details')
     
     return render(request, 'admin/coupon.html',{'categories':categories})
 
@@ -62,12 +78,30 @@ def edit_coupon(request, coupon_id):
 
     if request.method == 'POST':
         code = request.POST.get('code')
-        category = request.POST.get('category')
-        discount_amount = request.POST.get('discount_amount')
+        category = request.POST.get('category').strip()
+        discount_amount = request.POST.get('discount_amount').strip()
         min_purchase_amount = request.POST.get('min_purchase_amount')
         start_date = request.POST.get('start_date')
         end_date = request.POST.get('end_date')
         usage_limit = request.POST.get('usage_limit')
+
+        errors={}
+        if not code:
+            errors['code_error']='Coupon Code required'
+        elif len(code)<4:
+            errors['code_error']='Coupon code contain atleast 4 charecter'
+        elif Coupon.objects.filter(code__iexact=code).exclude(coupon_id=coupons.coupon_id).exists():
+            errors['code_error'] = 'Coupon code already exists'
+
+        try:
+            discount_amount = Decimal(discount_amount) 
+            if discount_amount >= 200:
+                errors['discount_error'] = 'Discount amount must be less than 200'
+        except ValueError:
+            errors['discount_error'] = 'Discount amount must be a valid number'        
+
+        if errors:
+            return JsonResponse({'success': False, 'errors': errors})
 
         coupons.code = code
         coupons.discount_amount = discount_amount
@@ -78,8 +112,8 @@ def edit_coupon(request, coupon_id):
         coupons.category = category
 
         coupons.save()
-
-        return redirect('coupon:coupon_details')  
+        return JsonResponse({'success': True, 'message': 'Coupon Updated successfully!'})
+        # return redirect('coupon:coupon_details')  
 
     return render(request, 'admin/edit_coupon.html', {'coupons': coupons})
 

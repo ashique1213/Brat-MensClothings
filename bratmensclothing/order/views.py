@@ -496,6 +496,13 @@ def verify_payment(request):
     return redirect('accounts:login_user')
 
 
+@never_cache
+def payment_cancelled(request):
+    if request.user.is_authenticated:
+    
+        return render(request,'user/payment_cancelled.html')
+    return redirect('accounts:login_user')
+    
 
 @never_cache
 def order_success(request):
