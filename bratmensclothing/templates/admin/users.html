@@ -139,28 +139,28 @@
                     <h4 class="mt-4">Users</h4>
                     <ol class="breadcrumb mb-4">
                         <li class="breadcrumb-item"><a href="">Dashboard</a></li>
-                        <li class="breadcrumb-item active">Users Table</li>
+                        <li class="breadcrumb-item active"> <a href="{% url 'userss:view_user' %}">Users Table</a></li>
                     </ol>
 
 
                     <div class="d-flex justify-content-between mb-3">
-                        <div class="input-group ms-1">
-                            <span class="input-group-text">
-                                <i class="fas fa-search"></i> <!-- Search Icon -->
-                            </span>
-                            <input type="text" id="" class="form-control" placeholder="Search Customers..." />
+                        <div class="input-group ms-1 w-100" style="max-width: 500px;">
+                            <form method="get" class="d-flex w-100">
+                                <input type="text" id="search" name="search" value="{{ search_query }}" class="form-control border-dark" placeholder="Search Customers..." />
+                                <button class="btn btn-dark ms-2" type="submit">
+                                    <i class="fas fa-search"></i> <!-- Search Icon Inside the Button -->
+                                </button>
+                            </form>
                         </div>
                         <!-- Sort Option on the Right with Icon -->
-                        <div class="input-group ms-1">
+                        <!-- <div class="input-group ms-1">
                             <span class="input-group-text">
-                                <i class="fas fa-filter"></i> <!-- FontAwesome filter icon -->
+                                <i class="fas fa-filter">   </i> 
                             </span>
                             <select id="sortOption" class="form-select">
                                 <option value="">Sort by</option>
-                                <!-- <option value="name">Name</option> -->
-                                <!-- <option value="date">Start Date</option> -->
                             </select>
-                        </div>
+                        </div> -->
                     </div>
 
 
