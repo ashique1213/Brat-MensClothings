@@ -231,6 +231,23 @@
                                                         <span class="out-of-stock-text">Out of Stock</span>
                                                     </div>
                                                     {% endif %}
+                                                    {% if cart_item.variant.product.is_deleted %}
+                                                    <div class="out-of-stock-overlay">
+                                                        <span class="out-of-stock-text">Product Unavailable</span>
+                                                    </div>
+                                                    {% endif %}
+                                                    {% if cart_item.variant.product.brand.is_deleted %}
+                                                    <div class="out-of-stock-overlay">
+                                                        <span class="out-of-stock-text">Product Unavailable</span>
+                                                    </div>
+                                                    {% endif %}
+                                                    {% for category in cart_item.variant.product.category.all %}
+                                                        {% if category.is_deleted %}
+                                                            <div class="out-of-stock-overlay">
+                                                                <span class="out-of-stock-text">Product Unavailable</span>
+                                                            </div>
+                                                        {% endif %}
+                                                    {% endfor %}
                                                 </div>
 
 

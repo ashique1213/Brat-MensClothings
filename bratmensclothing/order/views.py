@@ -45,6 +45,14 @@ def checkout(request):
             variant = cart_item.variant
             product = variant.product
 
+            if product.is_deleted or product.brand.is_deleted:
+                messages.error(request, "Please remove Unavailable Products")
+                return redirect('cart:viewcart')  
+        
+            for category in product.category.all():
+                if category.is_deleted:
+                    messages.error(request, "Please remove Unavailable Products ")
+                    return redirect('cart:viewcart')
 
             product_offer = Product_Offers.objects.filter(
                 product_id=product,

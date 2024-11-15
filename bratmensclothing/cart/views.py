@@ -31,11 +31,13 @@ def view_cart(request):
         user = request.user
 
         cart = Cart.objects.filter(user=user).first()
-        cart_items = cart.items.filter(
-            variant__product__is_deleted=False,
-            variant__product__category__is_deleted=False,  
-            variant__product__brand__is_deleted=False  
-            ) if cart else []
+        cart_items=CartItem.objects.filter(cart=cart)
+
+        # cart_items = cart.items.filter(
+        #     variant__product__is_deleted=False,
+        #     variant__product__category__is_deleted=False,  
+        #     variant__product__brand__is_deleted=False  
+        #     ) if cart else []
 
         for cart_item in cart_items:
             variant = cart_item.variant
