@@ -4,6 +4,7 @@ from products.models import ProductDetails,VariantSize
 from django.contrib import messages
 from products.models import Category,Brand
 from .models import Address
+from django.http import Http404
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.views.decorators.cache import never_cache
 from django.db.models import Q,Min  
@@ -378,6 +379,7 @@ def edit_account_details(request, userid):
 
     return render(request, 'user/edit_account.html', {'user': userdetails})
 
+
 @never_cache
 @login_required(login_url='accounts:login_user')
 def reset_password(request, userid):
@@ -520,8 +522,9 @@ def remove_address(request, id):
 @never_cache
 @login_required(login_url='accounts:login_user')
 def edit_address(request, id):
-    address = get_object_or_404(Address, id=id)
-    if address.user != request.user:
+    try:
+        address = get_object_or_404(Address, id=id)
+    except Http404:
         return redirect('userss:error')
     user_id = address.user.userid 
 
