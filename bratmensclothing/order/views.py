@@ -306,7 +306,7 @@ def place_order(request):
                     "total_price":float(grand_total), 
                     "coupon_code": couponuser.coupon.code if couponuser else 0, 
                     "coupon_amount":int(float(couponuser.coupon.discount_amount)) if couponuser else 0,
-                    "total_offer_discount":float(total_offer_discount) if total_offer_discount else 0
+                    "total_offer_discount":float(total_offer_discount) if total_offer_discount else 0,
                     
 
                 }
@@ -318,8 +318,8 @@ def place_order(request):
                 })
           
             # Handle Cash on Delivery 
-            if payment_type == 'COD' and grand_total > Decimal('1500.00'):
-                messages.error(request, 'Cash on Delivery is not available for orders above ₹1500.')
+            if payment_type == 'COD' and grand_total > Decimal('1000.00'):
+                messages.error(request, 'Cash on Delivery is not available for orders above ₹1000.')
                 return render(request, 'user/checkout.html', {
                     'user': user,
                     'addresses': addresses,
@@ -383,121 +383,118 @@ def verify_payment(request):
     if request.user.is_authenticated:
 
         if request.method == "POST":
-            payment_data = json.loads(request.body.decode('utf-8'))
+            razorpay_order_id = request.POST.get('razorpay_order_id')
+            razorpay_payment_id = request.POST.get('razorpay_payment_id')
+            razorpay_signature = request.POST.get('razorpay_signature')
+            payment_status = request.POST.get('payment_status')
+
             params_dict = {
-                'razorpay_order_id': payment_data.get('razorpay_order_id'),
-                'razorpay_payment_id': payment_data.get('razorpay_payment_id'),
-                'razorpay_signature': payment_data.get('razorpay_signature')
+                'razorpay_order_id':razorpay_order_id,
+                'razorpay_payment_id':razorpay_payment_id,
+                'razorpay_signature': razorpay_signature
             }
+            order_data = request.session.get('pending_order_details')
+            if not order_data:
+                return JsonResponse({'error': 'Order details not found in session.'}, status=400)
+
+            user_id = order_data.get("user")
+            shipping_address_id = order_data.get("shipping_address")
+            total_price = order_data.get("total_price")
+            coupon_code = order_data.get("coupon_code")
+            coupon_amount = order_data.get("coupon_amount")
+            total_offer_discount = order_data.get("total_offer_discount")
+               
+            user = get_object_or_404(Users, userid=user_id)
+            shipping_address = get_object_or_404(Address, id=shipping_address_id)
             
             client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
+            payment_status='Failure'
             try:
                 client.utility.verify_payment_signature(params_dict)
-
-                order_data = request.session.get('pending_order_details')
-                if not order_data:
-                    return JsonResponse({'error': 'Order details not found in session.'}, status=400)
-
-                user_id = order_data.get("user")
-                shipping_address_id = order_data.get("shipping_address")
-                total_price = order_data.get("total_price")
-                coupon_code = order_data.get("coupon_code")
-                coupon_amount = order_data.get("coupon_amount")
-                total_offer_discount = order_data.get("total_offer_discount")
-
-               
-                user = get_object_or_404(Users, userid=user_id)
-                shipping_address = get_object_or_404(Address, id=shipping_address_id)
-                
-                couponuser = None
-                # Check for active coupon
-                # couponuser = CouponUser.objects.get(user=user, status=True)
-                if coupon_code:
-                    couponuser = CouponUser.objects.filter(user=user, coupon__code=coupon_code, status=True).first()
-            
-                if couponuser:
-                    coupon = couponuser.coupon
-                    coupon.usage_limit -= 1
-                    coupon.save()  # Save the coupon 
-                    couponuser.status = False  
-                    couponuser.save() 
-
-                # Use an atomic transaction for order and stock updates
-                with transaction.atomic():
-                    # Create and save the order
-                    new_order = Order.objects.create(
-                        user=user,
-                        shipping_address=shipping_address,
-                        payment_type='Razorpay',
-                        payment_status='Success',
-                        total_price=total_price,
-                        coupon_code=coupon_code,
-                        coupon_amount=coupon_amount,
-                        total_offer_discount=total_offer_discount
-                        
-                    )
-
-                    # Retrieve cart and create order items
-                    cart = get_object_or_404(Cart, user=user)
-                    cart_items = CartItem.objects.filter(cart=cart)
-                   
-                    for cart_item in cart_items:
-                        variant = cart_item.variant
-                        product = variant.product
-
-
-                        product_offer = Product_Offers.objects.filter(
-                            product_id=product,
-                            status=True,
-                            started_date__lte=timezone.now(),
-                            end_date__gte=timezone.now()
-                        ).first()
-
-                        brand_offer = Brand_Offers.objects.filter(
-                            brand_id=product.brand,
-                            status=True,
-                            started_date__lte=timezone.now(),
-                            end_date__gte=timezone.now()
-                        ).first()
-
-                        discounted_price = product.price
-
-                        if product_offer:
-                            discounted_price = product.price - product_offer.offer_price
-
-                        if brand_offer:
-                            brand_discounted_price = product.price - brand_offer.offer_price
-
-                            discounted_price = min(discounted_price, brand_discounted_price)
-
-                        cart_item.variant.product.price = discounted_price
-
-                    for item in cart_items:
-                        OrderItem.objects.create(
-                            order=new_order,
-                            variants=item.variant,
-                            quantity=item.quantity,
-                            price=item.variant.product.price,
-                            subtotal_price=item.quantity * item.variant.product.price
-                        )
-
-                        # Deduct stock
-                        item.variant.qty -= item.quantity
-                        item.variant.save()
-
-                    # Clear the cart
-                    cart_items.delete()
-                    del request.session['pending_order_details']
-
-                return JsonResponse({'message': 'Order placed successfully!'})
+                payment_status='Success'
 
             except razorpay.errors.SignatureVerificationError:
-                return JsonResponse({'error': 'Payment verification failed.'}, status=400)
-            except Exception as e:
-                # Log exception and return error
-                print(f"Order creation failed: {e}")
-                return JsonResponse({'error': 'An error occurred while placing the order.'}, status=500)
+                pass
+    
+            couponuser = None
+    
+            if coupon_code:
+                couponuser = CouponUser.objects.filter(user=user, coupon__code=coupon_code, status=True).first()
+            
+            if couponuser:
+                coupon = couponuser.coupon
+                coupon.usage_limit -= 1
+                coupon.save()  # Save the coupon 
+                couponuser.status = False  
+                couponuser.save() 
+
+                # Use an atomic transaction for order and stock updates
+            with transaction.atomic():
+                    # Create and save the order
+                new_order = Order.objects.create(
+                    user=user,
+                    shipping_address=shipping_address,
+                    payment_type='Razorpay',
+                    payment_status=payment_status,
+                    total_price=total_price,
+                    coupon_code=coupon_code,
+                    coupon_amount=coupon_amount,
+                    total_offer_discount=total_offer_discount
+                        
+                )
+                    # Retrieve cart and create order items
+                cart = get_object_or_404(Cart, user=user)
+                cart_items = CartItem.objects.filter(cart=cart)
+                   
+                for cart_item in cart_items:
+                    variant = cart_item.variant
+                    product = variant.product
+
+
+                    product_offer = Product_Offers.objects.filter(
+                        product_id=product,
+                        status=True,
+                        started_date__lte=timezone.now(),
+                        end_date__gte=timezone.now()
+                    ).first()
+
+                    brand_offer = Brand_Offers.objects.filter(
+                        brand_id=product.brand,
+                        status=True,
+                        started_date__lte=timezone.now(),
+                        end_date__gte=timezone.now()
+                    ).first()
+
+                    discounted_price = product.price
+
+                    if product_offer:
+                        discounted_price = product.price - product_offer.offer_price
+
+                    if brand_offer:
+                        brand_discounted_price = product.price - brand_offer.offer_price
+
+                        discounted_price = min(discounted_price, brand_discounted_price)
+
+                    cart_item.variant.product.price = discounted_price
+
+                for item in cart_items:
+                    OrderItem.objects.create(
+                        order=new_order,
+                        variants=item.variant,
+                        quantity=item.quantity,
+                        price=item.variant.product.price,
+                        subtotal_price=item.quantity * item.variant.product.price
+                    )
+                    # Deduct stock
+                    item.variant.qty -= item.quantity
+                    item.variant.save()
+
+                    # Clear the cart
+                cart_items.delete()
+                del request.session['pending_order_details']
+            
+            return redirect('order:order_success')
 
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
 

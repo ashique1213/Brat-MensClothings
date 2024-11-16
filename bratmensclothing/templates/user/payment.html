@@ -44,9 +44,21 @@
     <!--====== End - Section 1 ======-->
 </div>
 <!--====== End - App Content ======-->
+<section class="ftco-section">
+    <div class="container">
+        <form id="razorpay-payment-form" method="post" action="{% url 'order:verify_payment' %}">
+            {% csrf_token %}
+            <input type="hidden" name="razorpay_order_id" value="{{ razorpay_order_id }}">
+            <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+            <input type="hidden" name="razorpay_signature" id="razorpay_signature">
+            <input type="hidden" name="payment_status" id="payment_status" value="Failed">
+        </form>
 
+        <!-- <button id="pay-button" class="btn btn-primary">Pay Now</button> -->
+        <button id="rzp-button" style="display:none;">Pay with Razorpay</button>
+    </div>
+</section>
     <!-- Button can be hidden if you don't need it on the page -->
-    <button id="rzp-button" style="display:none;">Pay with Razorpay</button>
 
     <script>
         var options = {
@@ -55,68 +67,54 @@
             "currency": "INR",
             "order_id": "{{ razorpay_order_id }}",
             "handler": function(response) {
-                const csrfToken = '{{ csrf_token }}';
-                $.ajax({
-                    type: "POST",
-                    url: "{% url 'order:verify_payment' %}",
-                    headers: { 'X-CSRFToken': csrfToken },
-                    data: JSON.stringify({
-                        razorpay_payment_id: response.razorpay_payment_id,
-                        razorpay_order_id: response.razorpay_order_id,
-                        razorpay_signature: response.razorpay_signature
-                    }),
-                    contentType: "application/json",
-                    success: function(data) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Payment Successful',
-                            text: 'Your payment has been successfully processed.',
-                            confirmButtonText: 'OK',
-                            confirmButtonColor: '#000',
-                            customClass: { icon: 'black-icon' }
-                        }).then(function() {
-                            window.location.href = "{% url 'order:order_success' %}";
-                        });
-                    },
-                    error: function() {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Payment Verification Failed',
-                            text: 'There was an issue verifying your payment.',
-                            confirmButtonText: 'Retry',
-                            confirmButtonColor: '#000',
-                            customClass: { icon: 'black-icon' }
-                        });
-                    }
+                // Set the payment details and status to 'Success'
+                document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
+                document.getElementById('razorpay_signature').value = response.razorpay_signature;
+                document.getElementById('payment_status').value = "Success";
+                
+                // Show SweetAlert for successful payment
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Payment Successful',
+                    text: 'Your payment has been successfully processed.',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#000',
+                    customClass: { icon: 'black-icon' }
+                }).then(() => {
+                    // Add a preloader for UX before redirection
+                    $('.preloader').addClass('is-active');
+                    setTimeout(() => {
+                        document.getElementById('razorpay-payment-form').submit();
+                    }, 1000); // 1 second delay for better UX
                 });
             },
+            
             "prefill": {
                 "name": "{{ user.username }}",
-                "email": "{{ user.email }}"
+                "email": "{{ user.email }}",
+                "contact": "{{ user.profile.phone_number }}"
             },
-            "theme": { "color": "#3399cc" },
             "modal": {
-                "ondismiss": function() {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Payment Incomplete',
-                        text: 'You closed the payment window. Please complete your payment to proceed.',
-                        showCancelButton: true,
-                        confirmButtonText: 'Retry Payment',
-                        cancelButtonText: 'Cancel',
-                        confirmButtonColor: '#000',
-                        cancelButtonColor: '#d33',
-                        customClass: { icon: 'black-icon' },
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // User chose "Retry Payment," reopen Razorpay modal
-                            rzp.open();
-                        }else{
-                            window.location.href = "{% url 'order:payment_cancelled' %}";
-                        } 
-                    });
-                }
+            "ondismiss": function () {
+                // If the modal is closed, submit the form with the status 'Failed'
+                 // Show SweetAlert for payment cancellation
+                 Swal.fire({
+                    icon: 'warning',
+                    title: 'Payment Cancelled',
+                    text: 'You can retry payment from MY Orders!.',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#000',
+                    customClass: { icon: 'black-icon' }
+                }).then(() => {
+                    // Submit the form after the SweetAlert is closed
+                    $('.preloader').addClass('is-active');
+                    setTimeout(() => {
+                        document.getElementById('payment_status').value = "Failed";
+                        document.getElementById('razorpay-payment-form').submit();
+                    }, 1000); // 500ms delay for better UX
+                });
             }
+        }
         };
     
         var rzp = new Razorpay(options);
@@ -125,9 +123,15 @@
         window.onload = function() {
             rzp.open();
         };
+
+        $(document).ready(function() {
+            // Show the preloader when form submission starts
+            $('#razorpay-payment-form').submit(function() {
+                $('.preloader').addClass('is-active');
+            });
+        });
     </script>
     
     
-
 
 {% endblock %}
