@@ -29,10 +29,13 @@ urlpatterns = [
     path('verify-payment/', views.verify_payment, name='verify_payment'),  
     path('order_success/', views.order_success, name='order_success'),    
     path('view_orders/', views.view_orders, name='view_orders'),    
+    path('single_order/<int:orderitem_id>', views.single_order, name='single_order'),    
     path('manage_orders/<int:orderitem_id>', views.manage_orders, name='manage_orders'),    
     path('cancel_order/<int:orderitem_id>', views.cancel_order, name='cancel_order'),    
     path('order_details/',views.order_details,name='order_details'),
     path('return_order/<int:orderitem_id>',views.return_order,name='return_order'),
-    path('payment_cancelled/',views.payment_cancelled,name='payment_cancelled'),
+    
+    path('retry_payment/<int:order_id>', views.retry_payment, name='retry_payment'),
+    path('verify_retry_payment/', views.verify_retry_payment, name='verify_retry_payment'),
     
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

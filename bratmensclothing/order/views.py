@@ -502,12 +502,77 @@ def verify_payment(request):
 
 
 @never_cache
-def payment_cancelled(request):
+def retry_payment(request, order_id):
     if request.user.is_authenticated:
+        order = get_object_or_404(Order, order_id=order_id)
+        
+        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+
+        # Create a Razorpay order
+        razorpay_order = client.order.create({
+            "amount": int(order.total_price * 100),  
+            "currency": "INR",
+            "payment_capture": "1"  
+        })
+        
+        
+        context = {
+            "order": order,
+            "razorpay_order_id": razorpay_order['id'],
+            "razorpay_key": settings.RAZORPAY_KEY_ID,  
+            "amount": order.total_price * 100,  
+        }
+        
+        return render(request, 'user/retry_payment.html', context)
     
-        return render(request,'user/payment_cancelled.html')
     return redirect('accounts:login_user')
-    
+
+
+@never_cache
+def verify_retry_payment(request):
+    if request.user.is_authenticated:
+        if request.method == 'POST':
+            user=request.user
+            orders=Order.objects.filter(user=user)
+            order_items=OrderItem.objects.filter(order__in=orders).order_by('-order')
+            
+            order_id = request.POST.get('order_id')
+            razorpay_payment_id = request.POST.get('razorpay_payment_id')
+            razorpay_order_id = request.POST.get('razorpay_order_id')
+            razorpay_signature = request.POST.get('razorpay_signature')
+
+            order = Order.objects.get(order_id=order_id)
+
+            client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+
+            # Verify the payment signature
+            params = {
+                'razorpay_order_id': razorpay_order_id,
+                'razorpay_payment_id': razorpay_payment_id,
+                'razorpay_signature': razorpay_signature,
+            }
+
+            try:
+                client.utility.verify_payment_signature(params)
+
+                order.payment_status = 'Success'
+                order.save()
+
+                messages.success(request, 'Payment successfully completed.')
+                return render(request, 'user/order_details.html', {'order': order,'order_items':order_items,'orders':orders})
+
+            except razorpay.errors.SignatureVerificationError:
+                # If signature verification fails, display error
+                # return render(request, 'user/payment_failure.html', {'order': order})
+                messages.success(request, 'Payment again failed')
+                return render(request, 'user/order_details.html', {'order': order,'order_items':order_items,'orders':orders})
+
+        else:
+            return redirect('order:order_details') 
+        
+    return redirect('accounts:login_user')
+
+
 
 @never_cache
 def order_success(request):
@@ -664,3 +729,14 @@ def return_order(request, orderitem_id):
     
     messages.success(request, 'Your order has been returned successfully.')
     return redirect('order:view_orders')
+
+
+
+@login_required(login_url='accounts:admin_login')
+@never_cache
+@user_passes_test(is_staff, login_url='accounts:admin_login')
+def single_order(request,orderitem_id):
+
+    order=OrderItem.objects.get(orderitem_id=orderitem_id)
+
+    return render(request,'admin/single_order.html',{'order':order})

@@ -65,6 +65,7 @@
             "key": "{{ razorpay_key_id }}",
             "amount": "{{ amount }}",
             "currency": "INR",
+            name: "B.R.A.T Mens Clothings PVT",
             "order_id": "{{ razorpay_order_id }}",
             "handler": function(response) {
                 // Set the payment details and status to 'Success'
@@ -92,7 +93,7 @@
             "prefill": {
                 "name": "{{ user.username }}",
                 "email": "{{ user.email }}",
-                "contact": "{{ user.profile.phone_number }}"
+                "contact": "{{ user.phone_number }}"
             },
             "modal": {
             "ondismiss": function () {

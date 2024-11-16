@@ -180,19 +180,30 @@
                                         </div>
 
                                         {% if orderitem.status == 'Order Pending' %}
-                                        <div style="background-color: rgb(231, 180, 180); padding: 9px; border-radius: 20px;">
+                                        <div class="manage-o__badge badge--delivered" >
                                             <a href="#" onclick="openConfirmCancelModal({{ orderitem.orderitem_id }})" style="font-weight: bold; font-size: 13px; color: rgb(197, 34, 34);">Cancel Order</a>
                                         </div>
                                         {% elif orderitem.status == 'Delivered' %}
-                                        <div style="background-color: rgb(197, 233, 207); padding: 9px; border-radius: 20px;">
-                                            <a href="#" onclick="openConfirmReturnModal({{ orderitem.orderitem_id }})" style="font-weight: bold; font-size: 13px; color: rgb(87, 159, 87);">Return Order</a>
+                                        <div class="manage-o__badge  badge--processing">
+                                            <a href="#" onclick="openConfirmReturnModal({{ orderitem.orderitem_id }})" style="font-weight: bold; font-size: 13px; color: rgb(9, 63, 128);">Return Order</a>
                                         </div>
                                         {% else %}
-                                        <div style="background-color: #b6d1e8; padding: 9px; border-radius: 20px;">
-                                            <a href="" style="font-weight: bold; font-size: 13px; color: rgb(9, 63, 128);">{{orderitem.status}}</a>
+                                        <div class="manage-o__badge badge--shipped">
+                                            <a href="" style="font-weight: bold; font-size: 13px; color: rgb(4, 99, 68);">{{orderitem.status}}</a>
                                         </div>
                                         {% endif %}
                                         
+
+
+                                        <div>
+                                            {% if orderitem.order.payment_status == 'Success' or orderitem.order.payment_status == 'Pending' %}
+                                            <span class="manage-o__text-2 u-c-silver">PAYMENT :</span>
+                                            <span class="manage-o__badge  badge--shipped ">{{orderitem.order.payment_status}}</span>
+                                            {% else %}
+                                            <span class="manage-o__text-2 u-c-silver">PAYMENT :</span>
+                                            <a href="{% url 'order:retry_payment' orderitem.order.order_id %}"><span  class="manage-o__badge badge--processing">Re-Try</span> </a>
+                                            {% endif %}
+                                        </div>
                                     
                                         <div>
                                             <div class="manage-o__text-2 u-c-silver">AMOUNT PAID
@@ -215,43 +226,7 @@
 
                                                 <span class="manage-o__text">Package 1</span></div>
                                         </div>
-                                        <!-- <div class="dash-l-r">
-                                            <div class="manage-o__text u-c-secondary">Delivered on 26 Oct 2016</div>
-                                            <div class="manage-o__icon"><i class="fas fa-truck u-s-m-r-5"></i>
-
-                                                <span class="manage-o__text">Standard</span></div>
-                                        </div> -->
-                                        <!-- <div class="manage-o__timeline">
-                                            <div class="timeline-row">
-                                                <div class="col-lg-4 u-s-m-b-30">
-                                                    <div class="timeline-step">
-                                                        <div class="timeline-l-i timeline-l-i--finish">
-
-                                                            <span class="timeline-circle"></span></div>
-
-                                                        <span class="timeline-text">Processing</span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-lg-4 u-s-m-b-30">
-                                                    <div class="timeline-step">
-                                                        <div class="timeline-l-i timeline-l-i--finish">
-
-                                                            <span class="timeline-circle"></span></div>
-
-                                                        <span class="timeline-text">Shipped</span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-lg-4 u-s-m-b-30">
-                                                    <div class="timeline-step">
-                                                        <div class="timeline-l-i">
-
-                                                            <span class="timeline-circle"></span></div>
-
-                                                        <span class="timeline-text">Delivered</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div> -->
+                                        
                                         <div class="manage-o__description">
                                             <div class="description__container">
                                                 <div class="description__img-wrap">

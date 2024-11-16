@@ -1,0 +1,67 @@
+{% extends "user/base.html" %}
+
+{% block content %}
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <div style="height: 400px;">
+
+    </div>
+    <form action="{% url 'order:verify_retry_payment' %}" method="POST" name="razorpay-form" id="razorpay-form">
+        {% csrf_token %}
+        
+        <input type="hidden" name="order_id" value="{{ order.order_id }}">
+        <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+        <input type="hidden" name="razorpay_order_id" value="{{ razorpay_order_id }}">
+        <input type="hidden" name="razorpay_signature" id="razorpay_signature">
+        
+        <!-- Button is hidden, since auto-submit is being triggered -->
+        <button type="button" id="pay-button" style="display: none;">Pay Now</button>
+    </form>
+
+    <script>
+        var options = {
+            key: "{{ razorpay_key }}", // Your Razorpay Key ID
+            amount: "{{ amount }}", // Amount to be paid (in paise)
+            currency: "INR",
+            name: "B.R.A.T Mens Clothings PVT",
+            description: "Retrying Payment for Order #{{ order.order_id }}",
+            order_id: "{{ razorpay_order_id }}", // Order ID created by your backend
+            handler: function (response) {
+                document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
+                document.getElementById('razorpay_signature').value = response.razorpay_signature;
+                document.getElementById('razorpay-form').submit(); // Submit the form to verify the payment
+                
+            },
+            prefill: {
+                name: "{{ user.username }}", // User's name
+                email: "{{ user.email }}", // User's email
+                contact: "{{ user.phone }}" // User's phone
+            },
+            modal: {
+                ondismiss: function() {
+                    // Show a SweetAlert popup when the Razorpay modal is closed
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Payment Failed',
+                        text: 'You have canceled the payment process.',
+                        confirmButtonText: 'View Orders',
+                        confirmButtonColor: '#000'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Redirect to the orders page
+                            window.location.href = "{% url 'order:view_orders' %}";
+                        }
+                    });
+                }
+            }
+        };
+
+        var rzp1 = new Razorpay(options);
+
+        // Automatically trigger payment when page loads
+        window.onload = function() {
+            rzp1.open();
+        };
+    </script>
+
+{% endblock %}

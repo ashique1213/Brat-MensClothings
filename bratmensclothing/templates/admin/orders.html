@@ -288,6 +288,7 @@
                                         <th>Size</th>
                                         <th>Price</th>
                                         <th>Payment Method</th>
+                                        <th>Payment Status</th>
                                         <th>Order Status</th>
                                         <th>Action</th>
                                     </tr>
@@ -295,7 +296,11 @@
                                 <tbody>
                                     {% for order in orders %}
                                     <tr>
-                                        <td><img src="{{ order.variants.product.image1.url }}" alt="Product Image" /></td>
+                                        <td>
+                                            <a href="{% url 'order:single_order' order.orderitem_id %}">
+                                                <img src="{{ order.variants.product.image1.url }}" alt="Product Image" />
+                                            </a>
+                                        </td>
                                         <td>{{order.order.user_id}}</td>
                                         <td>{{order.order.user.username |title}}</td>
                                         <td>#{{order.order.tracking_number}}</td>
@@ -303,6 +308,7 @@
                                         <td>{{order.variants.size|title}}</td>
                                         <td>₹{{order.subtotal_price}}</td>
                                         <td>{{order.order.payment_type}}</td>
+                                        <td>{{order.order.payment_status}}</td>
                                         <td style="font-weight: bold;">{{order.status}}</td>
 
                                         {% if order.status != 'Cancelled' %}
