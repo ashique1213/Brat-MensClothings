@@ -3,7 +3,13 @@
 {% block content %}
 {% load static %}
   
-
+<style>
+    .unavalable{
+        color: red;
+        padding-left: 55px;
+        padding-right: 55px;
+    }
+</style>
 {% if Wishlist_items %}
   
 <!--====== App Content ======-->
@@ -80,9 +86,19 @@
                                 </div>
                                 <div class="w-r__wrap-2">
 
-                                    <a href="{% url 'cart:addtocart' item.product.variant_id %}" class="w-r__link btn--e-brand-b-2" data-modal="modal" data-modal-id="#add-to-cart">ADD TO CART</a>
-
-                                    <a href="{% url 'userss:product_details' item.product.product.product_id %}" class="w-r__link btn--e-transparent-platinum-b-2">VIEW</a>
+                                        {% for category in item.product.product.category.all %}
+                                            {% if category.is_deleted %}
+                                                {% with is_category_deleted=True %}
+                                                <a href="" class="w-r__link btn--e-transparent-platinum-b-2 unavalable" >PRODUCT UNAVAILABLE</a>
+                                                {% endwith %}
+                                            {% elif item.product.product.is_deleted or item.product.product.brand.is_deleted or is_category_deleted %}
+                                                <a href="" class="w-r__link btn--e-transparent-platinum-b-2 unavalable" >PRODUCT UNAVAILABLE</a>
+                                            {% else %}
+                                                <a href="{% url 'cart:addtocart' item.product.variant_id %}" class="w-r__link btn--e-brand-b-2" data-modal="modal" data-modal-id="#add-to-cart">ADD TO CART</a>
+                                                <a href="{% url 'userss:product_details' item.product.product.product_id %}" class="w-r__link btn--e-transparent-platinum-b-2">VIEW</a>
+                                            {% endif %}
+                                        {% endfor %}
+                                    
 
                                     <a href="{% url 'wishlist:remove_wishlist' item.product.variant_id %}" class="w-r__link btn--e-transparent-platinum-b-2" >REMOVE</a></div>
                             </div>
