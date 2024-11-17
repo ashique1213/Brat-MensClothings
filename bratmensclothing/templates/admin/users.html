@@ -143,25 +143,18 @@
                     </ol>
 
 
-                    <div class="d-flex justify-content-between mb-3">
-                        <div class="input-group ms-1 w-100" style="max-width: 500px;">
-                            <form method="get" class="d-flex w-100">
-                                <input type="text" id="search" name="search" value="{{ search_query }}" class="form-control border-dark" placeholder="Search Customers..." />
-                                <button class="btn btn-dark ms-2" type="submit">
-                                    <i class="fas fa-search"></i> <!-- Search Icon Inside the Button -->
-                                </button>
-                            </form>
-                        </div>
-                        <!-- Sort Option on the Right with Icon -->
-                        <!-- <div class="input-group ms-1">
+                    <!-- <div class="d-flex justify-content-between mb-3">
+                        
+                         Sort Option on the Right with Icon 
+                        <div class="input-group ms-1">
                             <span class="input-group-text">
                                 <i class="fas fa-filter">   </i> 
                             </span>
                             <select id="sortOption" class="form-select">
                                 <option value="">Sort by</option>
                             </select>
-                        </div> -->
-                    </div>
+                        </div>
+                    </div> -->
 
 
                     <div class="card mb-4">
@@ -170,7 +163,14 @@
                                 <i class="fas fa-users me-1"></i>
                                 <span>Users Table</span>
                             </div>
-
+                            <div class="input-group ms-auto" style="max-width: 500px;">
+                                <form method="get" class="d-flex w-100">
+                                    <input type="text" id="search" name="search" value="{{ search_query }}" class="form-control border-dark" placeholder="Search Users..." />
+                                    <button class="btn btn-dark ms-2" type="submit">
+                                        <i class="fas fa-search"></i> <!-- Search Icon Inside the Button -->
+                                    </button>
+                                </form>
+                            </div>
                             {% if messages %}
                             <div aria-live="polite" aria-atomic="true" style="position: relative;">
                                 <div id="toast-container" class="toast-container position-fixed end-0 translate-middle-y p-3" style="top: 150px;">

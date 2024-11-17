@@ -230,7 +230,7 @@
                         </div>
                         
 
-                        <div class="">
+                        <div class="mb-5 mt-2">
                             <!-- Dropdown for selecting the view -->
                             <div class="row align-items-center">
                                 <div class="col-6">
@@ -252,6 +252,86 @@
                             <canvas id="monthSalesChart" width="400" height="100"></canvas>
                             <canvas id="yearSalesChart" width="400" height="100"></canvas>
                         </div>
+
+                        <div class="row text-center my-4">
+                            <!-- Section Header -->
+                            <div class="col-12 mb-4">
+                                <h3 class="text-dark fw-bold">Top 6 Best-Selling Products</h3>
+                                <p class="text-muted">Discover our top-performing products based on sales data</p>
+                            </div>
+                        
+                            <!-- Product Cards -->
+                            {% for product in best_selling_products %}
+                            <div class="col-lg-4 col-md-6 col-sm-12 mb-3">
+                                <div class="card shadow-sm border-1 d-flex flex-row align-items-center" style="border-radius: 12px;">
+                                    <!-- Product Image -->
+                                    <div class="card-img-left" style="flex: 1; max-width: 100px;">
+                                        <img 
+                                            src="{{ product.variants__product__image1.url }}" 
+                                            alt="{{ product.variants__product__product_name }}" 
+                                            class="img-fluid rounded"
+                                            style="height: 80px; object-fit: cover; border-radius: 12px;"
+                                        />
+                                    </div>
+                        
+                                    <!-- Product Details -->
+                                    <div class="card-body text-start ms-3" style="flex: 1;">
+                                        <p class="fw-bold mb-0 small text-dark">{{ product.variants__product__product_name }}</p>
+                                        <p class="text-muted small mb-0">Occasion: {{ product.variants__product__occasion }}</p>
+                                        <p class="fw-bold text-dark small mb-0">Price: ₹{{ product.variants__product__price }}</p>
+                                        <p class="text-success fw-bold small mb-0">Total Sold: {{ product.total_sold }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+
+                        <div class="row text-center my-4">
+                            <!-- Section Header -->
+                            <div class="col-12 mb-4">
+                                <h5 class="text-dark fw-bold fs-3">Best Selling Categories</h5>
+                                <p class="text-muted fs-6">Top-performing categories based on sales count</p>
+                            </div>
+                        
+                            <!-- Category Sales List -->
+                            {% for category in best_selling_categories %}
+                            <div class="col-md-3 col-sm-6 mb-3">
+                                <div class="card shadow-sm border-1 " style="border-radius: 12px;">
+                                    <!-- Category Name and Sales Count -->
+                                    <div class="card-body text-start">
+                                        <p class="fw-bold text-dark fs-6 mb-1">{{ category.variants__product__category__category }}</p>
+                                        <p class="text-success fw-bold fs-6 mb-0">Total Sold: {{ category.total_sold }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        
+
+                        <div class="row text-center my-4">
+                            <!-- Section Header -->
+                            <div class="col-12 mb-4">
+                                <h5 class="text-dark fw-bold fs-3">Best Selling Brands</h5>
+                                <p class="text-muted fs-6">Top-performing brands based on sales count</p>
+                            </div>
+                        
+                            <!-- Brand Sales List -->
+                            {% for brand in best_selling_brands %}
+                            <div class="col-md-4 col-sm-6 mb-3">
+                                <div class="card shadow-sm border-1 " style="border-radius: 12px;">
+                                    <!-- Brand Name and Sales Count -->
+                                    <div class="card-body text-start">
+                                        <p class="fw-bold text-dark fs-6 mb-1">{{ brand.variants__product__brand__brandname }}</p>
+                                        <p class="text-success fw-bold fs-6 mb-0">Total Sold: {{ brand.total_sold }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        
                     </div>
                 </main>
             </div>

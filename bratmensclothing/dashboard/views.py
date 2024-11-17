@@ -28,6 +28,31 @@ def admin_dashboard(request):
     ).aggregate(total_discount_amount=Sum('total_discount'))['total_discount_amount'] or 0
     total_canceled_order = OrderItem.objects.filter(status='Cancelled').count()
     total_products_count = ProductDetails.objects.count()
+    
+    best_selling_products = (
+        OrderItem.objects.values(
+            "variants__product__product_id",
+            "variants__product__product_name",
+            "variants__product__image1",
+            "variants__product__price",
+            "variants__product__occasion",
+        )
+        .annotate(total_sold=Sum("quantity"))
+        .order_by("-total_sold")[:6]
+    )
+
+    best_selling_categories = (
+        OrderItem.objects
+        .values('variants__product__category__category')  
+        .annotate(total_sold=Sum('quantity')) 
+        .order_by('-total_sold')  
+    )
+
+    best_selling_brands = (
+        OrderItem.objects.values("variants__product__brand__brandname")
+        .annotate(total_sold=Sum("quantity"))
+        .order_by("-total_sold")[:10]
+    )
 
     # Day-wise Sales Data
     sales_data = Order.objects.annotate(date=TruncDate('created_at')) \
@@ -84,6 +109,9 @@ def admin_dashboard(request):
         'month_data': json.dumps(month_data),
         'year_labels': json.dumps(year_labels),
         'year_data': json.dumps(year_data),
+        'best_selling_products':best_selling_products,
+        'best_selling_categories':best_selling_categories,
+        'best_selling_brands':best_selling_brands      
     }
 
     return render(request, 'admin/dashboard.html', context)
