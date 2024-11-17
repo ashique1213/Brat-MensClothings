@@ -93,7 +93,7 @@ def view_salesreport(request):
         'sales_report': sales_report,
         'startdate': startdate,
         'enddate': enddate,
-        'sortOption': sort_option,
+        'sortOption': sort_option, 
     }
     
     # Handle Download Requests
