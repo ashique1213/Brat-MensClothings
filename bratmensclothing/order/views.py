@@ -635,32 +635,82 @@ def manage_orders(request, orderitem_id):
 def cancel_order(request, orderitem_id):
     item = get_object_or_404(OrderItem, orderitem_id=orderitem_id)
     user = item.order.user
+    order = item.order
 
-    if item.order.payment_status=='Success':
-        order = item.order 
-        
-        total_quantity = Decimal(OrderItem.objects.filter(order=order).aggregate(total_qty=Sum('quantity'))['total_qty'] or 0)
-        item_quantity = Decimal(item.quantity)  
+    if order.payment_status == 'Success':
+        # Get the total price of the order before the cancellation (including tax, deliver)
+        total_order_value_before_cancellation = order.total_price
+        print(f'Before cancellation: {total_order_value_before_cancellation}')
 
+        # Calculate the new total price of cancelling the item
+        total_order_value_after_cancellation = total_order_value_before_cancellation - item.subtotal_price
+        print(f'After cancellation: {total_order_value_after_cancellation}')
 
-        new_price = Decimal(item.price) * Decimal(item_quantity)
+        # Get the Coupon object if applied
+        coupon_applied = None
+        if order.coupon_code:
+            try:
+                coupon_applied = Coupon.objects.get(code=order.coupon_code)
+            except Coupon.DoesNotExist:
+                coupon_applied = None
 
-        if order.coupon_amount and total_quantity:
-            new_price -= Decimal(order.coupon_amount) / Decimal(total_quantity)
-        
-        user_wallet, created = Wallet.objects.get_or_create(user_id=user)
+        # Refund the canceled item to the wallet
+        item_refund_amount = item.subtotal_price
+        print(f'Item refund amount: {item_refund_amount}')
+        if item_refund_amount > 0:
+            user_wallet, created = Wallet.objects.get_or_create(user_id=user)
+            user_wallet.balance = Decimal(user_wallet.balance or 0) + item_refund_amount
+            user_wallet.save()
 
-        user_wallet.balance = Decimal(user_wallet.balance or 0) + new_price
-        user_wallet.save()
-        
-        details_text = f"Tracking: {order.tracking_number}, Product: {item.variants.product.product_name}"
-        Transaction.objects.create(
-            wallet_id=user_wallet,
-            transaction_type='Order Cancellation',
-            amount=new_price,
-            details=details_text
-        )
-    
+            # Record the refund transaction
+            details_text = f"Order Cancelled: {item.variants.product.product_name}, Item Refund"
+            Transaction.objects.create(
+                wallet_id=user_wallet,
+                transaction_type='Item Refund',
+                amount=item_refund_amount,
+                details=details_text
+            )
+
+        if coupon_applied and total_order_value_after_cancellation < coupon_applied.min_purchase_amount:
+            print("Coupon minimum purchase violated. Recalculating total price.")
+            total_order_value_after_cancellation += order.coupon_amount
+            order.coupon_amount = 0
+
+        order.total_price = total_order_value_after_cancellation
+
+        # Save the order adjustments
+        order.save()
+
+        # Update the product variant quantity
+        if item.variants:
+            item.variants.qty += item.quantity
+            item.variants.save()
+
+        # Change the item status to 'Cancelled'
+        item.status = 'Cancelled'
+        item.save()
+
+        if order.items.filter(status='Cancelled').count() == order.items.count():
+            full_refund_amount = order.total_price  
+            print(f'Full refund amount: {full_refund_amount}')
+
+            if full_refund_amount > 0:
+                user_wallet, created = Wallet.objects.get_or_create(user_id=user)
+                user_wallet.balance = Decimal(user_wallet.balance or 0) + full_refund_amount
+                user_wallet.save()
+
+                # Record the full refund transaction
+                details_text = f"Order Tax and Delivery charge"
+                Transaction.objects.create(
+                    wallet_id=user_wallet,
+                    transaction_type='Order cancellation',
+                    amount=full_refund_amount,
+                    details=details_text
+                )
+
+            order.total_price = Decimal(0)  
+            order.save()
+
     if item.variants:
         item.variants.qty += item.quantity
         item.variants.save()

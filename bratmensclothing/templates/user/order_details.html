@@ -106,13 +106,11 @@
                             <!--====== End - Dashboard Features ======-->
                         </div>
 
-
                         <div class="col-lg-9 col-md-12">
                             <div class="dash__box dash__box--shadow dash__box--radius dash__box--bg-white u-s-m-b-30">
                                 <div class="dash__pad-2">
                                     <h1 class="dash__h1 u-s-m-b-14">My Orders</h1>
 
-                                    <span class="dash__text u-s-m-b-30">Here you can see all Orders </span>
                                     <!-- <form class="m-order u-s-m-b-30">
                                         <div class="m-order__select-wrapper">
 
@@ -127,7 +125,8 @@
                                             </select>
                                         </div>
                                     </form> -->
-                                    {% for item in order_items%}
+                                {% if order_items %}
+                                    {% for item in order_items %}
                                     <div class="m-order__list">
                                         <div class="m-order__get">
                                             <div class="manage-o__header u-s-m-b-30">
@@ -189,6 +188,10 @@
                                     </div>
 
                                     {% endfor %}
+
+                                   {% else %} 
+                                   <span class="dash__text u-s-m-b-30">No orders yet</span>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
