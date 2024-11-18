@@ -171,13 +171,17 @@
 
 
                                         <div>
+                                        <!-- 
                                             {% if orderitem.order.payment_status == 'Success' or orderitem.order.payment_status == 'Pending' %}
                                             <span class="manage-o__text-2 u-c-silver">PAYMENT :</span>
                                             <span class="manage-o__badge  badge--shipped ">{{orderitem.order.payment_status}}</span>
                                             {% else %}
+                                            {% endif %} -->
+                                            {% if orderitem.order.payment_status == 'Failure' %}
                                             <span class="manage-o__text-2 u-c-silver">PAYMENT :</span>
                                             <a href="{% url 'order:retry_payment' orderitem.order.order_id %}"><span  class="manage-o__badge badge--processing">Re-Try</span> </a>
                                             {% endif %}
+
                                         </div>
                                     
                                         <div>
@@ -186,7 +190,7 @@
                                                 <span class="manage-o__text-2 u-c-secondary">₹{{orderitem.order.total_price}}</span> 
                                             </div>
                                             <div class="manage-o__text-2 u-c-silver" style="font-size: 12px;">Coupon Applied:<br>
-                                                
+
                                                 <span class="manage-o__text-2 u-c-secondary" style="font-size: 12px;" >{{orderitem.order.coupon_code | upper}}- ₹{{orderitem.order.coupon_amount}}</span>
                                             </div>
                                         </div>

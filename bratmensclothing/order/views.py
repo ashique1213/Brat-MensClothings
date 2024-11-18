@@ -638,48 +638,53 @@ def cancel_order(request, orderitem_id):
     order = item.order
 
     if order.payment_status == 'Success':
-        # Get the total price of the order before the cancellation (including tax, deliver)
         total_order_value_before_cancellation = order.total_price
-        print(f'Before cancellation: {total_order_value_before_cancellation}')
-
-        # Calculate the new total price of cancelling the item
         total_order_value_after_cancellation = total_order_value_before_cancellation - item.subtotal_price
-        print(f'After cancellation: {total_order_value_after_cancellation}')
 
-        # Get the Coupon object if applied
         coupon_applied = None
         if order.coupon_code:
-            try:
-                coupon_applied = Coupon.objects.get(code=order.coupon_code)
-            except Coupon.DoesNotExist:
-                coupon_applied = None
+            coupon_applied = Coupon.objects.filter(code=order.coupon_code).first()
 
-        # Refund the canceled item to the wallet
-        item_refund_amount = item.subtotal_price
-        print(f'Item refund amount: {item_refund_amount}')
-        if item_refund_amount > 0:
-            user_wallet, created = Wallet.objects.get_or_create(user_id=user)
-            user_wallet.balance = Decimal(user_wallet.balance or 0) + item_refund_amount
+        user_wallet, _ = Wallet.objects.get_or_create(user_id=user)
+
+        # Detect single-product order
+        if order.items.filter(status='Cancelled').count() + 1 == order.items.count():
+            # Single product: Refund full order value
+            full_refund_amount = order.total_price
+            user_wallet.balance += Decimal(full_refund_amount)
             user_wallet.save()
 
-            # Record the refund transaction
-            details_text = f"Order Cancelled: {item.variants.product.product_name}, Item Refund"
             Transaction.objects.create(
                 wallet_id=user_wallet,
-                transaction_type='Item Refund',
-                amount=item_refund_amount,
-                details=details_text
+                transaction_type='Full Refund',
+                amount=full_refund_amount,
+                details="Order Cancelled: Full Refund including tax and delivery charges"
             )
 
-        if coupon_applied and total_order_value_after_cancellation < coupon_applied.min_purchase_amount:
-            print("Coupon minimum purchase violated. Recalculating total price.")
-            total_order_value_after_cancellation += order.coupon_amount
+            # Reset order total_price and coupon
+            order.total_price = 0
             order.coupon_amount = 0
+            order.save()
+        else:
+            # Multi-product: Adjust price and refund only the item subtotal
+            if item.subtotal_price > 0:
+                user_wallet.balance += Decimal(item.subtotal_price)
+                user_wallet.save()
 
-        order.total_price = total_order_value_after_cancellation
+                Transaction.objects.create(
+                    wallet_id=user_wallet,
+                    transaction_type='Item Refund',
+                    amount=item.subtotal_price,
+                    details=f"Order Cancelled: {item.variants.product.product_name}, Item Refund"
+                )
 
-        # Save the order adjustments
-        order.save()
+            # Adjust for coupon violation
+            if coupon_applied and total_order_value_after_cancellation < coupon_applied.min_purchase_amount:
+                total_order_value_after_cancellation += order.coupon_amount
+                order.coupon_amount = 0
+
+            order.total_price = total_order_value_after_cancellation
+            order.save()
 
         # Update the product variant quantity
         if item.variants:
@@ -718,6 +723,9 @@ def cancel_order(request, orderitem_id):
     item.status = 'Cancelled'
     item.save()
     
+    order.payment_status = 'Pending'
+    order.save()
+
     messages.success(request, 'Your order has been cancelled successfully.')
     return redirect('order:view_orders')
 
