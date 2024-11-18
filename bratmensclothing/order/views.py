@@ -26,6 +26,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
 from wallet.models import Wallet,Transaction
 from django.db.models import Sum, F
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from xhtml2pdf import pisa
+from django.shortcuts import get_object_or_404
 
 
 
@@ -740,3 +744,26 @@ def single_order(request,orderitem_id):
     order=OrderItem.objects.get(orderitem_id=orderitem_id)
 
     return render(request,'admin/single_order.html',{'order':order})
+
+
+@never_cache
+def download_invoice(request, orderitem_id):
+    order_item = get_object_or_404(OrderItem, orderitem_id=orderitem_id)  
+    order = order_item.order
+    all_order_items = OrderItem.objects.filter(order=order)
+
+    # Generate HTML content for the invoice using a template
+    html_content = render_to_string('user/invoice_template.html', {'order': order, 'all_order_items': all_order_items})
+
+    # Create a response object to serve the PDF file
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="invoice_{order.tracking_number}.pdf"'
+
+    # Create the PDF from the HTML content
+    pisa_status = pisa.CreatePDF(html_content, dest=response)
+
+    # Check for errors during PDF creation
+    if pisa_status.err:
+        return HttpResponse('Error generating PDF', status=500)
+
+    return response

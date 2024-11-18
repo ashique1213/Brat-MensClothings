@@ -35,6 +35,8 @@ urlpatterns = [
     path('order_details/',views.order_details,name='order_details'),
     path('return_order/<int:orderitem_id>',views.return_order,name='return_order'),
     
+    path('download_invoice/<int:orderitem_id>', views.download_invoice, name='download_invoice'), 
+
     path('retry_payment/<int:order_id>', views.retry_payment, name='retry_payment'),
     path('verify_retry_payment/', views.verify_retry_payment, name='verify_retry_payment'),
     
