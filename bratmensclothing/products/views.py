@@ -160,19 +160,46 @@ def viewproducts(request):
 
 def addproducts(request):
     if request.method == 'POST':
-        productname = request.POST.get('productname')
-        description = request.POST.get('description')
+        productname = request.POST.get('productname').strip()
+        description = request.POST.get('description').strip()
         brand_name = request.POST.get('brandname')
         category_ids = request.POST.getlist('category')
         price = Decimal(request.POST.get('price', '0'))
-        color = request.POST.get('color')
+        color = request.POST.get('color').strip()
         occasion = request.POST.get('occasion')
         fit = request.POST.get('fit')
-
         image1 = request.FILES.get('image1')
         image2 = request.FILES.get('image2')
         image3 = request.FILES.get('image3')
         image4 = request.FILES.get('image4')
+        
+        errors={}
+
+        if not productname:
+            errors['productname'] = 'Product name is required and cannot contain spaces.'
+        elif ProductDetails.objects.filter(product_name__iexact=productname).exists():
+            errors['productname'] = 'Product name already exists.'
+
+        # Validation for description
+        if not description:
+            errors['description'] = 'Description is required.'
+        elif len(description) < 10:
+            errors['description'] = 'Description must be between 10 and 20 characters.'
+
+        try:
+            price = Decimal(price)
+            if price < 400:
+                errors['price'] = 'Price must be a number greater than or equal to 400.'
+        except:
+            errors['price'] = 'Price must be a valid number.'
+
+        if not color:
+            errors['color'] = 'Color is required and cannot be empty.'
+        elif ' ' in color:
+            errors['color'] = 'Color cannot contain spaces.'
+
+        if errors:
+            return JsonResponse({'success': False, 'errors': errors})
 
         try:
             brand = Brand.objects.get(brandname=brand_name)
@@ -181,7 +208,7 @@ def addproducts(request):
 
         product = ProductDetails.objects.create(
             product_name=productname,
-            description=description,
+            description=description, 
             brand=brand,
             price=price,
             color=color,
@@ -193,8 +220,9 @@ def addproducts(request):
             image4=image4
         )
         product.category.set(category_ids)  
-        messages.success(request, 'Product added successfully!')  
-        return redirect('products:viewproducts')  
+        # messages.success(request, 'Product added successfully!')  
+        # return redirect('products:viewproducts') 
+        return JsonResponse({'success': True, 'message': 'Product added successfully!'}) 
 
     categories = Category.objects.filter(is_deleted=False)
     brands = Brand.objects.filter(is_deleted=False)
@@ -208,23 +236,47 @@ def editproduct(request, product_id):
     categories = Category.objects.filter(is_deleted=False)
 
     if request.method == 'POST':
-        product.product_name = request.POST.get('product_name')
-        if not product.product_name:
-            messages.error(request, 'Product name cannot be empty.')
-            return redirect('products:viewproducts')
+        errors = {}
 
-        product.description = request.POST.get('description')
+        product.product_name = request.POST.get('product_name').strip()
+        
+        if not product.product_name:
+            errors['productname'] = 'Product name is required and cannot contain spaces.'
+        elif ProductDetails.objects.filter(product_name__iexact=product.product_name).exclude(product_id=product.product_id).exists():
+            errors['productname'] = 'Product name already exists.'
+
+        product.description = request.POST.get('description').strip()
+
+        if not product.description:
+            errors['description'] = 'Description is required.'
+        elif len(product.description) < 10 :
+            errors['description'] = 'Description must be between 10 and 500 characters.'
 
         brand_id = request.POST.get('brandname')
         product.brand_id = brand_id if brand_id else product.brand_id
 
         category_ids = request.POST.getlist('category')
         product.category.set(category_ids)
-        product.color = request.POST.get('color')
+        product.color = request.POST.get('color').strip()
         product.price = request.POST.get('price')
         product.occasion = request.POST.get('occasion')
         product.fit = request.POST.get('fit')
 
+        try:
+            product.price = Decimal(product.price)
+            if product.price < 400:
+                errors['price'] = 'Price must be a number greater than or equal to 400.'
+        except:
+            errors['price'] = 'Price must be a valid number.'
+
+        if not product.color:
+            errors['color'] = 'Color is required and cannot be empty.'
+        elif ' ' in product.color:
+            errors['color'] = 'Color cannot contain spaces.'
+
+        # Return errors if any
+        if errors:
+            return JsonResponse({'success': False, 'errors': errors})
         if 'image1' in request.FILES:
             product.image1 = request.FILES['image1']
         if 'image2' in request.FILES:
@@ -235,8 +287,9 @@ def editproduct(request, product_id):
             product.image4 = request.FILES['image4']
 
         product.save()
-        messages.success(request, 'Product updated successfully!')
-        return redirect('products:viewproducts')
+        # messages.success(request, 'Product updated successfully!')
+        # return redirect('products:viewproducts')
+        return JsonResponse({'success': True, 'message': 'Product updated successfully.'})
 
     return render(request, 'admin/products/product.html', {
         'product': product,

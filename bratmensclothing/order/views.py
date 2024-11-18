@@ -638,8 +638,8 @@ def cancel_order(request, orderitem_id):
     order = item.order
 
     if order.payment_status == 'Success':
-        total_order_value_before_cancellation = order.total_price
-        total_order_value_after_cancellation = total_order_value_before_cancellation - item.subtotal_price
+        total_order_value_before_cancellation = Decimal(order.total_price)
+        total_order_value_after_cancellation = total_order_value_before_cancellation - Decimal(item.subtotal_price)
 
         coupon_applied = None
         if order.coupon_code:
@@ -651,7 +651,7 @@ def cancel_order(request, orderitem_id):
         if order.items.filter(status='Cancelled').count() + 1 == order.items.count():
             # Single product: Refund full order value
             full_refund_amount = order.total_price
-            user_wallet.balance += Decimal(full_refund_amount)
+            user_wallet.balance = Decimal(user_wallet.balance or 0) + full_refund_amount
             user_wallet.save()
 
             Transaction.objects.create(
@@ -662,26 +662,26 @@ def cancel_order(request, orderitem_id):
             )
 
             # Reset order total_price and coupon
-            order.total_price = 0
-            order.coupon_amount = 0
+            order.total_price = Decimal(0)
+            order.coupon_amount = Decimal(0)
             order.save()
         else:
             # Multi-product: Adjust price and refund only the item subtotal
             if item.subtotal_price > 0:
-                user_wallet.balance += Decimal(item.subtotal_price)
+                user_wallet.balance = Decimal(user_wallet.balance or 0) + Decimal(item.subtotal_price)
                 user_wallet.save()
 
                 Transaction.objects.create(
                     wallet_id=user_wallet,
                     transaction_type='Item Refund',
-                    amount=item.subtotal_price,
+                    amount=Decimal(item.subtotal_price),
                     details=f"Order Cancelled: {item.variants.product.product_name}, Item Refund"
                 )
 
             # Adjust for coupon violation
             if coupon_applied and total_order_value_after_cancellation < coupon_applied.min_purchase_amount:
                 total_order_value_after_cancellation += order.coupon_amount
-                order.coupon_amount = 0
+                order.coupon_amount = Decimal(0)
 
             order.total_price = total_order_value_after_cancellation
             order.save()
