@@ -739,11 +739,19 @@ def is_staff(user):
 @never_cache
 @user_passes_test(is_staff, login_url='accounts:admin_login')
 def order_details(request):
-    orders = OrderItem.objects.all().order_by('-orderitem_id')
+    search_query=request.GET.get('search','') 
+
+    if search_query:
+        orders = OrderItem.objects.filter(
+            Q(order__tracking_number__icontains=search_query) | 
+            Q(order__user__userid__icontains=search_query)
+        ).order_by('-orderitem_id')
+    else:
+        orders = OrderItem.objects.all().order_by('-orderitem_id')
     
-    # paginator = Paginator(orders, 4)  
-    # page_number = request.GET.get('page') 
-    # orders = paginator.get_page(page_number)  
+    paginator = Paginator(orders, 4)  
+    page_number = request.GET.get('page') 
+    orders = paginator.get_page(page_number)  
 
     if request.method == 'POST':
         ALLOWED_TRANSITIONS = {
@@ -780,7 +788,7 @@ def order_details(request):
 
             return redirect('order:order_details')
 
-    return render(request, 'admin/orders.html', {'orders': orders}) 
+    return render(request, 'admin/orders.html', {'orders': orders,'search_query':search_query}) 
 
 
 

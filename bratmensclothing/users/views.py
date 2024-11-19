@@ -37,19 +37,19 @@ def error(request):
 @never_cache
 @user_passes_test(is_staff,'accounts:admin_login')
 def view_user(request):
-
-    search_query=request.GET.get('search','')
-
-    users=Users.objects.filter(
-        Q(username__icontains=search_query) | Q(email__icontains=search_query),
-        is_superuser=False
-    ).order_by('-date_joined')
-
-    # users=Users.objects.filter(is_superuser=False).order_by('-date_joined')
+    search_query=request.GET.get('search','') 
     
-    # paginator=Paginator(users,5)
-    # page_number=request.GET.get('page')
-    # users=paginator.get_page(page_number)
+    if search_query:
+        users=Users.objects.filter(
+            Q(username__icontains=search_query) | Q(email__icontains=search_query),
+            is_superuser=False
+        ).order_by('-date_joined')
+    else:
+        users=Users.objects.filter(is_superuser=False).order_by('-date_joined')
+    
+    paginator=Paginator(users,5)
+    page_number=request.GET.get('page')
+    users=paginator.get_page(page_number)
 
     return render(request,'admin/users.html',{'users':users,'search_query': search_query})
 

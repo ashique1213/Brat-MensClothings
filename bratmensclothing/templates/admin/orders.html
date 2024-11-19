@@ -241,31 +241,30 @@
                 <div class="container-fluid px-4">
                     <h4 class="mt-4">Orders</h4>
                     <ol class="breadcrumb mb-4">
-                        <li class="breadcrumb-item"><a href="">Dashboard</a></li>
-                        <li class="breadcrumb-item active">Orders</li>
+                        <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item active"><a href="{% url 'order:order_details' %}">Orders</a></li>
                     </ol>
 
 
 
-                    <div class="d-flex justify-content-between mb-3">
+                    <!-- <div class="d-flex justify-content-between mb-3">
                         <div class="input-group ms-1">
                             <span class="input-group-text">
-                                <i class="fas fa-search"></i> <!-- Search Icon -->
+                                <i class="fas fa-search"></i>
                             </span>
                             <input type="text" id="" class="form-control" placeholder="Search Orders..." />
                         </div>
-                        <!-- Sort Option on the Right with Icon -->
                         <div class="input-group ms-1">
                             <span class="input-group-text">
-                                <i class="fas fa-filter"></i> <!-- FontAwesome filter icon -->
+                                <i class="fas fa-filter"></i> 
                             </span>
                             <select id="sortOption" class="form-select">
                                 <option value="">Sort by</option>
-                                <!-- <option value="name">Name</option>
-                                <option value="date">Start Date</option> -->
+                                <option value="name">Name</option>
+                                <option value="date">Start Date</option> 
                             </select>
                         </div>
-                    </div>
+                    </div> -->
 
 
 
@@ -275,7 +274,16 @@
                                 <i class="fas fa-shopping-cart me-1"></i>
                                 <span>Orders Table</span>
                             </div>
+                            <div class="input-group ms-auto" style="max-width: 500px;">
+                                <form method="get" class="d-flex w-100">
+                                    <input type="text" id="search" name="search" value="{{ search_query }}" class="form-control border-dark" placeholder="Search orders..." />
+                                    <button class="btn btn-dark ms-2" type="submit">
+                                        <i class="fas fa-search"></i> <!-- Search Icon Inside the Button -->
+                                    </button>
+                                </form>
+                            </div>
                         </div>
+                        
                         <div class="card-body">
                             <table id="productsTable" style="font-size: 14px;">
                                 <thead>
@@ -346,7 +354,7 @@
                             </table>
                         </div>
 
-                        <!-- <div class="pagination-container">
+                        <div class="pagination-container">
                             <div class="pagination">
                                 <span class="step-links">
                                     {% if orders.has_previous %}
@@ -364,7 +372,7 @@
                                     {% endif %}
                                 </span>
                             </div>
-                        </div> -->
+                        </div>
                         
                     </div>
                     

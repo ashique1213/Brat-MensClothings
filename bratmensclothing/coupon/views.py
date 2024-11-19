@@ -12,6 +12,8 @@ from .models import Coupon,CouponUser
 from products.models import Category
 from offer.models import Product_Offers,Brand_Offers
 from django.utils import timezone
+from django.db.models import Q
+
 
 
 def is_staff(user):
@@ -23,8 +25,15 @@ def is_staff(user):
 def coupon_details(request):
     categories = Category.objects.filter(is_deleted=False)
 
-    coupons = Coupon.objects.all()
-    return render(request, 'admin/coupon.html', {'coupons': coupons,'categories':categories})
+    search_query=request.GET.get('search','') 
+
+    if search_query:
+        coupons = Coupon.objects.filter(
+           Q(code__icontains=search_query) | Q (category__icontains=search_query)
+        ).order_by('-created_at')
+    else:
+        coupons = Coupon.objects.all()
+    return render(request, 'admin/coupon.html', {'coupons': coupons,'categories':categories,'search_query':search_query})
 
 @never_cache
 def add_coupon(request):

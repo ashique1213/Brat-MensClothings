@@ -138,7 +138,7 @@
                 <div class="container-fluid px-4">
                     <h4 class="mt-4">Users</h4>
                     <ol class="breadcrumb mb-4">
-                        <li class="breadcrumb-item"><a href="">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
                         <li class="breadcrumb-item active"> <a href="{% url 'userss:view_user' %}">Users Table</a></li>
                     </ol>
 
@@ -285,7 +285,7 @@
                             </table>
                         </div>
 
-                        <!-- <div class="pagination-container">
+                        <div class="pagination-container">
                             <div class="pagination">
                                 <span class="step-links">
                                     {% if users.has_previous %}
@@ -303,7 +303,7 @@
                                     {% endif %}
                                 </span>
                             </div>
-                        </div> -->
+                        </div>
 
 
                     </div>

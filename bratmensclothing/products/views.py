@@ -7,7 +7,7 @@ from django.db.models import F
 from django.http import JsonResponse
 from decimal import Decimal
 from django.core.paginator import Paginator
-
+from django.db.models import Q
 
 
 def is_staff(user):
@@ -41,13 +41,21 @@ def add_brands(request):
 @never_cache
 @user_passes_test(is_staff,'accounts:admin_login')
 def view_brands(request):
-    Brands=Brand.objects.all().order_by('is_deleted', '-created_at')
 
-    # paginator = Paginator(Brands, 5)  
-    # page_number = request.GET.get('page') 
-    # Brands = paginator.get_page(page_number) 
+    search_query=request.GET.get('search','') 
 
-    return render(request,'admin/brand.html',{'brands':Brands})
+    if search_query:
+        Brands = Brand.objects.filter(
+            brandname__icontains=search_query 
+        ).order_by('is_deleted', '-created_at')
+    else:
+        Brands=Brand.objects.all().order_by('is_deleted', '-created_at')
+
+    paginator = Paginator(Brands, 5)  
+    page_number = request.GET.get('page') 
+    Brands = paginator.get_page(page_number) 
+
+    return render(request,'admin/brand.html',{'brands':Brands,'search_query':search_query})
 
 
 def edit_brands(request, brand_id):
@@ -147,15 +155,24 @@ def edit_category(request, category_id):
 @never_cache
 @user_passes_test(is_staff,'accounts:admin_login')
 def viewproducts(request):
-    products = ProductDetails.objects.all().order_by('-created_at')
+    search_query=request.GET.get('search','')
+
+    if search_query:
+        products =ProductDetails.objects.filter(
+            Q(product_name__icontains=search_query) | Q(category__category__icontains=search_query)|
+            Q(brand__brandname__icontains=search_query)
+        ).order_by('-created_at')   
+    else:
+        products = ProductDetails.objects.all().order_by('-created_at')
+
     brands = Brand.objects.filter(is_deleted=False)
     categories = Category.objects.filter(is_deleted=False)
     
-    # paginator=Paginator(products,3)
-    # page_number = request.GET.get('page')  
-    # products = paginator.get_page(page_number) 
+    paginator=Paginator(products,3)
+    page_number = request.GET.get('page')  
+    products = paginator.get_page(page_number) 
 
-    return render(request, 'admin/products/product.html', {'products': products,'brands': brands,'categories': categories})
+    return render(request, 'admin/products/product.html', {'products': products,'brands': brands,'categories': categories,'search_query':search_query})
 
 
 def addproducts(request):

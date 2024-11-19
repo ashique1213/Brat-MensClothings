@@ -142,32 +142,11 @@
                 <div class="container-fluid px-4">
                     <h4 class="mt-4">Offers</h4>
                     <ol class="breadcrumb mb-4">
-                        <li class="breadcrumb-item"><a href="">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
                         <li class="breadcrumb-item"><a href="{% url 'offer:view_offer'%}">Offers</a></li>
                         <li class="breadcrumb-item active">Brand Offers</li>
                     </ol>
 
-
-
-                    <div class="d-flex justify-content-between mb-3">
-                        <div class="input-group ms-1">
-                            <span class="input-group-text">
-                                <i class="fas fa-search"></i> <!-- Search Icon -->
-                            </span>
-                            <input type="text" id="" class="form-control" placeholder="Search Offers..." />
-                        </div>
-                        <!-- Sort Option on the Right with Icon -->
-                        <div class="input-group ms-1">
-                            <span class="input-group-text">
-                                <i class="fas fa-filter"></i> <!-- FontAwesome filter icon -->
-                            </span>
-                            <select id="sortOption" class="form-select">
-                                <option value="">Sort by</option>
-                                <option value="name">Name</option>
-                                <option value="date">Start Date</option>
-                            </select>
-                        </div>
-                    </div>
 
 
                     
@@ -177,7 +156,15 @@
                                 <i class="fas fa-gift me-1"></i>
                                 <span>Offers Table</span>
                             </div>
-                            <button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#addBrandOfferModal">Add Offer</button>
+                            <div class="input-group ms-auto" style="max-width: 500px;">
+                                <form method="get" class="d-flex w-100">
+                                    <input type="text" id="search" name="search" value="{{ search_query }}" class="form-control border-dark" placeholder="Search offers..." />
+                                    <button class="btn btn-dark ms-2" type="submit">
+                                        <i class="fas fa-search"></i> <!-- Search Icon Inside the Button -->
+                                    </button>
+                                </form>
+                            </div>
+                            <button class="btn btn-dark ms-1" data-bs-toggle="modal" data-bs-target="#addBrandOfferModal">Add Offer</button>
 
                         </div>
                         <div class="card-body">

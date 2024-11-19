@@ -112,8 +112,8 @@
                 <div class="container-fluid px-4">
                     <h4 class="mt-4">Category</h4>
                     <ol class="breadcrumb mb-4">
-                        <li class="breadcrumb-item"><a href="">Dashboard</a></li>
-                        <li class="breadcrumb-item active">Category</li>
+                        <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item active"><a href="{% url 'products:view_category' %}">Category</a></li>
                     </ol>
 
                     <!-- <div class="d-flex justify-content-between mb-3">

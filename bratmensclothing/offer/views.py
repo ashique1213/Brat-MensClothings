@@ -26,10 +26,18 @@ def view_offer(request):
 @never_cache
 @user_passes_test(is_staff,'accounts:admin_login')
 def view_product_offer(request):
-    product_offer=Product_Offers.objects.all()
+
+    search_query=request.GET.get('search','') 
+
+    if search_query:
+        product_offer=Product_Offers.objects.filter(
+            Q(offer_name__icontains=search_query) | Q(product__product_name__icontains=search_query)
+        )
+    else:
+        product_offer=Product_Offers.objects.all()
 
     products = ProductDetails.objects.all()
-    return render(request,'admin/offer/product_offer.html',{'products':products,'product_offer':product_offer})
+    return render(request,'admin/offer/product_offer.html',{'products':products,'product_offer':product_offer,'search_query':search_query})
 
 def add_product_offer(request):
     if request.method == "POST":
@@ -170,9 +178,16 @@ def edit_product_offer(request, offer_id):
 @never_cache
 @user_passes_test(is_staff,'accounts:admin_login')
 def view_brand_offer(request):
-    brand_offers=Brand_Offers.objects.all()
+    search_query=request.GET.get('search','') 
+
+    if search_query:
+        brand_offers=Brand_Offers.objects.filter(
+            Q(offer_name__icontains=search_query) | Q(brand__brandname__icontains=search_query)
+        )
+    else:
+        brand_offers=Brand_Offers.objects.all()
     brands = Brand.objects.all()
-    return render(request,'admin/offer/brand_offer.html', {'brands': brands,'brand_offers':brand_offers})
+    return render(request,'admin/offer/brand_offer.html', {'brands': brands,'brand_offers':brand_offers,'search_query':search_query})
 
 
 def add_brand_offer(request):

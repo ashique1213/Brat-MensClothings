@@ -170,14 +170,14 @@
                 <div class="container-fluid px-4">
                     <h4 class="mt-4">Products</h4>
                     <ol class="breadcrumb mb-4">
-                        <li class="breadcrumb-item"><a href="">Dashboard</a></li>
-                        <li class="breadcrumb-item active">Products</li>
+                        <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item active"><a href="{% url 'products:viewproducts' %}">Products</a></li>
                     </ol>
 
-                    <div class="d-flex justify-content-between mb-3">
+                    <!-- <div class="d-flex justify-content-between mb-3">
                         <div class="input-group ms-1">
                             <span class="input-group-text">
-                                <i class="fas fa-search"></i> <!-- Search Icon -->
+                                <i class="fas fa-search"></i> 
                             </span>
                             <input type="text" id="searchProduct" class="form-control" placeholder="Search Products..." />
                         </div>
@@ -187,11 +187,11 @@
                             </span>
                             <select id="sortOption" class="form-select">
                                 <option value="">Sort by</option>
-                                <!-- <option value="name">Name</option> -->
-                                <!-- <option value="date">Start Date</option> -->
+                                <option value="name">Name</option>
+                                <option value="date">Start Date</option>
                             </select>
                         </div>
-                    </div>
+                    </div> -->
 
 
  
@@ -201,7 +201,15 @@
                                 <i class="fas fa-box me-1"></i>
                                 <span>Products Table</span>
                             </div>
-                            <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                            <div class="input-group ms-auto" style="max-width: 500px;">
+                                <form method="get" class="d-flex w-100">
+                                    <input type="text" id="search" name="search" value="{{ search_query }}" class="form-control border-dark" placeholder="Search products..." />
+                                    <button class="btn btn-dark ms-2" type="submit">
+                                        <i class="fas fa-search"></i> <!-- Search Icon Inside the Button -->
+                                    </button>
+                                </form>
+                            </div>
+                            <button type="button" class="btn btn-dark ms-1" data-bs-toggle="modal" data-bs-target="#addProductModal">
                                 Add Products
                             </button>
                         </div>
@@ -319,12 +327,12 @@
                                         </td>
                                     </tr>
                                     {% endfor %}
-                                </tbody>
+                                </tbody> 
                             </table>
                         </div>
 
 
-                        <!-- <div class="pagination-container">
+                        <div class="pagination-container">
                             <div class="pagination">
                                 <span class="step-links">
                                     {% if products.has_previous %}
@@ -342,7 +350,7 @@
                                     {% endif %}
                                 </span>
                             </div>
-                        </div> -->
+                        </div>
 
 
                     </div>
