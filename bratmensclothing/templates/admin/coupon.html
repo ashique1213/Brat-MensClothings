@@ -339,6 +339,7 @@
                     <div class="mb-3">
                         <label for="min-purchase" class="col-form-label">Minimum Purchase Amount</label>
                         <input type="number" class="form-control" id="min-purchase" name="min_purchase_amount" required>
+                        <p id="min_purchase_error" class="text-danger"></p> 
                     </div>
                     <div class="mb-3">
                         <label for="start-date" class="col-form-label">Start Date</label>
@@ -351,6 +352,7 @@
                     <div class="mb-3">
                         <label for="usage-limit" class="col-form-label">Usage Limit</label>
                         <input type="number" class="form-control" id="usage-limit" name="usage_limit" required>
+                        <p id="usage_limit_error" class="text-danger"></p> 
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -401,6 +403,7 @@
                     <div class="mb-3">
                         <label for="edit-min-purchase{{ coupon.coupon_id }}" class="col-form-label">Minimum Purchase</label>
                         <input type="text" class="form-control" id="edit-min-purchase{{ coupon.coupon_id }}" name="min_purchase_amount" value="{{ coupon.min_purchase_amount }}" required>
+                        <p id="min_purchase_error" class="text-danger"></p> 
                     </div>
                     <div class="mb-3">
                         <label for="edit-start-date{{ coupon.coupon_id }}" class="col-form-label">Start Date</label>
@@ -413,6 +416,7 @@
                     <div class="mb-3">
                         <label for="edit-usage-limit{{ coupon.coupon_id }}" class="col-form-label">Usage Limit</label>
                         <input type="number" class="form-control" id="edit-usage-limit{{ coupon.coupon_id }}" name="usage_limit" value="{{ coupon.usage_limit }}" required>
+                        <p id="usage_limit_error" class="text-danger"></p> 
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

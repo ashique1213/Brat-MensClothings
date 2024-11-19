@@ -48,12 +48,31 @@ def add_coupon(request):
             errors['code_error']='Coupon code already exits'
         
         try:
-            discount_amount = Decimal(discount_amount) 
+            discount_amount = Decimal (discount_amount) 
             if discount_amount >= 200:
                 errors['discount_error'] = 'Discount amount must be less than 200'
         except ValueError:
             errors['discount_error'] = 'Discount amount must be a valid number'
 
+        if not min_purchase_amount:
+            errors['min_purchase_error'] = 'Min purchase amount is required.'
+        else:
+            try:
+                min_purchase_amount = float(min_purchase_amount)
+                if min_purchase_amount < 500:
+                    errors['min_purchase_error'] = 'Min purchase amount must be at least 500.'
+            except ValueError:
+                errors['min_purchase_error'] = 'Invalid min purchase amount format. It must be a valid number.'
+        
+        if not usage_limit:
+            errors['usage_limit_error'] = 'Usage limit is required.'
+        else:
+            try:
+                usage_limit = int(usage_limit)
+                if usage_limit < 1:
+                    errors['usage_limit_error'] = 'Usage limit must be at least 1.'
+            except ValueError:
+                errors['usage_limit_error'] = 'Invalid usage limit format. It must be a valid integer.'
         if errors:
             return JsonResponse({'success': False, 'errors': errors})
         
@@ -99,6 +118,27 @@ def edit_coupon(request, coupon_id):
                 errors['discount_error'] = 'Discount amount must be less than 200'
         except ValueError:
             errors['discount_error'] = 'Discount amount must be a valid number'        
+
+        
+        if not min_purchase_amount:
+            errors['min_purchase_error'] = 'Min purchase amount is required.'
+        else:
+            try:
+                min_purchase_amount = float(min_purchase_amount)
+                if min_purchase_amount < 500:
+                    errors['min_purchase_error'] = 'Min purchase amount must be at least 500.'
+            except ValueError:
+                errors['min_purchase_error'] = 'Invalid min purchase amount format. It must be a valid number.'
+
+        if not usage_limit:
+            errors['usage_limit_error'] = 'Usage limit is required.'
+        else:
+            try:
+                usage_limit = int(usage_limit)
+                if usage_limit < 1:
+                    errors['usage_limit_error'] = 'Usage limit must be at least 1.'
+            except ValueError:
+                errors['usage_limit_error'] = 'Invalid usage limit format. It must be a valid integer.'
 
         if errors:
             return JsonResponse({'success': False, 'errors': errors})

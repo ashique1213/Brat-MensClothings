@@ -32,6 +32,12 @@
             height: 50px;
             object-fit: cover;
         }
+
+        p.text-danger {
+            font-size: 10px;
+            margin-left: 5px;
+            color: red; /* Set the text color to red for error messages */
+          }
     </style>
 </head>
 <body class="sb-nav-fixed">
@@ -230,57 +236,63 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form method="POST" action="{% url 'offer:add_product_offer' %}">
+          <form method="POST" id="addProductOffer" action="{% url 'offer:add_product_offer' %}">
             {% csrf_token %}
             
             <!-- Offer Name -->
             <div class="mb-3">
-              <label for="offer-name" class="col-form-label">Offer Name</label>
-              <input type="text" name="offer_name" class="form-control" id="offer-name" placeholder="Enter offer name">
+                <label for="offer-name" class="col-form-label">Offer Name</label>
+                <input type="text" name="offer_name" class="form-control" id="offer-name" placeholder="Enter offer name">
+                <p id="offer_name" class="text-danger"></p> 
             </div>
-  
+            
             <!-- Product Selection -->
             <div class="mb-3">
-              <label for="product-id" class="col-form-label">Product</label>
-              <select name="product_id" class="form-select" id="product-id">
-                <option value="" disabled selected>Select Product</option>
-                {% for product in products %}
-                  <option value="{{ product.product_id }}">{{ product.product_name }}</option>
-                {% endfor %}
-              </select>
+                <label for="product-id" class="col-form-label">Product</label>
+                <select name="product_id" class="form-select" id="product-id">
+                    <option value="" disabled selected>Select Product</option>
+                    {% for product in products %}
+                    <option value="{{ product.product_id }}">{{ product.product_name }} Price:{{product.price}}</option>
+                    {% endfor %}
+                </select>
+                <p id="product_name_error" class="text-danger"></p> 
             </div>
             
             <!-- Discount -->
             <div class="mb-3">
-              <label for="offer-price" class="col-form-label">Discount Price</label>
-              <input type="number" name="offer_price" class="form-control" id="offer-price" placeholder="Enter discount price">
+                <label for="offer-price" class="col-form-label">Discount Price</label>
+                <input type="number" name="offer_price" class="form-control" id="offer-price" placeholder="Enter discount price">
+                <p id="offer_price" class="text-danger"></p> 
+                
             </div>
             
             <!-- Offer Details -->
             <div class="mb-3">
-              <label for="offer-details" class="col-form-label">Offer Details</label>
-              <textarea name="offer_details" class="form-control" id="offer-details" placeholder="Enter offer details"></textarea>
+                <label for="offer-details" class="col-form-label">Offer Details</label>
+                <textarea name="offer_details" class="form-control" id="offer-details" placeholder="Enter offer details"></textarea>
             </div>
             
             <!-- Start Date -->
             <div class="mb-3">
-              <label for="start-date" class="col-form-label">Start Date</label>
-              <input type="date" name="start_date" class="form-control" id="start-date">
+                <label for="start-date" class="col-form-label">Start Date</label>
+                <input type="date" name="start_date" class="form-control" id="start-date">
+                <p id="dates" class="text-danger"></p> 
             </div>
             
             <!-- End Date -->
             <div class="mb-3">
-              <label for="end-date" class="col-form-label">End Date</label>
-              <input type="date" name="end_date" class="form-control" id="end-date">
+                <label for="end-date" class="col-form-label">End Date</label>
+                <input type="date" name="end_date" class="form-control" id="end-date">
+                <p id="dates" class="text-danger"></p> 
             </div>
             
             <!-- Modal Footer -->
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-primary">Add Offer</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Add Offer</button>
             </div>
-          </form>
-        </div>
+        </form>
+    </div>
       </div>
     </div>
   </div>
@@ -297,30 +309,35 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form method="POST" action="{% url 'offer:edit_product_offer' offer.id %}">
+        <form method="POST" id="editOfferform{{ offer.id }}" data-id="{{ offer.id }}" action="{% url 'offer:edit_product_offer' offer.id %}">
           {% csrf_token %}
           
           <!-- Offer Name -->
           <div class="mb-3">
             <label for="offer-name{{ offer.id }}" class="col-form-label">Offer Name</label>
             <input type="text" name="offer_name" class="form-control" id="offer-name{{ offer.id }}" value="{{ offer.offer_name }}" placeholder="Enter offer name" required>
-          </div>
-
-          <!-- Product Selection -->
-          <div class="mb-3">
+            <p id="offer_name" class="text-danger"></p> 
+        </div>
+        
+        <!-- Product Selection -->
+        <div class="mb-3">
             <label for="product-id{{ offer.id }}" class="col-form-label">Product</label>
             <select name="product_id" class="form-select" id="product-id{{ offer.id }}" required>
-              {% for product in products %}
-                <option value="{{ product.product_id }}" {% if product.product_id == offer.product_id %} selected {% endif %}>{{ product.product_name }}</option>
-              {% endfor %}
+                {% for product in products %}
+                <option value="{{ product.product_id }}" {% if product.product_id == offer.product_id %} selected {% endif %}>{{ product.product_name }} Price:{{product.price}}</option>
+                {% endfor %}
             </select>
+            <p id="product_name_error" class="text-danger"></p> 
+
           </div>
 
           <!-- Discount Price -->
           <div class="mb-3">
             <label for="offer-price{{ offer.id }}" class="col-form-label">Discount Price</label>
             <input type="number" name="offer_price" class="form-control" id="offer-price{{ offer.id }}" value="{{ offer.offer_price }}" placeholder="Enter discount price" required>
-          </div>
+            <p id="offer_price" class="text-danger"></p> 
+  
+        </div>
 
           <!-- Offer Details -->
           <div class="mb-3">
@@ -332,13 +349,15 @@
           <div class="mb-3">
             <label for="start-date{{ offer.id }}" class="col-form-label">Start Date</label>
             <input type="date" name="start_date" class="form-control" id="start-date{{ offer.id }}" value="{{ offer.started_date|date:'Y-m-d' }}" required>
-          </div>
+            <p id="dates" class="text-danger"></p> 
+        </div>
 
           <!-- End Date -->
           <div class="mb-3">
             <label for="end-date{{ offer.id }}" class="col-form-label">End Date</label>
             <input type="date" name="end_date" class="form-control" id="end-date{{ offer.id }}" value="{{ offer.end_date|date:'Y-m-d' }}" required>
-          </div>
+            <p id="date" class="text-danger"></p>   
+        </div>
 
           <!-- Modal Footer -->
           <div class="modal-footer">
@@ -368,6 +387,9 @@
       <!-- <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script> -->
       
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
   
   
       <script>
@@ -400,6 +422,71 @@
               modal.find('form').attr('action', actionUrl);
           });
   
+
+          $('#addProductOffer').submit(function(e) {
+            e.preventDefault(); // Prevent default form submission
+        
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'offer:add_product_offer' %}",
+                data: $(this).serialize(), // Serialize form data
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            text: response.message,
+                            icon: 'success',
+                            timer: 1000,  // Auto-close after 1 second
+                            showConfirmButton: false  // Hide the "OK" button
+                        }).then(() => {
+                            $('#addProductOfferModal').modal('hide'); // Close the modal
+                            location.reload(); // Reload the page or update content dynamically
+                        });
+                    } else {
+                        // If errors, display them under respective fields
+                        $.each(response.errors, function(key, value) {
+                            $('#' + key).text(value).show(); // Show error message under each field
+                        });
+                    }
+                }
+            });
+        });
+        
+            // Handle form submission for editing a product offer
+            $(document).on('submit', 'form[id^="editOfferform"]', function(e) {
+                e.preventDefault(); // Prevent default form submission
+
+                const form = $(this); // Capture the specific form
+                const offerID = form.data('id'); // Get offer ID from data attribute
+                const modalId = `#editModal${offerID}`; // Construct modal ID for the current offer
+
+                $.ajax({
+                    type: 'POST',
+                    url: "{% url 'offer:edit_product_offer' 0 %}".replace('0', offerID), // Replace '0' with the actual offer ID
+                    data: form.serialize(), // Serialize form data
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire({
+                                text: response.message,
+                                icon: 'success',
+                                timer: 1000,  // Auto-close after 1 second
+                                showConfirmButton: false  // Hide the "OK" button
+                            }).then(() => {
+                                $(modalId).modal('hide'); // Close the modal for the current offer
+                                location.reload(); // Reload the page or update content dynamically
+                            });
+                        } else {
+                            // Clear any previous errors
+                            form.find('.text-danger').text('');
+
+                            // Display validation errors within the form
+                            $.each(response.errors, function(key, value) {
+                                form.find(`#${key}`).text(value).show(); // Show each error within form context
+                            });
+                        }
+                    }
+                });
+            });
+
   
       </script>
 </body>
