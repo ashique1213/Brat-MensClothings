@@ -639,7 +639,7 @@ def cancel_order(request, orderitem_id):
 
     if order.payment_status == 'Success':
         total_order_value_before_cancellation = Decimal(order.total_price)
-        total_order_value_after_cancellation = total_order_value_before_cancellation - Decimal(item.subtotal_price + (item.subtotal_price* Decimal(0.02)))
+        total_order_value_after_cancellation = total_order_value_before_cancellation - Decimal(item.subtotal_price)
 
         coupon_applied = None
         if order.coupon_code:
