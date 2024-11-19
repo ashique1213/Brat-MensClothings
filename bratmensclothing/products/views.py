@@ -331,17 +331,12 @@ def add_sizevariants(request, product_id):
     product = get_object_or_404(ProductDetails, product_id=product_id)
 
     if request.method == 'POST':
-        size = request.POST.get('size').strip()
+        size = request.POST.get('size')
         quantity = request.POST.get('quantity').strip()
 
         errors={}
-        if not size:
-            errors['variant_error'] = 'Size is required.'
         
-        elif len(size) > 6:
-            errors['variant_error'] = 'Size length is too long. Maximum 6 characters allowed.'
-        
-        elif VariantSize.objects.filter(size__iexact=size, product=product).exists():
+        if VariantSize.objects.filter(size__iexact=size, product=product).exists():
             errors['variant_error'] = 'This size variant already exists for this product.'
         
         try:
@@ -374,19 +369,33 @@ def edit_sizevariants(request, variant_id):
     variant = get_object_or_404(VariantSize, variant_id=variant_id)
 
     if request.method == 'POST':
-        size = request.POST.get('size').strip()
+        size = request.POST.get('size')
         quantity = request.POST.get('quantity').strip()
 
+        errors = {}
+
+        if VariantSize.objects.filter(size__iexact=size, product=variant.product).exclude(variant_id=variant.variant_id).exists():
+            errors['variant_error'] = 'This size variant already exists for this product.'
+        
+        # Validate quantity field
+        try:
+            quantity = int(quantity) if quantity else None
+            if quantity is None or quantity <= 0:
+                errors['quantity_error'] = 'Quantity must be a positive integer.'
+        except (ValueError, TypeError):
+            errors['quantity_error'] = 'Invalid quantity format.'
+        
+        # Return errors if any
+        if errors:
+            return JsonResponse({'success': False, 'errors': errors})
+
+        # If no errors, update the variant
         if size and quantity:
             variant.size = size
-            # variant.qty = quantity
-            variant.qty = F('qty') + quantity
-            variant.save() 
+            variant.qty = F('qty') + quantity  # Update quantity using F expression
+            variant.save()
 
-            messages.success(request, 'Size variant updated successfully!')
-            return redirect('products:view_sizevariants', product_id=variant.product.product_id)
-        else:
-            messages.error(request, 'All fields are required.')
+            return JsonResponse({'success': True, 'message': 'Size variant updated successfully!'})
 
     return render(request, 'admin/products/edit_variantsize.html', {
         'variant': variant,

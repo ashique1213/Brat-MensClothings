@@ -389,6 +389,9 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
     <script>
 
         document.addEventListener("DOMContentLoaded", function() {
@@ -428,10 +431,16 @@
                 data: $(this).serialize(), // Serialize form data
                 success: function(response) {
                     if (response.success) {
-                        // Close the modal and reload the page
-                        alert(response.message);
-                        $('#addBrandModal').modal('hide');
-                        location.reload();
+                        Swal.fire({
+                            text: response.message,
+                            icon: 'success',
+                            timer: 1000,  // Auto-close after 2 seconds
+                            showConfirmButton: false  // Hide the "OK" button
+                        }).then(() => {
+                            $('#addBrandModal').modal('hide'); // Close the modal
+                            location.reload(); // Reload the page or update content dynamically
+                        });
+                        
                     } else {
                         // Display validation errors in the form
                         $.each(response.errors, function(key, value) {
@@ -455,9 +464,16 @@
                 data: form.serialize(), // Serialize form data
                 success: function(response) {
                     if (response.success) {
-                        // Close the modal for the current brand and reload the page if needed
-                        $(modalId).modal('hide');
-                        location.reload(); // Optionally reload or update content dynamically
+                        // Show success message with SweetAlert
+                        Swal.fire({
+                            text: response.message,
+                            icon: 'success',
+                            timer: 1000,  // Auto-close after 2 seconds
+                            showConfirmButton: false  // Hide the "OK" button
+                        }).then(() => {
+                            $(modalId).modal('hide'); // Close the modal for the current brand
+                            location.reload(); // Reload the page or update content dynamically
+                        });
                     } else {
                         // Display validation errors within the form
                         $.each(response.errors, function(key, value) {
