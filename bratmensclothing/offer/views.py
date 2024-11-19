@@ -174,19 +174,53 @@ def view_brand_offer(request):
 
 def add_brand_offer(request):
     if request.method == "POST":
-        offer_name = request.POST.get("offer_name")
+        offer_name = request.POST.get("offer_name").strip()
         brand_id = request.POST.get("brand_id")
         offer_price = request.POST.get("offer_price")
         offer_details = request.POST.get("offer_details")
         started_date = request.POST.get("start_date")
         end_date = request.POST.get("end_date")
+
+
+        errors = {}
+
+        if not offer_name:
+            errors['offer_name'] = 'Offer name can\'t be empty.'
+        elif Brand_Offers.objects.filter(offer_name=offer_name).exists():
+            errors['offer_name'] = 'Offer name Exists'  
+
+        if not brand_id:
+            errors['brand_id'] = 'Brand is required.'
+        elif Brand_Offers.objects.filter(brand_id=brand_id).exists():
+            errors['brand_id'] = 'Brand name Exists'
+
+
+        if not offer_price:
+            errors['offer_price'] = 'Offer price is required.'
+
+        try:
+            offer_price = Decimal(offer_price) 
+            if offer_price <= 0:
+                errors['offer_price'] = 'Offer price must be greater than 0.'
+            elif offer_price >= 150:
+                errors['offer_price'] = 'Offer price must be less than 150.'
+        except ValueError:
+            errors['offer_price'] = 'Invalid offer price.'
+
+        if not started_date or not end_date:
+            errors['dates'] = 'Start date and end date are required.'
+        elif started_date >= end_date:
+            errors['dates'] = 'End date must be after the start date.'
+        
+        if errors:
+            return JsonResponse({'success': False, 'errors': errors})
         
         if offer_name and brand_id and offer_price and started_date and end_date:
             try:
                 brand = Brand.objects.get(brand_id=brand_id)
                 new_offer = Brand_Offers(
                     offer_name=offer_name,
-                    brand_id=brand,
+                    brand_id=brand_id,
                     offer_price=offer_price,
                     offer_details=offer_details,
                     started_date=started_date,
@@ -194,8 +228,9 @@ def add_brand_offer(request):
                     status=True  
                 )
                 new_offer.save()
-                messages.success(request, 'Offer added successfully!')
-                return redirect('offer:view_brand_offer')  
+                # messages.success(request, 'Offer added successfully!')
+                # return redirect('offer:view_brand_offer')  
+                return JsonResponse({'success': True, 'message': 'Offer added successfully!'})
             except Brand.DoesNotExist:
                 messages.error(request, 'Product not found.')
         else:
@@ -209,12 +244,45 @@ def edit_brand_offer(request, offer_id):
     offer = get_object_or_404(Brand_Offers, id=offer_id)
 
     if request.method == "POST":
-        offer_name = request.POST.get("offer_name")
+        offer_name = request.POST.get("offer_name").strip()
         brand_id = request.POST.get("brand_id")
         offer_price = request.POST.get("offer_price")
         offer_details = request.POST.get("offer_details")
         start_date = request.POST.get("start_date")
         end_date = request.POST.get("end_date")
+
+        errors = {}
+
+        if not offer_name:
+            errors['offer_name'] = 'Offer name can\'t be empty.'
+        elif Brand_Offers.objects.filter(offer_name=offer_name).exclude(id=offer_id).exists():
+            errors['offer_name'] = 'Offer name Exists'  
+
+        if not brand_id:
+            errors['brand_id'] = 'Brand is required.'
+        elif Brand_Offers.objects.filter(brand_id=brand_id).exclude(id=offer_id).exists():
+            errors['brand_id'] = 'Brand name Exists'
+
+
+        if not offer_price:
+            errors['offer_price'] = 'Offer price is required.'
+
+        try:
+            offer_price = Decimal(offer_price) 
+            if offer_price <= 0:
+                errors['offer_price'] = 'Offer price must be greater than 0.'
+            elif offer_price >= 150:
+                errors['offer_price'] = 'Offer price must be less than 150.'
+        except ValueError:
+            errors['offer_price'] = 'Invalid offer price.'
+
+        if not start_date or not end_date:
+            errors['dates'] = 'Start date and end date are required.'
+        elif start_date >= end_date:
+            errors['dates'] = 'End date must be after the start date.'
+        
+        if errors:
+            return JsonResponse({'success': False, 'errors': errors})
 
         if offer_name and brand_id and offer_price and start_date and end_date:
             try:
@@ -226,11 +294,13 @@ def edit_brand_offer(request, offer_id):
                 offer.offer_details = offer_details
                 offer.started_date = start_date
                 offer.end_date = end_date
-                offer.status = True  # Assuming status remains active
+                offer.status = True 
                 offer.save()
 
-                messages.success(request, 'Offer updated successfully!')
-                return redirect('offer:view_brand_offer')  # Redirect to the page that shows offers
+                # messages.success(request, 'Offer updated successfully!')
+                # return redirect('offer:view_brand_offer') 
+                return JsonResponse({'success': True, 'message': 'Offer updated successfully!'})
+
             except Brand.DoesNotExist:
                 messages.error(request, 'Brand not found.')
         else:
