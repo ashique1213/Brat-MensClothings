@@ -146,7 +146,7 @@
                         <div class="col-6 col-md-6 col-lg-4 mb-4">
                             <div class="order-detail-item mb-3">
                                 <strong>Customer:</strong>
-                                <span>{{ order.user.username }}</span>
+                                <span>{{ order.user.username  |capfirst  }}</span>
                             </div>
                         </div>
                         <div class="col-6 col-md-6 col-lg-4 mb-4">
@@ -158,7 +158,7 @@
                         <div class="col-12 col-md-12 col-lg-4 mb-4">
                             <div class="order-detail-item">
                                 <strong>Shipping Address:</strong>
-                                <span>{{ order.shipping_address }}</span>
+                                <span>{{ order.shipping_address  |capfirst }}</span>
                             </div>
                         </div>
                     </div>
@@ -175,10 +175,12 @@
 
             {% for item in all_order_items %}
             <tr>
-                <td>{{ item.variants.product.product_name }}</td>
+                {% if item.status != 'Cancelled' %}
+                <td>{{ item.variants.product.product_name |capfirst }}</td>
                 <td>{{ item.quantity }}</td>
                 <td>MRP {{ item.price }}</td>
                 <td>MRP {{ item.subtotal_price }}</td>
+                {% endif %}
             </tr>
             {% endfor %}
 

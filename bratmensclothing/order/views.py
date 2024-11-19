@@ -639,7 +639,7 @@ def cancel_order(request, orderitem_id):
 
     if order.payment_status == 'Success':
         total_order_value_before_cancellation = Decimal(order.total_price)
-        total_order_value_after_cancellation = total_order_value_before_cancellation - Decimal(item.subtotal_price)
+        total_order_value_after_cancellation = total_order_value_before_cancellation - Decimal(item.subtotal_price + (item.subtotal_price* Decimal(0.02)))
 
         coupon_applied = None
         if order.coupon_code:
@@ -647,7 +647,7 @@ def cancel_order(request, orderitem_id):
 
         user_wallet, _ = Wallet.objects.get_or_create(user_id=user)
 
-        # Detect single-product order
+        # Detect single product order
         if order.items.filter(status='Cancelled').count() + 1 == order.items.count():
             # Single product: Refund full order value
             full_refund_amount = order.total_price
@@ -810,10 +810,10 @@ def download_invoice(request, orderitem_id):
     order = order_item.order
     all_order_items = OrderItem.objects.filter(order=order)
 
-    # Generate HTML content for the invoice using a template
+    # Generate html content for the invoice using a template
     html_content = render_to_string('user/invoice_template.html', {'order': order, 'all_order_items': all_order_items})
 
-    # Create a response object to serve the PDF file
+    # then create a response object to serve the PDF file
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="invoice_{order.tracking_number}.pdf"'
 

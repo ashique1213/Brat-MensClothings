@@ -130,7 +130,7 @@
                                     </ul>
                                 </div>
                             </div>
-
+                            {% if orderitem.status != 'Cancelled' %}
                             <div class="dash__box dash__box--bg-white dash__box--shadow u-s-m-b-30">
                                 <div class="dash__pad-1">
                                     <a href="{% url 'order:download_invoice' orderitem_id=orderitem.orderitem_id %}" style="color: black; font-weight: bold;" >
@@ -138,6 +138,7 @@
                                     </a>
                                 </div>
                             </div>
+                            {% endif %}
                             
 
                             <!--====== End - Dashboard Features ======-->
