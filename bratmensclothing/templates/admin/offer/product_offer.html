@@ -276,14 +276,14 @@
             <div class="mb-3">
                 <label for="start-date" class="col-form-label">Start Date</label>
                 <input type="date" name="start_date" class="form-control" id="start-date">
-                <p id="dates" class="text-danger"></p> 
+                <p id="date" class="text-danger"></p> 
             </div>
             
             <!-- End Date -->
             <div class="mb-3">
                 <label for="end-date" class="col-form-label">End Date</label>
                 <input type="date" name="end_date" class="form-control" id="end-date">
-                <p id="dates" class="text-danger"></p> 
+                <p id="date" class="text-danger"></p> 
             </div>
             
             <!-- Modal Footer -->
@@ -349,7 +349,7 @@
           <div class="mb-3">
             <label for="start-date{{ offer.id }}" class="col-form-label">Start Date</label>
             <input type="date" name="start_date" class="form-control" id="start-date{{ offer.id }}" value="{{ offer.started_date|date:'Y-m-d' }}" required>
-            <p id="dates" class="text-danger"></p> 
+            <p id="date" class="text-danger"></p> 
         </div>
 
           <!-- End Date -->
