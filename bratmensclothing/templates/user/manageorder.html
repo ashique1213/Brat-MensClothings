@@ -180,7 +180,7 @@
                                             {% endif %} -->
                                             {% if orderitem.order.payment_status == 'Failure' %}
                                             <span class="manage-o__text-2 u-c-silver">PAYMENT :</span>
-                                            <a href="{% url 'order:retry_payment' orderitem.order.order_id %}"><span  class="manage-o__badge badge--processing">Re-Try</span> </a>
+                                            <a href="{% url 'order:retry_payment' orderitem.order.order_id %}"><span  class="manage-o__badge badge--processing">Retry</span> </a>
                                             {% endif %}
 
                                         </div>

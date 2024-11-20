@@ -120,6 +120,7 @@ def checkout(request):
         tax_rate = Decimal('0.02')
         tax = total_after_discount * tax_rate
         grand_total = total_after_discount + tax + delivery_charge
+        limit= Decimal(1000)
 
         coupons=Coupon.objects.all()
         
@@ -132,7 +133,8 @@ def checkout(request):
                     'delivery_charge':delivery_charge,
                     'grand_total':grand_total,
                     'coupons':coupons,
-                    'discount':coupon_discount
+                    'discount':coupon_discount,
+                    'limit':limit
 
                 }) 
     return redirect('accounts:login_user') 
@@ -562,8 +564,9 @@ def verify_retry_payment(request):
                 order.payment_status = 'Success'
                 order.save()
 
-                messages.success(request, 'Payment successfully completed.')
-                return render(request, 'user/order_details.html', {'order': order,'order_items':order_items,'orders':orders})
+                # messages.success(request, 'Payment successfully completed.')
+                # return render(request, 'user/order_details.html', {'order': order,'order_items':order_items,'orders':orders})
+                return redirect('order:order_success')
 
             except razorpay.errors.SignatureVerificationError:
                 # If signature verification fails, display error

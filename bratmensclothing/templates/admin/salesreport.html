@@ -190,11 +190,11 @@
                             </div>
                             <div class="input-group ms-1">
                                 <label for="startDate" class="input-group-text">Start Date</label>
-                                <input type="date" id="start_date" name="startdate" class="form-control" value="{{ startdate|date:'Y-m-d' }}" />
+                                <input type="date" id="start_date" name="startdate" class="form-control" value="{{ startdate|date:'Y-m-d' }}" max="{{ today }}"/>
                             </div>
                             <div class="input-group ms-1">
                                 <label for="endDate" class="input-group-text">End Date</label>
-                                <input type="date" id="end_date" name="enddate" class="form-control" value="{{ enddate|date:'Y-m-d' }}" />
+                                <input type="date" id="end_date" name="enddate" class="form-control" value="{{ enddate|date:'Y-m-d' }}" max="{{ today }}"/>
                             </div>
                             <div class="ms-1">
                                 <button class="btn btn-dark" type="submit" id="applyDateFilter">Apply</button>
@@ -288,7 +288,10 @@
                 }, 3000); // Change this to adjust how long the toast is displayed
             });
         }); 
-
+            // Set the max attribute dynamically to today's date
+            const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+            document.getElementById('start_date').setAttribute('max', today);
+            document.getElementById('end_date').setAttribute('max', today);
     
      
     

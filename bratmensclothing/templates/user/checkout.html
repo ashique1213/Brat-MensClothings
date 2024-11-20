@@ -220,7 +220,7 @@
                             {% endfor %}
                             </div>
                         </div>
-                    </div>
+                    </div> 
                 </div>
 
 
@@ -265,6 +265,7 @@
                             <h1 class="checkout-f__h1">PAYMENT INFORMATION</h1>
                                 <div class="u-s-m-b-10">
 
+                                    {% if grand_total <= limit %}
                                     <div class="radio-box">
                                         <input type="radio" id="cash-on-delivery" name="optradio" value="COD" required>
                                         <div class="radio-box__state radio-box__state--primary">
@@ -273,6 +274,7 @@
                                     </div>
 
                                     <span class="gl-text u-s-m-t-6">Pay Upon Cash on delivery. (This service is only available for some countries)</span>
+                                    {% endif %}
                                 </div>
 
                                 <div class="u-s-m-b-10">
