@@ -86,7 +86,7 @@
             <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
                 <div class="sb-sidenav-menu p-5">
                     <div class="nav">
-                        <a class="nav-link " href="{% url 'admin_dashboard' %}">
+                        <a class="nav-link " href="{% url 'dashboard:admin_dashboard' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                             Dashboard
                         </a>
@@ -135,7 +135,7 @@
                 <div class="container-fluid px-4">
                     <h4 class="mt-4">Sales Report</h4>
                     <ol class="breadcrumb mb-4">
-                        <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard:admin_dashboard' %}">Dashboard</a></li>
                         <li class="breadcrumb-item active"><a href="{% url 'salesreport:view_salesreport' %}">Sales Report</a></li>
                     </ol>
 

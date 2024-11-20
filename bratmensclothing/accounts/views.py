@@ -285,8 +285,15 @@ def logout_user(request):
     logout(request)
     return redirect('accounts:login_user')
 
-
+def is_staff(user):
+    return user.is_staff
+   
+@never_cache
 def admin_login(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard:admin_dashboard')
+    
+    
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
@@ -300,7 +307,7 @@ def admin_login(request):
 
             if admin is not None and admin.is_superuser:
                 login(request, admin)
-                return redirect('admin_dashboard')
+                return redirect('dashboard:admin_dashboard')
         
         error_message = "Invalid credentials or not a superuser."
         return render(request, 'admin/admin_login.html', {'error_message': error_message})
@@ -309,6 +316,7 @@ def admin_login(request):
 
 @never_cache
 def admin_logout(request):
+    request.session.flush()
     logout(request)
     return redirect('accounts:admin_login')
 
