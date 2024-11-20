@@ -92,6 +92,10 @@
             margin: 5px 1px;
     
         } 
+        .couponhead{
+            color: #49c36e;
+            font-weight: bold;
+        }
         
 </style>
 
@@ -149,6 +153,7 @@
 
                 <div class="row u-s-m-b-16">
                     <div class="col-lg-6">
+                        <span class="gl-text couponhead">Coupons Available For You</span>
                         <div class="o-summary__item-wrap gl-scroll alter-height"  style="display: grid;grid-template-columns: repeat(2, 1fr); gap: 10px; height: 130px;">
                             {% if coupons%}
                             {% for coupon in coupons %}

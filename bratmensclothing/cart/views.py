@@ -97,7 +97,17 @@ def view_cart(request):
         tax = total_after_discount * tax_rate
         grand_total = total_after_discount + tax + delivery_charge
 
-        coupons = Coupon.objects.filter(is_active=False,usage_limit__gt=0)
+        # coupons = Coupon.objects.filter(is_active=False,usage_limit__gt=0)
+
+        used_coupon_ids = CouponUser.objects.filter(user=user).values_list('coupon_id', flat=True)
+        coupons = Coupon.objects.filter(
+            ~Q(coupon_id__in=used_coupon_ids),  
+            is_active=False,                    
+            usage_limit__gt=0,                 
+            valid_from__lte=timezone.now().date(),
+            valid_to__gte=timezone.now().date()
+        )
+
         return render(request, 'user/cart.html', {
             'cart_items': cart_items,
             'grand_total': grand_total,
