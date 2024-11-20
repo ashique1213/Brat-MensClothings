@@ -46,6 +46,7 @@ urlpatterns = [
     path('variant/soft-delete/<int:variant_id>/', views.soft_delete_variant, name='soft_delete_variant'),
     path('variant/restore/<int:variant_id>/', views.restore_variant, name='restore_variant'),
 
+    path('single_product/<int:product_id>/', views.single_product, name='single_product'),
 
     
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

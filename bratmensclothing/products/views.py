@@ -168,7 +168,7 @@ def viewproducts(request):
     brands = Brand.objects.filter(is_deleted=False)
     categories = Category.objects.filter(is_deleted=False)
     
-    paginator=Paginator(products,3)
+    paginator=Paginator(products,4)
     page_number = request.GET.get('page')  
     products = paginator.get_page(page_number) 
 
@@ -437,3 +437,11 @@ def restore_variant(request,variant_id):
     return redirect('products:view_sizevariants',product_id=variant.product.product_id)
 
 
+
+@login_required(login_url='accounts:admin_login')
+@never_cache
+@user_passes_test(is_staff,'accounts:admin_login')
+def single_product(request,product_id):
+    product_details=ProductDetails.objects.get(product_id=product_id)
+
+    return render(request,'admin/single_product.html',{'product_details':product_details})

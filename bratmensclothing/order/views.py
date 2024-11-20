@@ -683,7 +683,7 @@ def cancel_order(request, orderitem_id):
 
             # Adjust for coupon violation
             if coupon_applied and total_order_value_after_cancellation < coupon_applied.min_purchase_amount:
-                total_order_value_after_cancellation += order.coupon_amount
+                # total_order_value_after_cancellation += order.coupon_amount
                 order.coupon_amount = Decimal(0)
 
             order.total_price = total_order_value_after_cancellation
@@ -719,15 +719,33 @@ def cancel_order(request, orderitem_id):
             order.total_price = Decimal(0)  
             order.save()
 
-    if item.variants:
-        item.variants.qty += item.quantity
-        item.variants.save()
+    # if item.variants:
+    #     item.variants.qty += item.quantity
+    #     item.variants.save()
     
-    item.status = 'Cancelled'
-    item.save()
+    # item.status = 'Cancelled'
+    # item.save()
     
-    order.payment_status = 'Pending'
-    order.save()
+    # if order.payment_status == 'Failure':
+    #     order.payment_status = 'Pending'
+    #     order.save()
+
+    elif order.payment_status == 'Pending':
+        if item.variants:
+            item.variants.qty += item.quantity
+            item.variants.save()
+        
+        item.status = 'Cancelled'
+        item.save()
+    else:
+        order.payment_status = 'Pending'
+        order.save()
+        if item.variants:
+            item.variants.qty += item.quantity
+            item.variants.save()
+        
+        item.status = 'Cancelled'
+        item.save()
 
     messages.success(request, 'Your order has been cancelled successfully.')
     return redirect('order:view_orders')

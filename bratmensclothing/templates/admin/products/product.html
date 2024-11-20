@@ -220,13 +220,12 @@
                                         <th>ID</th>
                                         <th>Images</th>
                                         <th>Name</th>
-                                        <th style="width: 25%;">Description</th>
                                         <th>Brand</th>
                                         <th>Category</th>
                                         <th>Color</th>
                                         <th>Price</th>
-                                        <th>Occasion</th>
-                                        <th>Fit</th>
+                                        <!-- <th>Occasion</th> -->
+                                        <!-- <th>Fit</th> -->
                                         <th>Variant</th>
                                         <th>Edit</th>
                                         <th>Unlist</th>
@@ -240,21 +239,22 @@
                                         <td>{{ product.product_id }}</td>
                                         <td>
                                         {% if product.image1 %}
+                                        <a href="{% url 'products:single_product' product.product_id %}">
                                             <img src="{{ product.image1.url }}" alt="Current Image 1" width="100" class="mb-2">
+                                        </a>
                                         {% endif %}
                                         </td>
                                         <td>{{ product.product_name |title}}</td>
-                                        <td style="font-size: 10px;" class="product-description">{{ product.description |capfirst }}</td>
                                         <td>{{ product.brand.brandname |title }}</td>
                                         <td>
                                             {% for category in product.category.all %}
-                                                {{ category.category |title }}-{{ category.category_type }}{% if not forloop.last %}, {% endif %}
+                                                {{ category.category |title }}{% if not forloop.last %}, {% endif %}
                                             {% endfor %}
                                         </td>
                                         <td>{{ product.color |title }}</td>
                                         <td>{{ product.price |title }}</td>
-                                        <td>{{ product.occasion |title }}</td>
-                                        <td>{{ product.fit |title }}</td>
+                                        <!-- <td>{{ product.occasion |title }}</td> -->
+                                        <!-- <td>{{ product.fit |title }}</td> -->
                                         
 
                                         <td>
