@@ -659,7 +659,12 @@
 
                 reader.readAsDataURL(file);
             } else {
-                alert('Please upload a valid image file.');
+                Swal.fire({
+                    icon: 'error',
+                    text: 'Please upload a valid image file.',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
             }
         }
 

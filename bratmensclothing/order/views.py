@@ -490,6 +490,7 @@ def verify_payment(request):
                         variants=item.variant,
                         quantity=item.quantity,
                         price=item.variant.product.price,
+                        status="Order Confirmed" if payment_status == "Success" else "Order Pending",
                         subtotal_price=item.quantity * item.variant.product.price
                     )
                     # Deduct stock
@@ -564,6 +565,9 @@ def verify_retry_payment(request):
                 order.payment_status = 'Success'
                 order.save()
 
+                for item in order_items:
+                    item.status="Order confirmed"
+                    item.save()
                 # messages.success(request, 'Payment successfully completed.')
                 # return render(request, 'user/order_details.html', {'order': order,'order_items':order_items,'orders':orders})
                 return redirect('order:order_success')
