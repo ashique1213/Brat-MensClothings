@@ -680,7 +680,7 @@ def cancel_order(request, orderitem_id):
 
             # Adjust for coupon violation
             if coupon_applied and total_order_value_after_cancellation < coupon_applied.min_purchase_amount:
-                total_order_value_after_cancellation += order.coupon_amount
+                # total_order_value_after_cancellation += order.coupon_amount
                 order.coupon_amount = Decimal(0)
 
             order.total_price = total_order_value_after_cancellation
