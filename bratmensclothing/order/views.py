@@ -490,7 +490,7 @@ def verify_payment(request):
                         variants=item.variant,
                         quantity=item.quantity,
                         price=item.variant.product.price,
-                        status="Order Confirmed" if payment_status == "Success" else "Order Pending",
+                        # status="Order Confirmed" if payment_status == "Success" else "Order Pending",
                         subtotal_price=item.quantity * item.variant.product.price
                     )
                     # Deduct stock
