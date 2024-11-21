@@ -30,6 +30,7 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from xhtml2pdf import pisa
 from django.shortcuts import get_object_or_404
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
 
 
@@ -666,12 +667,27 @@ def view_orders(request):
     if request.user.is_authenticated:
         user=request.user
         orders=Order.objects.filter(user=user)
+
         order_items=OrderItem.objects.filter(order__in=orders).order_by('-order')
+
+
+        paginator = Paginator(order_items, 4)
+
+        page_number = request.GET.get('page')
+
+        try:
+            page_obj = paginator.get_page(page_number)
+        except PageNotAnInteger:
+            page_obj = paginator.get_page(1)
+        except EmptyPage:
+            page_obj = paginator.get_page(paginator.num_pages)
 
         return render(request,'user/order_details.html',
                       {
                         'orders':orders,
-                        'order_items':order_items,
+                        # 'order_items':order_items,
+                        'order_items': page_obj, 
+                        'page_obj': page_obj  
                     })
     
     return redirect('accounts:login_user')
