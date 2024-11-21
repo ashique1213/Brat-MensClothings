@@ -17,6 +17,31 @@
         background-color: black; /* Background color when checked */
     }
 
+    /* Customize SweetAlert buttons */
+    .swal-button-confirm,
+    .swal-button-cancel {
+        background-color: #000; /* Black background */
+        color: #fff; /* White text */
+        border: 1px solid #fff; /* White border */
+    }
+
+    .swal-button-confirm:hover,
+    .swal-button-cancel:hover {
+        background-color: #fff; /* White background on hover */
+        color: #000; /* Black text on hover */
+        border: 1px solid #000; /* Black border on hover */
+    }
+
+    /* SweetAlert icon styles */
+    .swal2-icon.swal2-question {
+        background-color: #fff; /* White background for the question icon */
+        border-color: #000; /* Black border for the icon */
+    }
+
+    .swal2-icon .swal2-icon-content {
+        color: #000; /* Black color for the icon content */
+    }
+
     
 </style>
  <!--====== App Content ======-->
@@ -190,7 +215,7 @@
                             </div>
                         </div>
                     </div>
-                    <form class="checkout-f__payment"  method="post" action="{% url 'order:place_order' %}">
+                    <form class="checkout-f__payment" id="checkout-form"  method="post" action="{% url 'order:place_order' %}">
                         {% csrf_token %}
                     <!-- Shipping & Billing -->
                     <h1 class="checkout-f__h1">Address Avialable</h1>   
@@ -271,7 +296,7 @@
                                         <div class="radio-box__state radio-box__state--primary">
                                             <label class="radio-box__label" for="cash-on-delivery">Cash on Delivery</label>
                                         </div>
-                                    </div>
+                                </div>
 
                                     <span class="gl-text u-s-m-t-6">Pay Upon Cash on delivery. (This service is only available for some countries)</span>
                                     {% endif %}
@@ -286,7 +311,19 @@
                                     <span class="gl-text u-s-m-t-6">When you click "Place Order" below we'll take you to RazorPay's site to set up your billing information.</span>
                                 </div>
 
-                                <div class="u-s-m-b-15">
+                                
+                                <div class="u-s-m-b-10">
+                                    {% if grand_total <= wallet_balance %}
+                                    <div class="radio-box">
+                                        <input type="radio"  id="wallet-payment" name="optradio" value="Wallet" required>
+                                        <div class="radio-box__state radio-box__state--primary">
+                                            <label class="radio-box__label" for="pay-pal">Wallet</label></div>
+                                    </div>
+                                    <span class="gl-text u-s-m-t-6">When you click "Place Order" below we'll take you to Wallet and Confirm payment</span>
+                                    {% endif %}
+                                </div>
+
+                                <!-- <div class="u-s-m-b-15">
                                     <div class="check-box">
                                         <input type="checkbox" id="term-and-condition">
                                         <div class="check-box__state check-box__state--primary">
@@ -294,7 +331,7 @@
                                     </div>
                                     <a class="gl-link">Terms of Service.</a>
                                 </div>
-                                
+                                 -->
                                 <div>
                                     <button class="btn btn--e-brand-b-2" id="placeorder" type="submit">PLACE ORDER</button>
                                 </div>
@@ -310,9 +347,8 @@
 <!--====== End - Section 3 ======-->
  
 
-<script>
+<!-- <script>
     $(document).ready(function() {
-        // Show the preloader when the login button is clicked
         $('#placeorder').click(function() {
             $('.preloader').addClass('is-active');
         });
@@ -320,7 +356,9 @@
        
     });
     
-</script>
+</script> -->
+
+
 <!--====== End - App Content ======-->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
@@ -355,6 +393,56 @@
             }
         });
     });
+    
+
+    document.getElementById('checkout-form').addEventListener('submit', function(e) {
+        const selectedPayment = document.querySelector('input[name="optradio"]:checked');
+        
+        if (selectedPayment) {
+            if (selectedPayment.value === 'Wallet') {
+                // Prevent form submission to show SweetAlert first for Wallet
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Confirm Wallet Payment',
+                    text: 'Are you sure you want to pay using your wallet?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Confirm',
+                    cancelButtonText: 'No, Cancel',
+                    customClass: {
+                        confirmButton: 'swal-button-confirm',
+                        cancelButton: 'swal-button-cancel'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // If confirmed, submit the form
+                        document.getElementById('checkout-form').submit();
+                    }
+                });
+            } else if (selectedPayment.value === 'COD') {
+                // Prevent form submission to show SweetAlert first for COD
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Confirm Cash on Delivery',
+                    text: 'Are you sure you want to pay with Cash on Delivery?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Confirm',
+                    cancelButtonText: 'No, Cancel',
+                    customClass: {
+                        confirmButton: 'swal-button-confirm',
+                        cancelButton: 'swal-button-cancel'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // If confirmed, submit the form
+                        document.getElementById('checkout-form').submit();
+                    }
+                });
+            }
+        }
+    });
+    
     
 </script>
 

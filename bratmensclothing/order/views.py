@@ -123,6 +123,8 @@ def checkout(request):
         limit= Decimal(1000)
 
         coupons=Coupon.objects.all()
+        user_wallet=Wallet.objects.get(user_id=user)
+        wallet_balance=user_wallet.balance
         
         return render(request,'user/checkout.html',
                 {
@@ -134,7 +136,8 @@ def checkout(request):
                     'grand_total':grand_total,
                     'coupons':coupons,
                     'discount':coupon_discount,
-                    'limit':limit
+                    'limit':limit,
+                    'wallet_balance':wallet_balance
 
                 }) 
     return redirect('accounts:login_user') 
@@ -218,6 +221,7 @@ def place_order(request):
         addresses = Address.objects.filter(user=user)
         cart = get_object_or_404(Cart, user=user)
         cart_items = CartItem.objects.filter(cart=cart)
+        user_wallet=Wallet.objects.get(user_id=user)
 
         if not cart_items.exists():
             return redirect('cart:viewcart')
@@ -322,8 +326,73 @@ def place_order(request):
                     "razorpay_key_id": settings.RAZORPAY_KEY_ID,
                     "amount": payment_data["amount"]
                 })
+            
+
+            if payment_type == 'Wallet':
+                if user_wallet.balance < grand_total:
+                    messages.error(request, 'Insufficient wallet balance to place the order.')
+                    return render(request, 'user/checkout.html', {
+                        'user': user,
+                        'addresses': addresses,
+                        'cart_items': cart_items,
+                        'tax': tax,
+                        'delivery_charge': delivery_charge,
+                        'grand_total': grand_total,
+                    })
+
+                try:
+                    with transaction.atomic():
+                        # Deduct wallet balance
+                        user_wallet.balance = Decimal(user_wallet.balance) - Decimal(grand_total)
+                        user_wallet.save()
+
+                        new_order = Order.objects.create(
+                            user=user,
+                            shipping_address=selected_address,
+                            payment_type=payment_type,
+                            payment_status='Success',
+                            total_price=grand_total,
+                            coupon_code=couponuser.coupon.code if couponuser else 0,
+                            coupon_amount=couponuser.coupon.discount_amount if couponuser else 0,
+                            total_offer_discount=total_offer_discount if total_offer_discount else 0
+                        )
+
+                        Transaction.objects.create(
+                            wallet_id=user_wallet,
+                            transaction_type='Debited',
+                            amount=grand_total,
+                            details="Wallet Payement for Order"
+                        )
+
+                        for item in cart_items:
+                            item_total_price = item.quantity * item.variant.product.price
+                            OrderItem.objects.create(
+                                order=new_order,
+                                variants=item.variant,
+                                quantity=item.quantity,
+                                price=item.variant.product.price,
+                                subtotal_price=item_total_price
+                            )
+                            item.variant.qty -= item.quantity
+                            item.variant.save()
+
+                        cart_items.delete()
+                    
+                    return redirect('order:order_success')
+
+                except Exception as e:
+                    messages.error(request, f"Failed to place order: {str(e)}")
+                    return render(request, 'user/checkout.html', {
+                        'user': user,
+                        'addresses': addresses,
+                        'cart_items': cart_items,
+                        'tax': tax,
+                        'delivery_charge': delivery_charge,
+                        'grand_total': grand_total,
+                    })
+
           
-            # Handle Cash on Delivery 
+                # Handle Cash on Delivery 
             if payment_type == 'COD' and grand_total > Decimal('1000.00'):
                 messages.error(request, 'Cash on Delivery is not available for orders above ₹1000.')
                 return render(request, 'user/checkout.html', {
@@ -339,7 +408,7 @@ def place_order(request):
             payment_status = 'Pending' if payment_type == 'COD' else 'Success'
 
             
-            if couponuser:
+            if couponuser: 
                 coupon = couponuser.coupon
                 coupon.usage_limit -= 1
                 coupon.save()  # Save the coupon 
