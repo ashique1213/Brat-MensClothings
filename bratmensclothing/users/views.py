@@ -217,6 +217,7 @@ def product_details(request, product_id):
     product_reviews=Review.objects.filter(product=product_id).order_by('-created_at')[:6]
     rating_count = Review.objects.filter(product_id=product_id).count() 
     avg_rating = Review.objects.filter(product_id=product_id).aggregate(average_rating=Avg('rating'))['average_rating']
+    rounded_avg_rating = round(avg_rating * 2) / 2 if avg_rating else 0
     
     # product offer
     product_offer = Product_Offers.objects.filter(
@@ -280,7 +281,7 @@ def product_details(request, product_id):
         'discount_percentage': discount_percentage,
         'product_reviews':product_reviews,
         'rating_count':rating_count,
-        'avg_rating':avg_rating
+        'avg_rating':rounded_avg_rating
     })
 
 
