@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from accounts.models import Users
-from products.models import ProductDetails,VariantSize
+from products.models import ProductDetails,VariantSize,Review
 from django.contrib import messages
 from products.models import Category,Brand
 from .models import Address
@@ -16,7 +16,7 @@ import re
 from datetime import timezone   
 from offer.models import Brand_Offers,Product_Offers
 from django.utils import timezone
-from django.db.models import Q, Sum, Min
+from django.db.models import Q, Sum, Min, Avg
 from django.views.decorators.cache import cache_control
 from django.core.paginator import Paginator
 from coupon.models import Coupon
@@ -208,6 +208,10 @@ def category_details(request):
 @cache_control(private=True, no_cache=True)
 def product_details(request, product_id):
     product = get_object_or_404(ProductDetails, product_id=product_id, is_deleted=False)
+
+    product_reviews=Review.objects.filter(product=product_id)
+    rating_count = Review.objects.filter(product_id=product_id).count() 
+    avg_rating = Review.objects.filter(product_id=product_id).aggregate(average_rating=Avg('rating'))['average_rating']
     
     # product offer
     product_offer = Product_Offers.objects.filter(
@@ -265,7 +269,10 @@ def product_details(request, product_id):
         'products': products,
         'coupons': coupons,
         'final_price': final_price,
-        'discount_percentage': discount_percentage
+        'discount_percentage': discount_percentage,
+        'product_reviews':product_reviews,
+        'rating_count':rating_count,
+        'avg_rating':avg_rating
     })
 
 

@@ -124,8 +124,11 @@ def checkout(request):
         limit= Decimal(1000)
 
         coupons=Coupon.objects.all()
-        user_wallet=Wallet.objects.get(user_id=user)
-        wallet_balance=user_wallet.balance
+        try:
+            user_wallet = Wallet.objects.get(user_id=user)
+            wallet_balance = user_wallet.balance
+        except Wallet.DoesNotExist:
+            wallet_balance = 0
         
         return render(request,'user/checkout.html',
                 {
@@ -221,8 +224,7 @@ def place_order(request):
         user = request.user
         addresses = Address.objects.filter(user=user)
         cart = get_object_or_404(Cart, user=user)
-        cart_items = CartItem.objects.filter(cart=cart)
-        user_wallet=Wallet.objects.get(user_id=user)
+        cart_items = CartItem.objects.filter(cart=cart)       
 
         if not cart_items.exists():
             return redirect('cart:viewcart')
@@ -330,6 +332,7 @@ def place_order(request):
             
 
             if payment_type == 'Wallet':
+                user_wallet=Wallet.objects.get(user_id=user)
                 if user_wallet.balance < grand_total:
                     messages.error(request, 'Insufficient wallet balance to place the order.')
                     return render(request, 'user/checkout.html', {

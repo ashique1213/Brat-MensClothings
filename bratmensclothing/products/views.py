@@ -1,5 +1,5 @@
 from django.shortcuts import render,redirect,get_object_or_404
-from .models import Brand,Category,ProductDetails,VariantSize
+from .models import Brand,Category,ProductDetails,VariantSize,Review
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.views.decorators.cache import never_cache
@@ -445,3 +445,46 @@ def single_product(request,product_id):
     product_details=ProductDetails.objects.get(product_id=product_id)
 
     return render(request,'admin/single_product.html',{'product_details':product_details})
+
+
+def add_review(request, product_id):
+    if request.user.is_authenticated:
+        if request.method == 'POST':
+            user = request.user
+            product = get_object_or_404(ProductDetails, product_id=product_id)
+
+            if Review.objects.filter(product=product, user=user).exists():
+                messages.error(request, "You have already reviewed this product.")
+                return redirect('userss:product_details', product_id=product_id)
+
+            rating = request.POST.get('rating')
+            review = request.POST.get('review')
+
+            print(f"Rating: {rating}, Review: {review}")
+
+            if not rating or not rating.isdigit():
+                messages.error(request, "Invalid rating. Please select a valid number.")
+                return redirect('userss:product_details', product_id=product_id)
+
+            rating = int(rating)
+            if rating < 1 or rating > 5:
+                messages.error(request, "Rating must be between 1 and 5.")
+                return redirect('userss:product_details', product_id=product_id)
+
+            if not review.strip():
+                messages.error(request, "Review text cannot be empty.")
+                return redirect('userss:product_details', product_id=product_id)
+
+            Review.objects.create(
+                product=product,
+                user=user,
+                rating=rating,
+                review=review
+            )
+
+            messages.success(request, "Your review has been submitted successfully.")
+            return redirect('userss:product_details', product_id=product_id)
+
+        return redirect('userss:product_details', product_id=product_id)
+    return redirect('accounts:login_user')
+
