@@ -77,6 +77,7 @@ def category_details(request):
     query = request.GET.get('search', '')
 
 
+
     selected_categories = request.GET.getlist('category')
     selected_brands = request.GET.getlist('brand')
     selected_colors = request.GET.getlist('color')
@@ -84,13 +85,16 @@ def category_details(request):
 
     products=(
         ProductDetails.objects.select_related('brand')
-        .prefetch_related('category','variants')
+        .prefetch_related('category','variants','Rating')
         .filter(
             Q(is_deleted=False),
             Q(brand__is_deleted=False),
             Q(category__is_deleted=False)
         )
-        .annotate(total_quantity=Sum('variants__qty'))
+        .annotate(
+        total_quantity=Sum('variants__qty'),
+        average_rating=Avg('Rating__rating')
+        )
     )
 
     if selected_categories:
@@ -173,6 +177,7 @@ def category_details(request):
         product.final_price = final_price
         product.discount_percentage = discount_percentage
 
+
         
     categories=Category.objects.all()
     Brands=Brand.objects.all()
@@ -209,7 +214,7 @@ def category_details(request):
 def product_details(request, product_id):
     product = get_object_or_404(ProductDetails, product_id=product_id, is_deleted=False)
 
-    product_reviews=Review.objects.filter(product=product_id)
+    product_reviews=Review.objects.filter(product=product_id).order_by('-created_at')[:6]
     rating_count = Review.objects.filter(product_id=product_id).count() 
     avg_rating = Review.objects.filter(product_id=product_id).aggregate(average_rating=Avg('rating'))['average_rating']
     
@@ -255,12 +260,15 @@ def product_details(request, product_id):
 
     products = (
         ProductDetails.objects.select_related('brand')
-        .prefetch_related('category', 'variants')
+        .prefetch_related('category', 'variants','Rating')
         .filter(
             Q(is_deleted=False),
             Q(brand__is_deleted=False),
             Q(category__is_deleted=False)
         )
+        .annotate(
+        average_rating=Avg('Rating__rating')    
+    )
     )
     
     coupons = Coupon.objects.filter(is_active=False,usage_limit__gt=0)

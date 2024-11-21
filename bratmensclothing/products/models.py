@@ -79,7 +79,7 @@ class VariantSize(models.Model):
 
 
 class Review(models.Model):
-    product = models.ForeignKey(ProductDetails,related_name='Product', on_delete=models.CASCADE)
+    product = models.ForeignKey(ProductDetails,related_name='Rating', on_delete=models.CASCADE)
     user = models.ForeignKey(Users,related_name='Users', on_delete=models.CASCADE)
     rating = models.IntegerField()
     review = models.TextField()

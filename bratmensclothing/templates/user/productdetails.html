@@ -5,12 +5,13 @@
 
 <style>
     
-.pd-tab__desc, .pd-tab__tag {
-    max-width: 100% !important; }
 
-    .size-buttons {
-        margin-top: 10px;
-    }
+    .pd-tab__desc, .pd-tab__tag {
+        max-width: 100% !important; }
+
+        .size-buttons {
+            margin-top: 10px;
+        }
     
 
     .size-button {
@@ -100,6 +101,42 @@
         margin: 5px 1px;
 
     } 
+
+
+    .rating-container {
+        text-align: center;
+        margin: 30px 0;
+    }
+    
+    .rating {
+        display: inline-block;
+    }
+    
+    .star {
+        font-size: 70px;
+        color: #ddd;
+        cursor: pointer;
+        transition: color 0.3s;
+    }
+    
+    .star:hover,
+    .star.hovered {
+        color: #f39c12; /* Gold on hover */
+    }
+    
+    .star.selected {
+        color: #f39c12; /* Gold when selected */
+    }
+    
+    .rating-value {
+        margin-top: 15px;
+        font-size: 20px;
+        color: #333;    
+    }
+    .btn{
+        margin-top: 5px;
+        padding: 15px 100px !important;
+    }
 </style>
         <!--====== App Content ======-->
         <div class="app-content">
@@ -193,21 +230,6 @@
                                     <span class="pd-detail__name ">{{ product.product_name |title }}</span>
                                 </div>
                                 <div>
-                                    <!-- <div class="pd-detail__inline">
-                                        {% if product.variants.all %}
-                                        <span class="pd-detail__price" id="product-price">₹ {{ product.variants.all.0.price }} </span>
-                                        {% endif %}
-
-                                        <span class="pd-detail__discount">(76% OFF)</span><del class="pd-detail__del">₹28.97</del>
-                                        
-                                    </div> -->
-
-                                    <!-- <div class="pd-detail__inline">
-                                        <span class="pd-detail__price" id="product-price">₹ {{ product.price }} </span>
-
-                                        <span class="pd-detail__discount">(76% OFF)</span><del class="pd-detail__del">₹28.97</del>
-                                        
-                                    </div> -->
 
                                     <div class="pd-detail__inline">
                                         {% if discount_percentage > 0 %}
@@ -525,111 +547,59 @@
                                                 <form class="pd-tab__rev-f2" method="post" action="{% url 'products:add_review' product.product_id %}">
                                                     {% csrf_token %}
                                                     <h2 class="u-s-m-b-15">Add a Review</h2>
-
-                                                    <span class="gl-text u-s-m-b-15">Your email address will not be published. Required fields are marked *</span>
-
-                                                    <div class="u-s-m-b-30">
-                                                        <div class="row justify-content-center">
-                                                            <!-- Rating 1 Star -->
-                                                            <div class="col-12 col-lg-2 col-md-2 text-center">
-                                                                <div class="gl-rating-style-2">
-                                                                    <i class="fas fa-star"></i>
-                                                                    <span>(1)</span>
-                                                                    <div class="radio-box">
-                                                                        <input type="radio" id="star-1" name="rating" value="1" required>
-                                                                        <div class="radio-box__state radio-box__state--primary">
-                                                                            <label class="radio-box__label" for="star-1"></label>
-                                                                        </div>
+                                                
+                                                    <span class="gl-text u-s-m-b-15">
+                                                        Your email address will not be published. Required fields are marked *
+                                                    </span>
+                                                
+                                                    <div class="container">
+                                                        <div class="row">
+                                                            <!-- Review Section -->
+                                                            <div class="col-12 col-md-6">
+                                                                <div class="rev-f2__group">
+                                                                    <div class="u-s-m-b-30">
+                                                                        <label class="gl-label" for="reviewer-text">YOUR REVIEW *</label>
+                                                                        <textarea
+                                                                            class="text-area text-area--primary-style"
+                                                                            name="review"
+                                                                            id="reviewer-text"
+                                                                            style="height: 200px;"
+                                                                            required
+                                                                        ></textarea>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                     
-                                                            <!-- Rating 2 Stars -->
-                                                            <div class="col-12 col-lg-2 col-md-2 text-center">
-                                                                <div class="gl-rating-style-2">
-                                                                    <i class="fas fa-star"></i>
-                                                                    <i class="fas fa-star"></i>
-                                                                    <span>(2)</span>
-                                                                    <div class="radio-box">
-                                                                        <input type="radio" id="star-2" name="rating" value="2" required>
-                                                                        <div class="radio-box__state radio-box__state--primary">
-                                                                            <label class="radio-box__label" for="star-2"></label>
-                                                                        </div>
+                                                            <!-- Rating Section -->
+                                                            <div class="col-12 col-md-6">
+                                                                <div class="rating-container">
+                                                                    <div class="rating">
+                                                                        <!-- Rating Stars -->
+                                                                        <span class="star" data-value="1">&#9733;</span>
+                                                                        <span class="star" data-value="2">&#9733;</span>
+                                                                        <span class="star" data-value="3">&#9733;</span>
+                                                                        <span class="star" data-value="4">&#9733;</span>
+                                                                        <span class="star" data-value="5">&#9733;</span>
                                                                     </div>
-                                                                </div>
-                                                            </div>
                                                     
-                                                            <!-- Rating 3 Stars -->
-                                                            <div class="col-12 col-lg-2 col-md-2 text-center">
-                                                                <div class="gl-rating-style-2">
-                                                                    <i class="fas fa-star"></i>
-                                                                    <i class="fas fa-star"></i>
-                                                                    <i class="fas fa-star"></i>
-                                                                    <span>(3)</span>
-                                                                    <div class="radio-box">
-                                                                        <input type="radio" id="star-3" name="rating" value="3" required>
-                                                                        <div class="radio-box__state radio-box__state--primary">
-                                                                            <label class="radio-box__label" for="star-3"></label>
-                                                                        </div>
+                                                                    <!-- Hidden Input Field to Store Rating -->
+                                                                    <input type="hidden" id="rating-input" name="rating" value="">
+                                                    
+                                                                    <!-- Display the Selected Value -->
+                                                                    <div class="rating-value">
+                                                                        <p>Your rating: <span id="selected-rating">0</span> stars</p>
                                                                     </div>
-                                                                </div>
-                                                            </div>
                                                     
-                                                            <!-- Rating 4 Stars -->
-                                                            <div class="col-12 col-lg-2 col-md-2 text-center">
-                                                                <div class="gl-rating-style-2">
-                                                                    <i class="fas fa-star"></i>
-                                                                    <i class="fas fa-star"></i>
-                                                                    <i class="fas fa-star"></i>
-                                                                    <i class="fas fa-star"></i>
-                                                                    <span>(4)</span>
-                                                                    <div class="radio-box">
-                                                                        <input type="radio" id="star-4" name="rating" value="4" required>
-                                                                        <div class="radio-box__state radio-box__state--primary">
-                                                                            <label class="radio-box__label" for="star-4"></label>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                    
-                                                            <!-- Rating 5 Stars -->
-                                                            <div class="col-12  col-lg-2 col-md-2 text-center">
-                                                                <div class="" style="color: #000;">
-                                                                    <i class="fas fa-star"></i>
-                                                                    <i class="fas fa-star"></i>
-                                                                    <i class="fas fa-star"></i>
-                                                                    <i class="fas fa-star"></i>
-                                                                    <i class="fas fa-star"></i>
-                                                                    <span>(5)</span>
-                                                                    <div class="radio-box">
-                                                                        <input type="radio" id="star-5" name="rating" value="5" required>
-                                                                        <div class="radio-box__state radio-box__state--primary">
-                                                                            <label class="radio-box__label" for="star-5"></label>
-                                                                        </div>
+                                                                    <!-- Submit Button -->
+                                                                    <div class="text-end ">
+                                                                        <button class="btn btn--e-brand-shadow btn" type="submit">SUBMIT</button>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    </div>
                                                     
-                                                    
-                                                    <div class="rev-f2__group">
-                                                        
-                                                       
-                                                    <div class="u-s-m-b-30">
-                                                        <label class="gl-label" for="reviewer-text">YOUR REVIEW *</label>
-                                                        <textarea class="text-area text-area--primary-style" name="review" id="reviewer-text" style="height: 150px;"></textarea>
-                                                    </div>
-                                                    </div>
-
-                                                    <div>
-
-                                                        <div style="text-align: right;">
-                                                            <button class="btn btn--e-brand-shadow" type="submit">SUBMIT</button>
-                                                        </div>
-
-                                                        <!-- <button class="btn btn--e-brand-shadow"  type="submit">SUBMIT</button></div> -->
                                                 </form>
+                                                
                                             </div>
                                         </div>
                                     </div>
@@ -701,13 +671,39 @@
                                         <span class="product-o__name">
 
                                             <a href="{% url 'userss:product_details' product.product_id %}">{{ product.product_name }}</a></span>
-                                        <div class="product-o__rating gl-rating-style"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                        <div class="product-o__rating gl-rating-style" >
+                                            
+                                            {% if product.average_rating == 1.0 %}
+                                            <i class="fas fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+                                        {% elif product.average_rating == 1.5 %}
+                                            <i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+                                        {% elif product.average_rating == 2.0 %}
+                                        
+                                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+                                        {% elif product.average_rating == 2.5 %}
+                                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+                                        {% elif product.average_rating == 3.0 %}
+                                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+                                        {% elif product.average_rating == 3.5 %}
+                                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i><i class="far fa-star"></i>
+                                        {% elif product.average_rating == 4.0 %}
+                                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i>
+                                        {% elif product.average_rating == 4.5 %}
+                                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                                        {% elif product.average_rating == 5.0 %}
+                                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                            <span class="product-o__price">₹{{product.price}}
 
-                                            <span class="product-o__review">(20)</span></div>
-                                        {% if product.variants.all %}
-                                        <span class="product-o__price">₹{{product.price}}
-                                        <!-- <span class="product-o__discount">₹160.00</span></span> -->
+                                        {% else%}
+                                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                            <span class="product-o__price">₹{{product.price}}
                                         {% endif %}
+
+                                        <!-- {% if product.variants.all %} -->
+                                        <!-- <span class="product-o__discount">₹160.00</span></span> -->
+                                        <!-- {% endif %} -->
+                                            <!-- <span class="product-o__review">(20)</span> -->
+                                        </div>
                                     </div>
 
                                 </div>
@@ -757,5 +753,34 @@
                     showToastMessage('Please select a size','error');
                 }
             });
+
+           // Get all stars and the hidden input field
+        const stars = document.querySelectorAll('.star');
+        const ratingInput = document.getElementById('rating-input');
+        const selectedRatingElement = document.getElementById('selected-rating');
+
+        // Add click event listener to each star
+        stars.forEach(star => {
+            star.addEventListener('click', function () {
+                // Get the selected rating value
+                const ratingValue = this.getAttribute('data-value');
+
+                // Update the hidden input value
+                ratingInput.value = ratingValue;
+
+                // Update the displayed rating value
+                selectedRatingElement.textContent = ratingValue;
+
+                // Clear previously selected stars
+                stars.forEach(s => s.classList.remove('selected'));
+
+                // Highlight the selected star and all previous ones
+                for (let i = 0; i < ratingValue; i++) {
+                    stars[i].classList.add('selected');
+                }
+            });
+        });
+
+
         </script>
 {% endblock %}
