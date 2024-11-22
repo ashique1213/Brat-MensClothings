@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('products', '0022_remove_variantsize_status_variantsize_is_deleted'),
-        ('wishlist', '0001_initial'),
+        ('wishlist', '0001_initial'), 
     ]
 
     operations = [

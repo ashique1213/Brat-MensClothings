@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('products', '0022_remove_variantsize_status_variantsize_is_deleted'),
-        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL), 
     ]
 
     operations = [
