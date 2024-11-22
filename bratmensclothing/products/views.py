@@ -4,18 +4,36 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.views.decorators.cache import never_cache
 from django.db.models import F
+from django.http import JsonResponse
+from django.core.paginator import Paginator
+
+
 
 def is_staff(user):
     return user.is_staff
 
 def add_brands(request):
-    if request.method=='POST':
-        brand=request.POST.get('brandname')
-        value=Brand.objects.create(brandname=brand)
-        print(value)
-        messages.success(request, 'Brand added successfully!')  
-        return redirect('products:view_brands')
-    return render(request,'admin/brand.html')
+    if request.method == 'POST':
+        brand = request.POST.get('brandname', '').strip()
+        
+        errors = {}
+
+        if not brand:
+            errors['brand_error'] = 'Brand name is required.'
+        
+        elif len(brand) < 2:
+            errors['brand_error'] = 'Brand name must be at least 2 characters long.'
+
+        elif Brand.objects.filter(brandname__iexact=brand).exists():
+            errors['brand_error'] = 'Brand already exists.'
+
+        if errors:
+            return JsonResponse({'success': False, 'errors': errors})
+
+        Brand.objects.create(brandname=brand)
+        return JsonResponse({'success': True, 'message': 'Brand added successfully!'})
+
+    return render(request, 'admin/brand.html')
 
 
 @login_required(login_url='accounts:admin_login')
@@ -23,20 +41,38 @@ def add_brands(request):
 @user_passes_test(is_staff,'accounts:admin_login')
 def view_brands(request):
     Brands=Brand.objects.all().order_by('is_deleted', '-created_at')
+    paginator = Paginator(Brands, 5)  
+
+    page_number = request.GET.get('page')  
+    
+    Brands = paginator.get_page(page_number) 
+
     return render(request,'admin/brand.html',{'brands':Brands})
 
 
-def edit_brands(request,brand_id):
-    Brands = get_object_or_404(Brand, brand_id=brand_id)
+def edit_brands(request, brand_id):
+    brand = get_object_or_404(Brand, brand_id=brand_id)
 
     if request.method == 'POST':
-        brandname = request.POST.get('brandname')
-        Brands.brandname = brandname
-        Brands.save()  
-        messages.success(request, 'Brand updated successfully!')  
-        return redirect('products:view_brands')  
-    return render(request, 'admin/brand.html', {'brands':Brands})
+        brandname = request.POST.get('brandname', '').strip()
+        errors = {}
 
+        if not brandname:
+            errors['brand_error'] = 'Brand name is required.'
+        elif len(brandname) < 2:
+            errors['brand_error'] = 'Brand name must be at least 2 characters long.'
+        elif Brand.objects.filter(brandname__iexact=brandname).exclude(brand_id=brand_id).exists():
+            errors['brand_error'] = 'Brand already exists.'
+
+        if errors:
+            return JsonResponse({'success': False, 'errors': errors})
+
+        brand.brandname = brandname
+        brand.save()
+        
+        return JsonResponse({'success': True, 'message': 'Brand updated successfully!'})
+
+    return render(request, 'admin/brand.html', {'brand': brand})
 
 
 def soft_delete_brand(request,brand_id):
@@ -65,7 +101,6 @@ def add_category(request):
         messages.success(request, 'Category added successfully!')  
         return redirect('products:view_category')
     return render(request,'admin/category.html')
-
 
 
 @login_required(login_url='accounts:admin_login')
@@ -112,9 +147,13 @@ def edit_category(request, category_id):
 @never_cache
 @user_passes_test(is_staff,'accounts:admin_login')
 def viewproducts(request):
-    products = ProductDetails.objects.all()
+    products = ProductDetails.objects.all().order_by('-created_at')
     brands = Brand.objects.filter(is_deleted=False)
     categories = Category.objects.filter(is_deleted=False)
+    paginator=Paginator(products,3)
+
+    page_number = request.GET.get('page')  # Get the current page number from the URL
+    products = paginator.get_page(page_number) 
 
     return render(request, 'admin/products/product.html', {'products': products,'brands': brands,'categories': categories})
 
@@ -224,7 +263,7 @@ def restoreproduct(request, product_id):
 @user_passes_test(is_staff,'accounts:admin_login')
 def view_sizevariants(request, product_id):
     product = get_object_or_404(ProductDetails, product_id=product_id)
-    variant_sizes = VariantSize.objects.filter(product=product)
+    variant_sizes = VariantSize.objects.filter(product=product).order_by('size')
     
     return render(request, 'admin/products/variantsize.html', {
         'product': product,
@@ -236,10 +275,39 @@ def add_sizevariants(request, product_id):
     product = get_object_or_404(ProductDetails, product_id=product_id)
 
     if request.method == 'POST':
-        size = request.POST.get('size')
-        price = request.POST.get('price')
-        quantity = request.POST.get('quantity')
+        size = request.POST.get('size').strip()
+        price = request.POST.get('price').strip()
+        quantity = request.POST.get('quantity').strip()
 
+        errors={}
+        if not size:
+            errors['variant_error'] = 'Size is required.'
+        
+        elif len(size) > 6:
+            errors['variant_error'] = 'Size length is too long. Maximum 6 characters allowed.'
+        
+        elif VariantSize.objects.filter(size__iexact=size, product=product).exists():
+            errors['variant_error'] = 'This size variant already exists for this product.'
+        
+        try:
+            price = float(price) if price else None
+            if price is None or price <= 0:
+                errors['price_error'] = 'Price must be a positive number.'
+        
+        except (ValueError, TypeError):
+            errors['price_error'] = 'Invalid price format.'
+
+        try:
+            quantity = int(quantity) if quantity else None
+            if quantity is None or quantity <= 0:
+                errors['quantity_error'] = 'Quantity must be a positive integer.'
+        
+        except (ValueError, TypeError):
+            errors['quantity_error'] = 'Invalid quantity format.'
+
+        if errors:
+            return JsonResponse({'success': False, 'errors': errors})
+        
         if size and price and quantity:
             VariantSize.objects.create(
                 product=product,  
@@ -247,8 +315,9 @@ def add_sizevariants(request, product_id):
                 price=price,
                 qty=quantity
             )
-            messages.success(request, 'Size variant added successfully!')
-            return redirect('products:view_sizevariants', product_id=product_id)  
+            # messages.success(request, 'Size variant added successfully!')
+            # return redirect('products:view_sizevariants', product_id=product_id) 
+            return JsonResponse({'success': True, 'message': 'Size variant added successfully!'}) 
         else:
             messages.error(request, 'All fields are required.')
 
@@ -259,15 +328,15 @@ def edit_sizevariants(request, variant_id):
     variant = get_object_or_404(VariantSize, variant_id=variant_id)
 
     if request.method == 'POST':
-        size = request.POST.get('size')
-        price = request.POST.get('price')
-        quantity = request.POST.get('quantity')
+        size = request.POST.get('size').strip()
+        price = request.POST.get('price').strip()
+        quantity = request.POST.get('quantity').strip()
 
         if size and price and quantity:
             variant.size = size
             variant.price = price
-            variant.qty = quantity
-            # variant.qty = F('qty') + quantity
+            # variant.qty = quantity
+            variant.qty = F('qty') + quantity
             variant.save() 
 
             messages.success(request, 'Size variant updated successfully!')
@@ -281,12 +350,20 @@ def edit_sizevariants(request, variant_id):
     })
 
 
-def delete_sizevariant(request, variant_id):
-    variant = get_object_or_404(VariantSize, variant_id=variant_id)
+def soft_delete_variant(request,variant_id):
+    variant= get_object_or_404(VariantSize,variant_id=variant_id)
+    variant.is_deleted=True 
+    variant.save()
 
-    if request.method == 'POST':
-        variant.delete()  
-        messages.success(request, f'Variant size {variant.size} has been permanently deleted!')
-        return redirect('products:view_sizevariants', product_id=variant.product.product_id)
-    
+    messages.success(request, 'Variant successfully Unlisted!')
+    return redirect('products:view_sizevariants',product_id=variant.product.product_id)
+
+def restore_variant(request,variant_id):
+    variant= get_object_or_404(VariantSize,variant_id=variant_id)
+    variant.is_deleted=False 
+    variant.save()
+
+    messages.success(request, 'Variant successfully listed!')
+    return redirect('products:view_sizevariants',product_id=variant.product.product_id)
+
 

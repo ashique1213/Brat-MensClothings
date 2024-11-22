@@ -13,6 +13,34 @@
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
     
     <style>
+
+
+        .pagination-container {
+            display: flex; /* Use flexbox for alignment */
+            justify-content: flex-end; /* Aligns child elements to the right */
+            margin-top: 20px; /* Adds space above the pagination */
+        }
+        
+        .pagination {
+            display: flex; /* Ensure pagination links are in a row */
+        }
+        
+        .step-links {
+            display: flex; /* Flexbox for step links to align correctly */
+            align-items: center; /* Center items vertically */
+        }
+        
+        .step-links a {
+            margin: 0 5px; /* Spacing between links */
+            text-decoration: none; /* Removes underline from links */
+        }
+        
+        .current {
+            margin: 0 10px; /* Spacing around current page text */
+            font-weight: bold; /* Makes the current page text bold */
+        }
+
+            
         table {
             width: 100%;
             border-collapse: collapse;
@@ -30,6 +58,12 @@
             height: 50px;
             object-fit: cover;
         }
+
+        p.text-danger {
+            font-size: 10px;
+            margin-left: 5px;
+            color: red; /* Set the text color to red for error messages */
+          }
     </style>
 </head>
 <body class="sb-nav-fixed">
@@ -78,11 +112,11 @@
                             <div class="sb-nav-link-icon"><i class="fas fa-box-open"></i></div>
                             Products
                         </a>
-                        <a class="nav-link" href="">
+                        <a class="nav-link" href="{% url 'order:order_details' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-shopping-cart"></i></div>
                             Orders
                         </a>
-                        <a class="nav-link" href="">
+                        <a class="nav-link" href="{% url 'coupon:coupon_details'%}">
                             <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
                             Coupons
                         </a>
@@ -104,7 +138,7 @@
         <div id="layoutSidenav_content">
             <main>
                 <div class="container-fluid px-4">
-                    <h1 class="mt-4">Brand</h1>
+                    <h3 class="mt-4">Brand</h3>
                     <ol class="breadcrumb mb-4">
                         <li class="breadcrumb-item"><a href="">Dashboard</a></li>
                         <li class="breadcrumb-item active">Brand</li>
@@ -182,7 +216,7 @@
                                     {% for brand in brands %}
                                     <tr>
                                         <td>{{brand.brand_id}}</td>
-                                        <td>{{brand.brandname}}</td>
+                                        <td>{{brand.brandname |title}}</td>
                                         <td>{{brand.created_at |date:"Y-m-d" }}</td>
                                         <td>
                                             <button type="button" class="btn btn-primary btn-sm me-3" data-bs-toggle="modal" data-bs-target="#editBrandModal{{ brand.brand_id }}">
@@ -245,12 +279,37 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            
                                         </td>
                                     </tr>
+
+
                                     {% endfor %}
                                 </tbody>
                             </table>
                         </div>
+
+                        <div class="pagination-container">
+                            <div class="pagination">
+                                <span class="step-links">
+                                    {% if brands.has_previous %}
+                                        <a href="?page=1">&laquo; First</a>
+                                        <a href="?page={{ brands.previous_page_number }}">Previous</a>
+                                    {% endif %}
+                            
+                                    <span class="current">
+                                        Page {{ brands.number }} of {{ brands.paginator.num_pages }}.
+                                    </span>
+                            
+                                    {% if brands.has_next %}
+                                        <a href="?page={{ brands.next_page_number }}">Next</a>
+                                        <a href="?page={{ brands.paginator.num_pages }}">Last &raquo;</a>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+
+
                     </div>
                     
                 </div>
@@ -268,40 +327,24 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form method="post" action="{% url 'products:add_brands' %}">
+                <form method="post" action="" id="BrandaddForm">
                     {% csrf_token %}
                     <div class="mb-3">
                         <label for="brandname" class="form-label">Brand Name</label>
                         <input type="text"  name="brandname" class="form-control" id="brandname" required>
-                        <p hidden id="brandNameError" style="color:red; font-size: 12px;">Field cannot be empty</p>
+                        <p id="brand_error" class="text-danger"></p> <!-- Error message container -->
                     </div>
-                
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" id="brandNameSubmitBtn" class="btn btn-primary">Submit</button>
+                        <button type="submit" class="btn btn-primary">Submit</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-    <script>
-        const brandNameError = document.getElementById('brandNameError')
-        const brandNameInput = document.getElementById('brandname')
-        const brandNameSubmitBtn = document.getElementById('brandNameSubmitBtn');
-        brandNameSubmitBtn.addEventListener('click',(event)=>{
-            const value = brandNameInput.value;
-            
-            console.log(value);
-            if(value.trim()===''){
-                event.preventDefault();
-                brandNameError.hidden = false
-                return
-            }else{
-                brandNameError.hidden = true
-            }
-        })
-    </script>
 </div>
+
+
 
 {% for brand in brands %}
 <!-- Edit Brand Modal -->
@@ -313,12 +356,12 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form method="post" action="{% url 'products:edit_brands' brand.brand_id %}">
+                <form method="post" action="" id="BrandeditForm{{ brand.brand_id }}" data-brand-id="{{ brand.brand_id }}">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label for="brandname" class="form-label">Brand Name</label>
+                        <label for="brandname{{ brand.brand_id }}" class="form-label">Brand Name</label>
                         <input type="text" name="brandname" class="form-control" id="brandname{{ brand.brand_id }}" value="{{ brand.brandname }}" required>
-                      
+                        <p id="brand_error{{ brand.brand_id }}" class="text-danger"></p> <!-- Error message container -->
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -329,6 +372,7 @@
         </div>
     </div>
 </div>
+
 {% endfor %}
 
 
@@ -344,6 +388,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
     <script>
 
@@ -372,6 +417,59 @@
         
             modal.find('form').attr('action', actionUrl);
         });
+
+
+
+       $('#BrandaddForm').submit(function(e) {
+            e.preventDefault(); // Prevent default form submission
+
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'products:add_brands' %}",
+                data: $(this).serialize(), // Serialize form data
+                success: function(response) {
+                    if (response.success) {
+                        // Close the modal and reload the page
+                        alert(response.message);
+                        $('#addBrandModal').modal('hide');
+                        location.reload();
+                    } else {
+                        // Display validation errors in the form
+                        $.each(response.errors, function(key, value) {
+                            $('#' + key).text(value).show(); // Show each error
+                        });
+                    }
+                }
+            });
+        });
+
+        $(document).on('submit', 'form[id^="BrandeditForm"]', function(e) {
+            e.preventDefault(); // Prevent default form submission
+        
+            const form = $(this); // Capture the specific form
+            const brandId = form.data('brand-id'); // Get brand ID from data attribute
+            const modalId = `#editBrandModal${brandId}`; // Construct modal ID for the current brand
+        
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'products:edit_brands' 0 %}".replace('0', brandId), // Replace '0' with the actual brand ID
+                data: form.serialize(), // Serialize form data
+                success: function(response) {
+                    if (response.success) {
+                        // Close the modal for the current brand and reload the page if needed
+                        $(modalId).modal('hide');
+                        location.reload(); // Optionally reload or update content dynamically
+                    } else {
+                        // Display validation errors within the form
+                        $.each(response.errors, function(key, value) {
+                            form.find(`#${key}${brandId}`).text(value).show(); // Show each error within form context
+                        });
+                    }
+                }
+            });
+        });
+        
+
 
     </script>
 </body>

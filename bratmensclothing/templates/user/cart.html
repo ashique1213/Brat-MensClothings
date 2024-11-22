@@ -2,10 +2,103 @@
 
 {% block content %}
 
+
+<style>
+    .table-p__img-wrap {
+        position: relative; /* Ensure child elements can be positioned relative to this */
+    }
+    
+    .out-of-stock-overlay {
+        position: absolute; /* Position overlay relative to the image */
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(202, 129, 129, 0.5); /* Semi-transparent red background */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-weight: bold;
+        font-size: 16px; /* Adjust font size as needed */
+        text-align: center; /* Center text */
+    }
+     
+    
+
+    
+    .form-inline {
+        display: flex;
+        gap: 10px;
+    }
+
+    .coupon-card {
+        background-color: #f9f9f9;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #e1e1e1;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        max-height: 70px;
+        margin: 5px 0;
+    }
+    
+        
+        .coupon-header {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .coupon-details {
+            font-size: 13px;
+            color: #000;
+        }
+        
+       
+        .coupon-info {
+            margin-bottom: 8px;
+        }
+        
+        .coupon-info__title {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .coupon-info__value {
+            color: #49c36e;
+            font-size: 13px;
+            font-weight: normal;
+        }
+        
+        .coupon-info__value:hover {
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        
+        .alter-height {
+            height: 100px;
+        }
+    
+    
+        .coupon-card-2{
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e1e1e1;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            height: 60px;
+            width: 210%;
+            margin: 5px 1px;
+    
+        } 
+        
+</style>
+
 {% if cart_items %}
 
    <!--====== App Content ======-->
-   <div class="app-content">
+<div class="app-content">
 
     <!--====== Section 1 ======-->
     <div class="u-s-p-b-30">
@@ -35,12 +128,12 @@
     <div class="u-s-p-b-60">
 
         <!--====== Section Intro ======-->
-        <div class="section__intro u-s-m-b-60">
+        <div class="section__intro u-s-p-b-30">
             <div class="container">
                 <div class="row">
                     <div class="col-lg-12">
-                        <div class="section__text-wrap">
-                            <h1 class="section__heading u-c-secondary">SHOPPING CART</h1>
+                        <div class="section__text-wrap"> 
+                            <h1 class="section__heading u-c-secondary">Shoping Cart</h1>
                         </div>
                     </div>
                 </div>
@@ -52,211 +145,208 @@
         <!--====== Section Content ======-->
         <div class="section__content">
             <div class="container">
-                <div class="row">
-                    {% for cart_item in cart_items %}
-
-                    <div class="col-lg-12 col-md-12 col-sm-12 u-s-m-b-30">
-
-                        <div class="table-responsive">
-                            <table class="table-p">
-                                <tbody>
-
-                                    <!--====== Row ======-->
-                                    <tr>
-                                        <td>
-                                            <div class="table-p__box">
-                                                    <div class="table-p__img-wrap">
-                                                        <img class="u-img-fluid" src="{{ cart_item.variant.product.image1.url }}" alt="{{ cart_item.variant.product.product_name }}">
-                                                    </div>
-                                                    <div class="table-p__info">
-                                                        <span class="table-p__name">
-                                                            <a href="">{{ cart_item.variant.product.product_name }}</a>
-                                                        </span>
-                                                        <p class="table-p__category ">
-                                                            <!-- <span>Categories: </span> -->
-                                                            {% for category in cart_item.variant.product.category.all %} <!-- Loop through categories -->
-                                                                {{ category.category }}{% if not forloop.last %}, {% endif %} <!-- Add a comma except for the last category -->
-                                                            {% endfor %}
-                                                        </p>
-                                                        <ul class="table-p__variant-list">
-                                                            <li>
-                                                                <span>Size: {{ cart_item.variant.size }}</span>
-                                                            </li>
-                                                            <li>
-                                                                <span>Color: {{ cart_item.variant.product.color }}</span>  <!-- Assuming color is stored in ProductDetails -->
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                              
-                                            </div>
-                                        </td>
-                                        <td>
-
-                                            <span class="table-p__price">₹ {{ cart_item.item_total }}</span></td>
-                                        <td>
-                                            <div class="table-p__input-counter-wrap">
-
-                                                <!--====== Input Counter ======-->
-                                                <div class="input-counter">
-
-                                                    <span class="input-counter__minus fas fa-minus"></span>
-
-                                                    <input class="input-counter__text input-counter--text-primary-style" type="text" value="{{ cart_item.quantity }}" data-min="1" data-max="1000">
-
-                                                    <span class="input-counter__plus fas fa-plus"></span></div>
-                                                <!--====== End - Input Counter ======-->
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="table-p__del-wrap">
-
-                                                <a class="far fa-trash-alt table-p__delete-link" href="{% url 'cart:delete_item' cart_item.cartitem_id %}"></a></div>
-                                        </td>
-                                    </tr>
-                                    <!--====== End - Row ======-->
-
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                    </div>
-                {% empty %}
-                    <p>Your cart is empty.</p>
-                {% endfor %}   
 
 
-                    <div class="col-lg-12">
-                        <div class="route-box">
-                            <div class="route-box__g1">
-
-                                <a class="route-box__link" href=""><i class="fas fa-long-arrow-alt-left"></i>
-
-                                    <span>CONTINUE SHOPPING</span></a></div>
-                            <div class="route-box__g2">
-
-                                <a class="route-box__link" href=""><i class="fas fa-trash"></i>
-
-                                    <span>CLEAR CART</span></a>
-
-                                <a class="route-box__link" href=""><i class="fas fa-sync"></i>
-
-                                    <span>UPDATE CART</span></a></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--====== End - Section Content ======-->
-    </div>
-    <!--====== End - Section 2 ======-->
-
-
-    <!--====== Section 3 ======-->
-    <div class="u-s-p-b-60">
-
-        <!--====== Section Content ======-->
-        <div class="section__content">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-12 col-md-12 col-sm-12 u-s-m-b-30">
-                        <form class="f-cart">
-                            <div class="row">
-                                <div class="col-lg-4 col-md-6 u-s-m-b-30">
-                                    <div class="f-cart__pad-box">
-                                        <h1 class="gl-h1">ESTIMATE SHIPPING AND TAXES</h1>
-
-                                        <span class="gl-text u-s-m-b-30">Enter your destination to get a shipping estimate.</span>
-                                        <div class="u-s-m-b-30">
-
-                                            <!--====== Select Box ======-->
-
-                                            <label class="gl-label" for="shipping-country">COUNTRY *</label><select class="select-box select-box--primary-style" id="shipping-country">
-                                                <option selected value="">Choose Country</option>
-                                                <option value="uae">United Arab Emirate (UAE)</option>
-                                                <option value="uk">United Kingdom (UK)</option>
-                                                <option value="us">United States (US)</option>
-                                            </select>
-                                            <!--====== End - Select Box ======-->
-                                        </div>
-                                        <div class="u-s-m-b-30">
-
-                                            <!--====== Select Box ======-->
-
-                                            <label class="gl-label" for="shipping-state">STATE/PROVINCE *</label><select class="select-box select-box--primary-style" id="shipping-state">
-                                                <option selected value="">Choose State/Province</option>
-                                                <option value="al">Alabama</option>
-                                                <option value="al">Alaska</option>
-                                                <option value="ny">New York</option>
-                                            </select>
-                                            <!--====== End - Select Box ======-->
-                                        </div>
-                                        <div class="u-s-m-b-30">
-
-                                            <label class="gl-label" for="shipping-zip">ZIP/POSTAL CODE *</label>
-
-                                            <input class="input-text input-text--primary-style" type="text" id="shipping-zip" placeholder="Zip/Postal Code"></div>
-                                        <div class="u-s-m-b-30">
-
-                                            <a class="f-cart__ship-link btn--e-transparent-brand-b-2" href="">CALCULATE SHIPPING</a></div>
-
-                                        <span class="gl-text">Note: There are some countries where free shipping is available otherwise our flat rate charges or country delivery charges will be apply.</span>
-                                    </div>
-                                </div>
-                                <div class="col-lg-4 col-md-6 u-s-m-b-30">
-                                    <div class="f-cart__pad-box">
-                                        <h1 class="gl-h1">NOTE</h1>
-
-                                        <span class="gl-text u-s-m-b-30">Add Special Note About Your Product</span>
-                                        <div>
-
-                                            <label for="f-cart-note"></label><textarea class="text-area text-area--primary-style" id="f-cart-note"></textarea></div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-4 col-md-6 u-s-m-b-30">
-                                    <div class="f-cart__pad-box">
-                                        <div class="u-s-m-b-30">
-                                            <table class="f-cart__table">
-                                                <tbody>
-                                                    <tr>
-                                                        <td>SHIPPING</td>
-                                                        <td>$4.00</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>TAX</td>
-                                                        <td>$0.00</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>SUBTOTAL</td>
-                                                        <td>$379.00</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>GRAND TOTAL</td>
-                                                        <td>$379.00</td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        <div>
-
-                                            <button class="btn btn--e-brand-b-2" type="submit"> PROCEED TO CHECKOUT</button></div>
+                <div class="row u-s-m-b-16">
+                    <div class="col-lg-6">
+                        <div class="o-summary__item-wrap gl-scroll alter-height"  style="display: grid;grid-template-columns: repeat(2, 1fr); gap: 10px; height: 130px;">
+                            {% if coupons%}
+                            {% for coupon in coupons %}
+                            <div class="coupon-card">
+                                <div class="coupon-details u-s-m-b-10">
+                                    <div class="coupon-info">
+                                        <span class="coupon-info__value">
+                                            THE <strong>{{ coupon.code|upper }}</strong> GET <strong>
+                                                ₹{{ coupon.discount_amount|capfirst |floatformat:0 }}
+                                            </strong> OFF FOR </span><br>
+                                        <span>
+                                            {% if coupon.category != 'None' %}
+                                                <strong>{{ coupon.category | upper }}</strong> 
+                                            {% endif %}
+                                            Minimum Purchase: ₹{{ coupon.min_purchase_amount | floatformat:0 }}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
-                        </form>
+                            {% endfor %}
+                            {% else %}
+                            <div class="coupon-card-2">
+                                    <div class="coupon-info">
+                                        <span class="coupon-info__value"><strong>NO COUPON AVAILABLE</strong> </span>
+                                    </div>
+                            </div>
+                            {% endif %}
+
+                        </div>
+                    </div>
+                
+                    <div class="col-lg-6">
+                        <div class="msg">
+                            <div class="c-f u-s-m-b-16">
+                                <span class="gl-text u-s-m-b-16">Enter your coupon code if you have one.</span>
+                                <form class="c-f__form" style="width: 100%;" method="post" action="{% url 'coupon:apply_coupon' %}">
+                                    {% csrf_token %}
+                                    <div class="u-s-m-b-16">
+                                        {% if couponuser and couponuser.status %}
+                                            <div class="u-s-m-b-15 form-inline">
+                                                <label for="coupon"></label>
+                                                <input class="input-text input-text--primary-style" name="couponcode" type="text" id="coupon" required value="{{ couponuser.coupon.code }}">
+                                                <a href="{% url 'coupon:remove_coupon' %}" class="btn btn--e-transparent-brand-b-2">REMOVE</a>                                            </div>
+                                        {% else %}
+                                            <div class="u-s-m-b-15 form-inline">
+                                                <label for="coupon"></label>
+                                                <input class="input-text input-text--primary-style" name="couponcode" type="text" id="coupon" required placeholder="Coupon Code">
+                                                <button class="btn btn--e-transparent-brand-b-2" type="submit">APPLY</button>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </form>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Cart Items Section -->
+                    <div class="col-lg-7 col-md-12 u-s-m-b-30">
+                        {% for cart_item in cart_items %}
+                        <div class="table-responsive mb-4">
+                            <table class="table-p">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="table-p__box d-flex">
+                                                <!-- <div class="table-p__img-wrap me-3">
+                                                    <img class="u-img-fluid" src="{{ cart_item.variant.product.image1.url }}" alt="{{ cart_item.variant.product.product_name }}">
+                                                </div> -->
+                                                <div class="table-p__img-wrap me-3 position-relative">
+                                                    <img class="u-img-fluid" src="{{ cart_item.variant.product.image1.url }}" alt="{{ cart_item.variant.product.product_name }}">
+                                                    
+                                                    {% if cart_item.variant.qty == 0 %}
+                                                    <div class="out-of-stock-overlay">
+                                                        <span class="out-of-stock-text">Out of Stock</span>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+
+
+                                                <div class="table-p__info">
+                                                    <span class="table-p__name">
+                                                        <a href="">{{ cart_item.variant.product.product_name }}</a>
+                                                    </span>
+                                                    <p class="table-p__category" style="font-size: 13px; font-weight: bold;">
+                                                        {% for category in cart_item.variant.product.category.all %}
+                                                            {{ category.category }}{% if not forloop.last %}, {% endif %}
+                                                        {% endfor %}
+                                                    </p>
+                                                    <ul class="table-p__variant-list list-unstyled" style="font-size: 12px; font-weight: bold;">
+                                                        <li>Size: {{ cart_item.variant.size }}</li>
+                                                        <li>Color: {{ cart_item.variant.product.color }}</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <td class="text-center">
+                                            <span class="table-p__price">₹<span class="item-total" data-id="{{ cart_item.cartitem_id }}">{{ cart_item.item_total }}</span></span>
+                                        </td>
+
+                                        <!-- <td class="text-center" >
+                                            <div class="table-p__input-counter-wrap">
+                                                <div class="input-counter">
+                                                    <span class="input-counter__minus fas fa-minus" data-id="{{ cart_item.cartitem_id }}"></span>
+                                                    <input class="input-counter__text input-counter--text-primary-style" type="text" value="{{ cart_item.quantity }}" data-min="1" data-max="6" data-id="{{ cart_item.cartitem_id }}">
+                                                    <span class="input-counter__plus fas fa-plus" data-id="{{ cart_item.cartitem_id }}"></span>
+                                                </div>
+                                            </div>
+                                        </td> -->
+                                        <td class="text-center">
+                                            <div class="table-p__input-counter-wrap">
+                                                <div class="input-counter">
+                                                    <span class="input-counter__minus fas fa-minus" data-id="{{ cart_item.cartitem_id }}" {% if cart_item.variant.qty == 0 %}style="opacity: 0.5; pointer-events: none;"{% endif %}></span>
+                                                    <input class="input-counter__text input-counter--text-primary-style" type="text" value="{{ cart_item.quantity }}" data-min="1" data-max="6" data-id="{{ cart_item.cartitem_id }}" {% if cart_item.variant.qty == 0 %}disabled{% endif %}>
+                                                    <span class="input-counter__plus fas fa-plus" data-id="{{ cart_item.cartitem_id }}" {% if cart_item.variant.qty == 0 %}style="opacity: 0.5; pointer-events: none;"{% endif %}></span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        
+
+                                        
+                                        <td class="text-center">
+                                            <a class="far fa-trash-alt table-p__delete-link" href="{% url 'cart:delete_item' cart_item.cartitem_id %}"></a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        {% endfor %}
+                    </div>
+        
+                    <!-- Summary and Checkout Section with Sticky Positioning -->
+                    <div class="col-lg-5 col-md-12">
+                        <div class="sticky-top" style="top: 20px;">
+                            <div class="o-summary__section u-s-m-b-30">
+                                <div class="f-cart__pad-box">
+                                    <table class="f-cart__table">
+                                        <tbody>
+                                            <tr>
+                                                <td>SHIPPING</td>
+                                                <td>₹{{delivery_charge|floatformat:2 }}</td>
+                                            </tr>
+
+                                            {% if discount %}
+                                            <tr>
+                                                <td style="color: #49c36e; font-weight: bold;">DISCOUNT</td>
+                                                <td>₹{{ discount }}</td>
+                                            </tr>
+                                            {% endif %}
+                                            
+                                            <tr>
+                                                <td>TAX</td>
+                                                <td>₹{{ tax|floatformat:2 }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>SUBTOTAL</td>
+                                                <td>₹{{ grand_total|floatformat:2 }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>GRAND TOTAL</td>
+                                                <td>₹{{ grand_total|floatformat:2 }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <a href="{% url 'order:checkout' %}" 
+                                    style="display: inline-block; background-color: black; color: white; text-align: center; text-decoration: none; border: none; border-radius: 3px; padding: 15px 10px; cursor: pointer; width: 100%;">
+                                    PROCEED TO CHECKOUT
+                                 </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+        
+                    <!-- Route Box Section -->
+                    <div class="col-lg-12 mt-4">
+                        <div class="route-box d-flex justify-content-between">
+                            <a class="route-box__link" href="{% url 'userss:category_details' %}"><i class="fas fa-long-arrow-alt-left"></i> CONTINUE SHOPPING</a>
+                            <div>
+                                <!-- <a class="route-box__link me-3" href=""><i class="fas fa-trash"></i> CLEAR CART</a> -->
+                                <a class="route-box__link" href=""><i class="fas fa-sync"></i> UPDATE CART</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </div> 
         <!--====== End - Section Content ======-->
     </div>
-    <!--====== End - Section 3 ======-->
+    <!--====== End - Section 2 ======-->
 </div>
 <!--====== End - App Content ======-->
 
 {% else %}
-
-   <!--====== App Content ======-->
-   <div class="app-content">
+<!--====== App Content ======-->
+   <div class="app-content u-s-p-y-60" >
 
     <!--====== Section 1 ======-->
     <div class="u-s-p-y-60">
@@ -273,7 +363,13 @@
 
                                 <span class="empty__text-1">No items found on your cart.</span>
 
-                                <a class="empty__redirect-link btn--e-brand" href="{% url 'userss:category_details' %}">CONTINUE SHOPPING</a></div>
+                                {%if request.user.is_authenticated %}
+                                <a class="empty__redirect-link btn--e-brand" href="{% url 'userss:category_details' %}">CONTINUE SHOPPING</a>
+                                {% else %}
+                                <a class="empty__redirect-link btn--e-brand" href="{% url 'accounts:login_user' %}">PLEASE SIGN IN</a>
+                                {% endif %}
+                            
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -285,11 +381,75 @@
 </div>
 <!--====== End - App Content ======-->
 
-
-
 {% endif %}
 
 
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const minusButtons = document.querySelectorAll('.input-counter__minus');
+        const plusButtons = document.querySelectorAll('.input-counter__plus');
 
+        function updateCartItemQuantity(cartItemId, quantity) {
+            fetch(`/cart/update/${cartItemId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'), // Ensure this function works
+                },
+                body: JSON.stringify({ quantity: quantity })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const itemTotalElement = document.querySelector(`.item-total[data-id="${cartItemId}"]`);
+                    itemTotalElement.textContent = ' ' + data.new_total; // Update the displayed total for the specific item
+                } else {
+                    console.error(data.error); // Log error for debugging
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        minusButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const input = button.nextElementSibling;
+                const cartItemId = button.getAttribute('data-id');
+                let quantity = parseInt(input.value);
+
+                    updateCartItemQuantity(cartItemId, quantity);
+                    location.reload();
+                }
+            );
+        });
+
+        plusButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const input = button.previousElementSibling;
+                const cartItemId = button.getAttribute('data-id');
+                let quantity = parseInt(input.value);
+
+               
+                    updateCartItemQuantity(cartItemId, quantity);
+                    location.reload();
+                }
+            );
+        });
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>
 
 {% endblock %}

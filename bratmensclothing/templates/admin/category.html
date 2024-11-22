@@ -85,11 +85,11 @@
                             <div class="sb-nav-link-icon"><i class="fas fa-box-open"></i></div>
                             Products
                         </a>
-                        <a class="nav-link" href="">
+                        <a class="nav-link" href="{% url 'order:order_details' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-shopping-cart"></i></div>
                             Orders
                         </a>
-                        <a class="nav-link" href="">
+                        <a class="nav-link" href="{% url 'coupon:coupon_details'%}">
                             <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
                             Coupons
                         </a>
@@ -110,7 +110,7 @@
         <div id="layoutSidenav_content">
             <main>
                 <div class="container-fluid px-4">
-                    <h1 class="mt-4">Category</h1>
+                    <h3 class="mt-4">Category</h3>
                     <ol class="breadcrumb mb-4">
                         <li class="breadcrumb-item"><a href="">Dashboard</a></li>
                         <li class="breadcrumb-item active">Category</li>
@@ -188,8 +188,8 @@
                                     {% for i in category %}
                                     <tr>
                                         <td>{{i.category_id}}</td>
-                                        <td>{{i.category}}</td>
-                                        <td>{{i.category_type}}</td>
+                                        <td>{{i.category |title}}</td>
+                                        <td>{{i.category_type |title}}</td>
                                         <td>{{i.created_date |date:"Y-m-d"}} </td>
                                         <td>
                                             <button type="button" class="btn btn-primary btn-sm me-3" data-toggle="modal" data-target="#editCategoryModal{{ i.category_id }}">

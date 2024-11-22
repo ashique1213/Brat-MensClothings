@@ -1,0 +1,264 @@
+{% extends "user/base.html" %}
+
+
+{% block content %}  
+
+ <!--====== App Content ======-->
+ <div class="app-content">
+
+    <!--====== Section 1 ======-->
+    <div class="u-s-p-b-30">
+
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="container">
+                <div class="breadcrumb">
+                    <div class="breadcrumb__wrap">
+                        <ul class="breadcrumb__list">
+                            <li class="has-separator">
+
+                                <a href="{% url 'accounts:logout_user' %}">Login</a></li>
+                            <li class="is-marked">
+
+                                <a href="">Otp</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--====== End - Section 1 ======-->
+
+
+    <!--====== Section 2 ======-->
+    <div class="u-s-p-b-30">
+
+        <!--====== Section Intro ======-->
+        <div class="section__intro u-s-p-b-30">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="section__text-wrap">
+                            <h1 class="section__heading u-c-secondary">OTP VERIFICATION</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--====== End - Section Intro ======-->
+
+
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="container">
+                <div class="row row--center">
+                    <div class="col-lg-6 col-md-8 u-s-m-b-30">
+                        <div class="l-f-o">
+                            <div class="l-f-o__pad-box">
+                                <h1 class="gl-h1">OTP VERIFICATION</h1>
+
+                                <span class="gl-text u-s-m-b-30">Enter otp send to email</span>
+                                <form class="l-f-o__form" method="post" id="otp-form">  
+                                    {% csrf_token %}
+                                    <div class="u-s-m-b-30">
+                                        <label class="gl-label" for="reset-email">OTP *</label>
+                                        <input class="input-text input-text--primary-style" name="otp" type="text" placeholder="Enter OTP">
+                                    </div>
+                                   
+                                    <div class="gl-inline">
+                                        <div class="u-s-m-b-30">
+                                            <button class="btn btn--e-transparent-brand-b-2" type="submit">VERIFY</button>
+                                        </div>
+                                        <div class="u-s-m-b-30">
+                                            <p>OTP will expire in: <span id="timer"></span></p>
+                                            <a class="gl-link active resend-otp-link" href="#" data-url="{% url 'accounts:reset_resend_otp' %}">Resend OTP</a>
+                                        </div>
+                                    </div>
+                                    <div class="u-s-m-b-30">
+                                        <a class="gl-link" href="{% url 'accounts:login_user' %}">Back to Login</a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--====== End - Section Content ======-->
+    </div>
+    <!--====== End - Section 2 ======-->
+</div>
+<!--====== End - App Content ======-->
+
+
+<script>
+    
+    $(document).ready(function() {
+        $('#otp-form').on('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+            $('.preloader').addClass('is-active');
+    
+            $.ajax({
+                type: 'POST',
+                url: '{% url "accounts:verify_otp" %}',  // URL for the verify OTP view
+                data: $(this).serialize(),
+                dataType: 'json',
+                success: function(response) {
+                    $('.preloader').removeClass('is-active');
+                    
+                    if (response.status === 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'OTP Verified!',
+                            text: 'Redirecting to reset password...',
+                            confirmButtonColor: '#000',
+                            customClass: {
+                                icon: 'black-icon'
+                            }
+                        }).then(() => {
+                            window.location.href = response.redirect_url;  // Redirect using the URL in the response
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    $('.preloader').removeClass('is-active');
+                    
+                    if (xhr.status === 400) {
+                        const errors = xhr.responseJSON.errors;
+                        let errorMessages = '';
+                        for (let key in errors) {
+                            errorMessages += errors[key] + '<br>';
+                        }
+    
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            html: errorMessages,
+                            confirmButtonColor: '#000',
+                            customClass: {
+                                icon: 'black-icon'
+                            }
+                        });
+                    }
+                }
+            });
+        });
+    });
+
+    
+    $(document).ready(function() {
+        // Set up CSRF token for AJAX requests
+        $.ajaxSetup({
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        });
+    
+        // Initialize OTP timer in seconds (e.g., 60 seconds for demonstration)
+        let otpExpiryTime = 60;
+        const timerElement = $('#timer');  // Ensure you have an HTML element with id="timer" to show the countdown
+    
+        // Start the countdown
+        const countdownTimer = setInterval(() => {
+            if (otpExpiryTime <= 0) {
+                // Stop the timer when it reaches 0
+                clearInterval(countdownTimer);
+                timerElement.text('OTP has expired.');
+    
+                // Optionally disable the resend OTP link (e.g., for visual feedback)
+                $('a.resend-otp-link').addClass('disabled').text('Resend OTP disabled');
+    
+                // Show an alert and redirect to the signup page
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Time Expired',
+                    text: 'Signup Again!',
+                    confirmButtonColor: '#000',
+                    customClass: {
+                        icon: 'black-icon'
+                    },
+                    timer: 3000, // Auto-close after 3 seconds
+                    willClose: () => {
+                        // Redirect to signup page when the alert closes
+                        window.location.href = '{% url "accounts:login_user" %}';
+                    }
+                });
+            } else {
+                // Update the timer display each second
+                let minutes = Math.floor(otpExpiryTime / 60);
+                let seconds = otpExpiryTime % 60;
+                timerElement.text(`${minutes}m ${seconds < 10 ? '0' : ''}${seconds}s`);
+                otpExpiryTime--;
+            }
+        }, 1000);
+    });
+    
+
+
+    $(document).ready(function() {
+        $('.resend-otp-link').on('click', function(event) {
+            event.preventDefault(); // Prevent default action of the link
+    
+            // Show loading state (optional)
+            const $link = $(this);
+            $link.prop('disabled', true).text('Sending...'); // Disable the link and change text
+    
+            $.ajax({
+                type: 'POST',
+                url: $link.data('url'),  // Use the URL stored in data attribute
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'OTP Resent',
+                            text: response.message,
+                            confirmButtonColor: '#000',
+                            customClass: {
+                                icon: 'black-icon'
+                            }
+                        });
+                        // Optionally restart the OTP timer if you have one
+                        // startOtpCountdown();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Something went wrong. Please try again.',
+                            confirmButtonColor: '#000',
+                            customClass: {
+                                icon: 'black-icon'
+                            }
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    let errorMessage = 'An unexpected error occurred.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message; // Use the error message from the server
+                    }
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: errorMessage,
+                        confirmButtonColor: '#000',
+                        customClass: {
+                            icon: 'black-icon'
+                        }
+                    });
+                },
+                complete: function() {
+                    // Reset link state after request is complete
+                    $link.prop('disabled', false).text('Resend OTP'); // Reset link to original state
+                }
+            });
+        });
+    });
+    
+    
+</script>
+
+
+{% endblock %}  

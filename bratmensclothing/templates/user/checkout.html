@@ -1,13 +1,29 @@
 
+{% extends "user/base.html" %}
 
 
+{% block content %}    
+<style>
+    .form-check-input {
+        appearance: none; /* Remove default radio button style */
+        width: 15px;     /* Custom width */
+        height: 15px;    /* Custom height */
+        border: 2px solid black; /* Custom border color */
+        border-radius: 50%; /* Make it circular */
+        outline: none; /* Remove focus outline */
+    }
+    
+    .form-check-input:checked {
+        background-color: black; /* Background color when checked */
+    }
 
-
+    
+</style>
  <!--====== App Content ======-->
  <div class="app-content">
 
     <!--====== Section 1 ======-->
-    <div class="u-s-p-y-60">
+    <div class="u-s-p-b-30">
 
         <!--====== Section Content ======-->
         <div class="section__content">
@@ -17,10 +33,13 @@
                         <ul class="breadcrumb__list">
                             <li class="has-separator">
 
-                                <a href="index.html">Home</a></li>
+                                <a href="">Home</a></li>
+                            <li class="has-separator">
+
+                                <a href="">Cart</a></li>
                             <li class="is-marked">
 
-                                <a href="checkout.html">Checkout</a></li>
+                                <a href="">Checkout</a></li>
                         </ul>
                     </div>
                 </div>
@@ -29,475 +48,335 @@
     </div>
     <!--====== End - Section 1 ======-->
 
+ <!--====== Section 2 ======-->
+ <div class="section__content">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div id="checkout-msg-group">
+                    <div class="msg u-s-m-b-30">
 
-    <!--====== Section 2 ======-->
-    <div class="u-s-p-b-60">
+                        <span class="msg__text">You want to add new address?
 
-        <!--====== Section Content ======-->
-        <div class="section__content">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div id="checkout-msg-group">
-                            <div class="msg u-s-m-b-30">
-
-                                <span class="msg__text">Returning customer?
-
-                                    <a class="gl-link" href="#return-customer" data-toggle="collapse">Click here to login</a></span>
-                                <div class="collapse" id="return-customer" data-parent="#checkout-msg-group">
-                                    <div class="l-f u-s-m-b-16">
-
-                                        <span class="gl-text u-s-m-b-16">If you have an account with us, please log in.</span>
-                                        <form class="l-f__form">
+                            <a class="gl-link" href="#return-customer" data-toggle="collapse">Click here</a></span>
+                        <div class="collapse" id="return-customer" data-parent="#checkout-msg-group">
+                            <div class="col-lg-12 col-md-12">
+                                <div class="dash__box dash__box--shadow dash__box--radius dash__box--bg-white">
+                                    <div class="dash__pad-2">
+                                        <h1 class="dash__h1 u-s-m-b-14">Add new Address</h1>
+    
+                                        <span class="dash__text u-s-m-b-30">We need an address where we could deliver products.</span>
+                                        <form class="dash-address-manipulation" id="addressForm" method="post" action="{% url 'order:add_address_checkout' user.userid %}">
+                                            {% csrf_token %}
                                             <div class="gl-inline">
-                                                <div class="u-s-m-b-15">
-
-                                                    <label class="gl-label" for="login-email">E-MAIL *</label>
-
-                                                    <input class="input-text input-text--primary-style" type="text" id="login-email" placeholder="Enter E-mail"></div>
-                                                <div class="u-s-m-b-15">
-
-                                                    <label class="gl-label" for="login-password">PASSWORD *</label>
-
-                                                    <input class="input-text input-text--primary-style" type="text" id="login-password" placeholder="Enter Password"></div>
+                                                <div class="u-s-m-b-30">
+                                                    <label class="gl-label">ADDRESS *</label>
+                                                    <input class="input-text input-text--primary-style" name="address" type="text" id="address-fname" placeholder="Address">
+                                                    <p id="address_error" style="display: none; color: red; font-size: 10px;"></p> <!-- Error message placeholder -->
+                                                </div>
                                             </div>
+                                            
                                             <div class="gl-inline">
-                                                <div class="u-s-m-b-15">
-
-                                                    <button class="btn btn--e-transparent-brand-b-2" type="submit">LOGIN</button></div>
-                                                <div class="u-s-m-b-15">
-
-                                                    <a class="gl-link" href="lost-password.html">Lost Your Password?</a></div>
+                                                <div class="u-s-m-b-30">
+                                                    <label class="gl-label">STREET *</label>
+                                                    <input class="input-text input-text--primary-style" name="street" type="text" id="address-lname" placeholder="Street">
+                                                    <p id="street_error" style="display: none; color: red; font-size: 10px;"></p> <!-- Error message placeholder -->
+                                                </div>
+                                                <div class="u-s-m-b-30">
+                                                    <label class="gl-label">LANDMARK</label>
+                                                    <input class="input-text input-text--primary-style" name="landmark" type="text" id="address-phone" placeholder="Landmark">
+                                                    <p id="landmark_error" style="display: none; color: red; font-size: 10px;"></p> <!-- Error message placeholder -->
+                                                </div>
                                             </div>
-
-                                            <!--====== Check Box ======-->
-                                            <div class="check-box">
-
-                                                <input type="checkbox" id="remember-me">
-                                                <div class="check-box__state check-box__state--primary">
-
-                                                    <label class="check-box__label" for="remember-me">Remember Me</label></div>
+                                            
+                                            <div class="gl-inline">
+                                                <div class="u-s-m-b-30">
+                                                    <label class="gl-label">TOWN/CITY *</label>
+                                                    <input class="input-text input-text--primary-style" name="city" type="text" id="address-city" placeholder="City">
+                                                    <p id="city_error" style="display: none; color: red; font-size: 10px;"></p> <!-- Error message placeholder -->
+                                                </div>
+                                                <div class="u-s-m-b-30">
+                                                    <label class="gl-label">ZIP/POSTAL CODE *</label>
+                                                    <input class="input-text input-text--primary-style" name="pincode" type="text" id="address-postal" placeholder="Zip/Postal Code">
+                                                    <p id="pincode_error" style="display: none; color: red; font-size: 10px;"></p> <!-- Error message placeholder -->
+                                                </div>
                                             </div>
-                                            <!--====== End - Check Box ======-->
+                                            
+                                            <div class="gl-inline">
+                                                <div class="u-s-m-b-30">
+                                                    <label class="gl-label">DISTRICT *</label>
+                                                    <select class="select-box select-box--primary-style" id="address-district" name="district">
+                                                        <option selected value="">Choose District</option>
+                                                        <option value="alappuzha">Alappuzha</option>
+                                                        <option value="ernakulam">Ernakulam</option>
+                                                        <option value="idukki">Idukki</option>
+                                                        <option value="kannur">Kannur</option>
+                                                        <option value="kasaragod">Kasaragod</option>
+                                                        <option value="kollam">Kollam</option>
+                                                        <option value="kottayam">Kottayam</option>
+                                                        <option value="kozhikode">Kozhikode</option>
+                                                        <option value="malappuram">Malappuram</option>
+                                                        <option value="palakkad">Palakkad</option>
+                                                        <option value="pathanamthitta">Pathanamthitta</option>
+                                                        <option value="thrissur">Thrissur</option>
+                                                        <option value="thiruvananthapuram">Thiruvananthapuram</option>
+                                                        <option value="wayanad">Wayanad</option>
+                                                    </select>
+                                                    <p id="district_error" style="display: none; color: red; font-size: 10px;"></p> <!-- Error message placeholder -->
+                                                </div>
+                                                
+                                                <div class="u-s-m-b-30">
+                                                    <label class="gl-label">STATE *</label>
+                                                    <input class="input-text input-text--primary-style" name="state" type="text" id="address-state" placeholder="State">
+                                                    <p id="state_error" style="display: none; color: red; font-size: 10px;"></p> <!-- Error message placeholder -->
+                                                </div>
+                                            </div>
+                                        
+                                            <button class="btn btn--e-brand-b-2" type="submit">SAVE</button>
                                         </form>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="msg">
-
-                                <span class="msg__text">Have a coupon?
-
-                                    <a class="gl-link" href="#have-coupon" data-toggle="collapse">Click Here to enter your code</a></span>
-                                <div class="collapse" id="have-coupon" data-parent="#checkout-msg-group">
-                                    <div class="c-f u-s-m-b-16">
-
-                                        <span class="gl-text u-s-m-b-16">Enter your coupon code if you have one.</span>
-                                        <form class="c-f__form">
-                                            <div class="u-s-m-b-16">
-                                                <div class="u-s-m-b-15">
-
-                                                    <label for="coupon"></label>
-
-                                                    <input class="input-text input-text--primary-style" type="text" id="coupon" placeholder="Coupon Code"></div>
-                                                <div class="u-s-m-b-15">
-
-                                                    <button class="btn btn--e-transparent-brand-b-2" type="submit">APPLY</button></div>
-                                            </div>
-                                        </form>
+                                        
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
-        <!--====== End - Section Content ======-->
     </div>
-    <!--====== End - Section 2 ======-->
+</div>
 
 
-    <!--====== Section 3 ======-->
-    <div class="u-s-p-b-60">
+<!--====== End - Section 2 ======-->
+   
 
-        <!--====== Section Content ======-->
-        <div class="section__content">
-            <div class="container">
-                <div class="checkout-f">
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <h1 class="checkout-f__h1">DELIVERY INFORMATION</h1>
-                            <form class="checkout-f__delivery">
-                                <div class="u-s-m-b-30">
-                                    <div class="u-s-m-b-15">
 
-                                        <!--====== Check Box ======-->
-                                        <div class="check-box">
 
-                                            <input type="checkbox" id="get-address">
-                                            <div class="check-box__state check-box__state--primary">
 
-                                                <label class="check-box__label" for="get-address">Use default shipping and billing address from account</label></div>
+
+<!--====== Section 3 ======-->
+<div class="section__content">
+    <div class="container">
+        <div class="checkout-f">
+            <div class="row">
+                <!-- Left Column: Order Summary and Shipping/Billing -->
+                <div class="col-lg-6">
+                    <h1 class="checkout-f__h1">ORDER SUMMARY</h1>
+                    <div class="o-summary">
+                        <div class="o-summary__section u-s-m-b-30">
+                            <div class="o-summary__item-wrap gl-scroll">
+                                <!-- Order Items -->
+
+                                 {% for item in cart_items %}
+                                <div class="o-card">
+                                    <div class="o-card__flex">
+                                        <div class="o-card__img-wrap">
+                                            <img class="u-img-fluid" src="{{ item.variant.product.image1.url }}" alt="">
                                         </div>
-                                        <!--====== End - Check Box ======-->
-                                    </div>
-
-                                    <!--====== First Name, Last Name ======-->
-                                    <div class="gl-inline">
-                                        <div class="u-s-m-b-15">
-
-                                            <label class="gl-label" for="billing-fname">FIRST NAME *</label>
-
-                                            <input class="input-text input-text--primary-style" type="text" id="billing-fname" data-bill=""></div>
-                                        <div class="u-s-m-b-15">
-
-                                            <label class="gl-label" for="billing-lname">LAST NAME *</label>
-
-                                            <input class="input-text input-text--primary-style" type="text" id="billing-lname" data-bill=""></div>
-                                    </div>
-                                    <!--====== End - First Name, Last Name ======-->
-
-
-                                    <!--====== E-MAIL ======-->
-                                    <div class="u-s-m-b-15">
-
-                                        <label class="gl-label" for="billing-email">E-MAIL *</label>
-
-                                        <input class="input-text input-text--primary-style" type="text" id="billing-email" data-bill=""></div>
-                                    <!--====== End - E-MAIL ======-->
-
-
-                                    <!--====== PHONE ======-->
-                                    <div class="u-s-m-b-15">
-
-                                        <label class="gl-label" for="billing-phone">PHONE *</label>
-
-                                        <input class="input-text input-text--primary-style" type="text" id="billing-phone" data-bill=""></div>
-                                    <!--====== End - PHONE ======-->
-
-
-                                    <!--====== Street Address ======-->
-                                    <div class="u-s-m-b-15">
-
-                                        <label class="gl-label" for="billing-street">STREET ADDRESS *</label>
-
-                                        <input class="input-text input-text--primary-style" type="text" id="billing-street" placeholder="House name and street name" data-bill=""></div>
-                                    <div class="u-s-m-b-15">
-
-                                        <label for="billing-street-optional"></label>
-
-                                        <input class="input-text input-text--primary-style" type="text" id="billing-street-optional" placeholder="Apartment, suite unit etc. (optional)" data-bill=""></div>
-                                    <!--====== End - Street Address ======-->
-
-
-                                    <!--====== Country ======-->
-                                    <div class="u-s-m-b-15">
-
-                                        <!--====== Select Box ======-->
-
-                                        <label class="gl-label" for="billing-country">COUNTRY *</label><select class="select-box select-box--primary-style" id="billing-country" data-bill="">
-                                            <option selected value="">Choose Country</option>
-                                            <option value="uae">United Arab Emirate (UAE)</option>
-                                            <option value="uk">United Kingdom (UK)</option>
-                                            <option value="us">United States (US)</option>
-                                        </select>
-                                        <!--====== End - Select Box ======-->
-                                    </div>
-                                    <!--====== End - Country ======-->
-
-
-                                    <!--====== Town / City ======-->
-                                    <div class="u-s-m-b-15">
-
-                                        <label class="gl-label" for="billing-town-city">TOWN/CITY *</label>
-
-                                        <input class="input-text input-text--primary-style" type="text" id="billing-town-city" data-bill=""></div>
-                                    <!--====== End - Town / City ======-->
-
-
-                                    <!--====== STATE/PROVINCE ======-->
-                                    <div class="u-s-m-b-15">
-
-                                        <!--====== Select Box ======-->
-
-                                        <label class="gl-label" for="billing-state">STATE/PROVINCE *</label><select class="select-box select-box--primary-style" id="billing-state" data-bill="">
-                                            <option selected value="">Choose State/Province</option>
-                                            <option value="al">Alabama</option>
-                                            <option value="al">Alaska</option>
-                                            <option value="ny">New York</option>
-                                        </select>
-                                        <!--====== End - Select Box ======-->
-                                    </div>
-                                    <!--====== End - STATE/PROVINCE ======-->
-
-
-                                    <!--====== ZIP/POSTAL ======-->
-                                    <div class="u-s-m-b-15">
-
-                                        <label class="gl-label" for="billing-zip">ZIP/POSTAL CODE *</label>
-
-                                        <input class="input-text input-text--primary-style" type="text" id="billing-zip" placeholder="Zip/Postal Code" data-bill=""></div>
-                                    <!--====== End - ZIP/POSTAL ======-->
-                                    <div class="u-s-m-b-10">
-
-                                        <!--====== Check Box ======-->
-                                        <div class="check-box">
-
-                                            <input type="checkbox" id="make-default-address" data-bill="">
-                                            <div class="check-box__state check-box__state--primary">
-
-                                                <label class="check-box__label" for="make-default-address">Make default shipping and billing address</label></div>
+                                        <div class="o-card__info-wrap">
+                                            <span class="o-card__name">
+                                                <a href="">{{item.variant.product.product_name}}</a>
+                                            </span>
+                                            <span class="o-card__quantity">Quantity x {{item.quantity}}</span>
+                                            <span class="o-card__price"></span>
                                         </div>
-                                        <!--====== End - Check Box ======-->
                                     </div>
-                                    <div class="u-s-m-b-10">
-
-                                        <a class="gl-link" href="#create-account" data-toggle="collapse">Want to create a new account?</a></div>
-                                    <div class="collapse u-s-m-b-15" id="create-account">
-
-                                        <span class="gl-text u-s-m-b-15">Create an account by entering the information below. If you are a returning customer please login at the top of the page.</span>
-                                        <div>
-
-                                            <label class="gl-label" for="reg-password">Account Password *</label>
-
-                                            <input class="input-text input-text--primary-style" type="text" data-bill id="reg-password"></div>
-                                    </div>
-                                    <div class="u-s-m-b-10">
-
-                                        <label class="gl-label" for="order-note">ORDER NOTE</label><textarea class="text-area text-area--primary-style" id="order-note"></textarea></div>
-                                    <div>
-
-                                        <button class="btn btn--e-transparent-brand-b-2" type="submit">SAVE</button></div>
+                                    <a class="">₹{{item.item_total}}</a>
                                 </div>
+                                {% endfor %}
+                                
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <form class="checkout-f__payment"  method="post" action="{% url 'order:place_order' %}">
+                        {% csrf_token %}
+                    <!-- Shipping & Billing -->
+                    <h1 class="checkout-f__h1">Address Avialable</h1>   
+                    <div class="o-summary__section u-s-m-b-30">
+                        <div class="o-summary__item-wrap gl-scroll">
+                            <div class="o-summary__box">
+                            {% for address in addresses %}
+                            <div class="ship-b">
+                                <span class="ship-b__text">Deliver to:</span>
+                                <div class="ship-b__box u-s-m-b-10">
+                                    <p class="ship-b__p">{{address.address |capfirst }},{{address.street |capfirst }},{{address.landmark |capfirst}} ,{{address.city |capfirst}} PIN:{{address.pincode}} {{address.district |capfirst }},{{address.state |capfirst}}</p> 
+                                                                       
+                                    <!-- <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="selected_address" id="address1" value="address1">
+                                        <label class="form-check-label" for="address1" style="color: black;">    
+                                        </label>
+                                    </div> -->
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="address" 
+                                               id="address{{ address.id }}" value="{{ address.id }}" required>
+                                        <label class="form-check-label" for="address{{ address.id }}"></label>
+                                    </div>
+                                
+                                </div> 
+                            </div>
+                            {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Right Column: Order Summary Table and Payment Information -->
+                <div class="col-lg-6">
+                    <!-- Summary Table -->
+                    <h1 class="checkout-f__h1">Amount to be paid</h1>   
+                    <div class="o-summary__section u-s-m-b-30">
+                        <div class="o-summary__box">
+                            <table class="o-summary__table">
+                                <tbody>
+                                    <tr>
+                                        <td>SHIPPING</td>
+                                        <td>₹{{delivery_charge|floatformat:2}}</td>
+                                    </tr>
+                                    {% if discount %}
+                                    <tr>
+                                        <td style="color: #49c36e; font-weight: bold;">DISCOUNT</td>
+                                        <td>₹{{ discount }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    <tr>
+                                        <td>TAX</td>
+                                        <td>₹{{ tax|floatformat:2 }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>SUBTOTAL</td>
+                                        <td>₹{{ grand_total|floatformat:2 }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>GRAND TOTAL</td>
+                                        <td>₹{{ grand_total|floatformat:2 }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Payment Information -->
+                    <div class="o-summary__section u-s-m-b-30">
+                        <div class="o-summary__box">
+                            <h1 class="checkout-f__h1">PAYMENT INFORMATION</h1>
+                                <div class="u-s-m-b-10">
+
+                                    <div class="radio-box">
+                                        <input type="radio" id="cash-on-delivery" name="optradio" value="COD" required>
+                                        <div class="radio-box__state radio-box__state--primary">
+                                            <label class="radio-box__label" for="cash-on-delivery">Cash on Delivery</label>
+                                        </div>
+                                    </div>
+
+                                    <span class="gl-text u-s-m-t-6">Pay Upon Cash on delivery. (This service is only available for some countries)</span>
+                                </div>
+
+                                <!-- <div class="u-s-m-b-10">
+                                    <div class="radio-box">
+                                        <input type="radio" id="direct-bank-transfer" name="payment">
+                                        <div class="radio-box__state radio-box__state--primary">
+                                        <label class="radio-box__label" for="direct-bank-transfer">Direct Bank Transfer</label></div>
+                                    </div>
+
+                                    <span class="gl-text u-s-m-t-6">Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order will not be shipped until the funds have cleared in our account.</span>
+                                </div> -->
+
+                                <!-- <div class="u-s-m-b-10">
+                                    <div class="radio-box">
+                                        <input type="radio" id="pay-with-check" name="payment">
+                                        <div class="radio-box__state radio-box__state--primary">
+                                        <label class="radio-box__label" for="pay-with-check">Pay With Check</label></div>
+                                    </div>
+                                    <span class="gl-text u-s-m-t-6">Please send a check to Store Name, Store Street, Store Town, Store State / County, Store Postcode.</span>
+                                </div> -->
+
+                                <!-- <div class="u-s-m-b-10">
+                                    <div class="radio-box">
+                                        <input type="radio" id="pay-with-card" name="optradio" value="Card" required>
+                                        <div class="radio-box__state radio-box__state--primary">
+                                            <label class="radio-box__label" for="pay-with-card">Pay With Credit / Debit Card</label>
+                                        </div>
+                                    </div>
+                                    <span class="gl-text u-s-m-t-6">International Credit Cards must be eligible for use within the United States.</span>
+                                </div> -->
+
+
+                                <!-- <div class="u-s-m-b-10">
+                                    <div class="radio-box">
+                                        <input type="radio" id="pay-pal" name="payment">
+                                        <div class="radio-box__state radio-box__state--primary">
+                                            <label class="radio-box__label" for="pay-pal">Pay Pal</label></div>
+                                    </div>
+                                    <span class="gl-text u-s-m-t-6">When you click "Place Order" below we'll take you to Paypal's site to set up your billing information.</span>
+                                </div> -->
+
+                                <!-- <div class="u-s-m-b-15">
+                                    <div class="check-box">
+                                        <input type="checkbox" id="term-and-condition">
+                                        <div class="check-box__state check-box__state--primary">
+                                        <label class="check-box__label" for="term-and-condition">I consent to the</label></div>
+                                    </div>
+                                    <a class="gl-link">Terms of Service.</a>
+                                </div>
+                                 -->
+                                <div>
+                                    <button class="btn btn--e-brand-b-2" type="submit">PLACE ORDER</button>
+                                </div>
+
                             </form>
                         </div>
-                        <div class="col-lg-6">
-                            <h1 class="checkout-f__h1">ORDER SUMMARY</h1>
-
-                            <!--====== Order Summary ======-->
-                            <div class="o-summary">
-                                <div class="o-summary__section u-s-m-b-30">
-                                    <div class="o-summary__item-wrap gl-scroll">
-                                        <div class="o-card">
-                                            <div class="o-card__flex">
-                                                <div class="o-card__img-wrap">
-
-                                                    <img class="u-img-fluid" src="images/product/electronic/product3.jpg" alt=""></div>
-                                                <div class="o-card__info-wrap">
-
-                                                    <span class="o-card__name">
-
-                                                        <a href="product-detail.html">Yellow Wireless Headphone</a></span>
-
-                                                    <span class="o-card__quantity">Quantity x 1</span>
-
-                                                    <span class="o-card__price">$150.00</span></div>
-                                            </div>
-
-                                            <a class="o-card__del far fa-trash-alt"></a>
-                                        </div>
-                                        <div class="o-card">
-                                            <div class="o-card__flex">
-                                                <div class="o-card__img-wrap">
-
-                                                    <img class="u-img-fluid" src="images/product/electronic/product18.jpg" alt=""></div>
-                                                <div class="o-card__info-wrap">
-
-                                                    <span class="o-card__name">
-
-                                                        <a href="product-detail.html">Nikon DSLR Camera 4k</a></span>
-
-                                                    <span class="o-card__quantity">Quantity x 1</span>
-
-                                                    <span class="o-card__price">$150.00</span></div>
-                                            </div>
-
-                                            <a class="o-card__del far fa-trash-alt"></a>
-                                        </div>
-                                        <div class="o-card">
-                                            <div class="o-card__flex">
-                                                <div class="o-card__img-wrap">
-
-                                                    <img class="u-img-fluid" src="images/product/women/product8.jpg" alt=""></div>
-                                                <div class="o-card__info-wrap">
-
-                                                    <span class="o-card__name">
-
-                                                        <a href="product-detail.html">New Dress D Nice Elegant</a></span>
-
-                                                    <span class="o-card__quantity">Quantity x 1</span>
-
-                                                    <span class="o-card__price">$150.00</span></div>
-                                            </div>
-
-                                            <a class="o-card__del far fa-trash-alt"></a>
-                                        </div>
-                                        <div class="o-card">
-                                            <div class="o-card__flex">
-                                                <div class="o-card__img-wrap">
-
-                                                    <img class="u-img-fluid" src="images/product/men/product8.jpg" alt=""></div>
-                                                <div class="o-card__info-wrap">
-
-                                                    <span class="o-card__name">
-
-                                                        <a href="product-detail.html">New Fashion D Nice Elegant</a></span>
-
-                                                    <span class="o-card__quantity">Quantity x 1</span>
-
-                                                    <span class="o-card__price">$150.00</span></div>
-                                            </div>
-
-                                            <a class="o-card__del far fa-trash-alt"></a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="o-summary__section u-s-m-b-30">
-                                    <div class="o-summary__box">
-                                        <h1 class="checkout-f__h1">SHIPPING & BILLING</h1>
-                                        <div class="ship-b">
-
-                                            <span class="ship-b__text">Ship to:</span>
-                                            <div class="ship-b__box u-s-m-b-10">
-                                                <p class="ship-b__p">4247 Ashford Drive Virginia VA-20006 USA (+0) 900901904</p>
-
-                                                <a class="ship-b__edit btn--e-transparent-platinum-b-2" data-modal="modal" data-modal-id="#edit-ship-address">Edit</a>
-                                            </div>
-                                            <div class="ship-b__box">
-
-                                                <span class="ship-b__text">Bill to default billing address</span>
-
-                                                <a class="ship-b__edit btn--e-transparent-platinum-b-2" data-modal="modal" data-modal-id="#edit-ship-address">Edit</a></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="o-summary__section u-s-m-b-30">
-                                    <div class="o-summary__box">
-                                        <table class="o-summary__table">
-                                            <tbody>
-                                                <tr>
-                                                    <td>SHIPPING</td>
-                                                    <td>$4.00</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>TAX</td>
-                                                    <td>$0.00</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>SUBTOTAL</td>
-                                                    <td>$379.00</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>GRAND TOTAL</td>
-                                                    <td>$379.00</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                <div class="o-summary__section u-s-m-b-30">
-                                    <div class="o-summary__box">
-                                        <h1 class="checkout-f__h1">PAYMENT INFORMATION</h1>
-                                        <form class="checkout-f__payment">
-                                            <div class="u-s-m-b-10">
-
-                                                <!--====== Radio Box ======-->
-                                                <div class="radio-box">
-
-                                                    <input type="radio" id="cash-on-delivery" name="payment">
-                                                    <div class="radio-box__state radio-box__state--primary">
-
-                                                        <label class="radio-box__label" for="cash-on-delivery">Cash on Delivery</label></div>
-                                                </div>
-                                                <!--====== End - Radio Box ======-->
-
-                                                <span class="gl-text u-s-m-t-6">Pay Upon Cash on delivery. (This service is only available for some countries)</span>
-                                            </div>
-                                            <div class="u-s-m-b-10">
-
-                                                <!--====== Radio Box ======-->
-                                                <div class="radio-box">
-
-                                                    <input type="radio" id="direct-bank-transfer" name="payment">
-                                                    <div class="radio-box__state radio-box__state--primary">
-
-                                                        <label class="radio-box__label" for="direct-bank-transfer">Direct Bank Transfer</label></div>
-                                                </div>
-                                                <!--====== End - Radio Box ======-->
-
-                                                <span class="gl-text u-s-m-t-6">Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order will not be shipped until the funds have cleared in our account.</span>
-                                            </div>
-                                            <div class="u-s-m-b-10">
-
-                                                <!--====== Radio Box ======-->
-                                                <div class="radio-box">
-
-                                                    <input type="radio" id="pay-with-check" name="payment">
-                                                    <div class="radio-box__state radio-box__state--primary">
-
-                                                        <label class="radio-box__label" for="pay-with-check">Pay With Check</label></div>
-                                                </div>
-                                                <!--====== End - Radio Box ======-->
-
-                                                <span class="gl-text u-s-m-t-6">Please send a check to Store Name, Store Street, Store Town, Store State / County, Store Postcode.</span>
-                                            </div>
-                                            <div class="u-s-m-b-10">
-
-                                                <!--====== Radio Box ======-->
-                                                <div class="radio-box">
-
-                                                    <input type="radio" id="pay-with-card" name="payment">
-                                                    <div class="radio-box__state radio-box__state--primary">
-
-                                                        <label class="radio-box__label" for="pay-with-card">Pay With Credit / Debit Card</label></div>
-                                                </div>
-                                                <!--====== End - Radio Box ======-->
-
-                                                <span class="gl-text u-s-m-t-6">International Credit Cards must be eligible for use within the United States.</span>
-                                            </div>
-                                            <div class="u-s-m-b-10">
-
-                                                <!--====== Radio Box ======-->
-                                                <div class="radio-box">
-
-                                                    <input type="radio" id="pay-pal" name="payment">
-                                                    <div class="radio-box__state radio-box__state--primary">
-
-                                                        <label class="radio-box__label" for="pay-pal">Pay Pal</label></div>
-                                                </div>
-                                                <!--====== End - Radio Box ======-->
-
-                                                <span class="gl-text u-s-m-t-6">When you click "Place Order" below we'll take you to Paypal's site to set up your billing information.</span>
-                                            </div>
-                                            <div class="u-s-m-b-15">
-
-                                                <!--====== Check Box ======-->
-                                                <div class="check-box">
-
-                                                    <input type="checkbox" id="term-and-condition">
-                                                    <div class="check-box__state check-box__state--primary">
-
-                                                        <label class="check-box__label" for="term-and-condition">I consent to the</label></div>
-                                                </div>
-                                                <!--====== End - Check Box ======-->
-
-                                                <a class="gl-link">Terms of Service.</a>
-                                            </div>
-                                            <div>
-
-                                                <button class="btn btn--e-brand-b-2" type="submit">PLACE ORDER</button></div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                            <!--====== End - Order Summary ======-->
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!--====== End - Section Content ======-->
     </div>
-    <!--====== End - Section 3 ======-->
 </div>
+<!--====== End - Section 3 ======-->
+
+
+ 
 <!--====== End - App Content ======-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    $('#addressForm').submit(function(e) {
+        e.preventDefault(); // Prevent default form submission
+    
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'order:add_address_checkout' user.userid %}",
+            data: $(this).serialize(), // Serialize form data
+            success: function(response) {
+                console.log('Response received:', response); // Debug log
+                if (response.success) {
+                    // Show the success message before reloading
+                    showToastMessage('New address added successfully.', 'success');
+                    
+                    // Reload the page after a short delay to allow the user to see the message
+                    setTimeout(function() {
+                        location.reload(); // Reload the page after 3 seconds
+                    }, 3000); // Adjust this duration as needed (3000ms = 3 seconds)
+                } else {
+                    // Display validation errors from response
+                    $.each(response.errors, function(key, value) {
+                        $('#' + key).text(value).show(); // Display each error
+                    });
+                    // Optionally, show a generic error message
+                    showToastMessage("Please fix the errors in the form.", "error");
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', status, error); // Debug log for AJAX errors
+            }
+        });
+    });
+    
+</script>
+
+
+{% endblock %}
+
+

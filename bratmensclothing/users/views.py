@@ -1,29 +1,40 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from accounts.models import Users
-from products.models import ProductDetails
+from products.models import ProductDetails,VariantSize
 from django.contrib import messages
 from products.models import Category,Brand
 from .models import Address
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.views.decorators.cache import never_cache
-from django.db.models import Q
+from django.db.models import Q,Min  
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.contrib.auth.hashers import check_password
 import re
-
+from django.db.models import Q, Sum, Min
+from django.views.decorators.cache import cache_control
+from django.core.paginator import Paginator
+from coupon.models import Coupon
+import cloudinary.uploader
 
 def is_staff(user):
     return user.is_staff
 
+@never_cache
+def error(request):
+    return render(request,'user/404.html')
+    
 
 @login_required(login_url='accounts:admin_login')
 @never_cache
 @user_passes_test(is_staff,'accounts:admin_login')
 def view_user(request):
-    users=Users.objects.filter(is_superuser=False)
+    users=Users.objects.filter(is_superuser=False).order_by('-date_joined')
+    paginator=Paginator(users,5)
 
+    page_number=request.GET.get('page')
+    users=paginator.get_page(page_number)
     return render(request,'admin/users.html',{'users':users})
 
 
@@ -42,8 +53,12 @@ def unblock_user(request,userid):
     messages.success(request,'User Un-Blocked Succesfully')
     return redirect('userss:view_user')
 
+ 
+
 @never_cache
 def category_details(request):
+    sort_option=request.GET.get('sort','')
+    query = request.GET.get('search', '')
     products=(
         ProductDetails.objects.select_related('brand')
         .prefetch_related('category','variants')
@@ -52,11 +67,51 @@ def category_details(request):
             Q(brand__is_deleted=False),
             Q(category__is_deleted=False)
         )
+        .annotate(total_quantity=Sum('variants__qty'))
+    ) 
+    if query:
+        query_terms = query.split()
+        q_filter = Q()
+        
+        for term in query_terms:
+            q_filter |= (Q(product_name__icontains=term) |
+                         Q(description__icontains=term) |
+                         Q(color__icontains=term) |
+                         Q(occasion__icontains=term) |
+                         Q(fit__icontains=term)|
+                         Q(brand__brandname__icontains=term)|
+                         Q(category__category__icontains=term))
+                         
+        products = products.filter(q_filter)
 
-    )
-    return render(request,'user/categorylist.html',{'products':products})
+    if sort_option == 'newly_added':
+        products = products.order_by('-created_at')  
+    elif sort_option == 'atoz':
+        products = products.order_by('product_name') 
+    elif sort_option == 'ztoa':
+        products = products.order_by('-product_name')  
+    elif sort_option == 'lowest_price':
+        products = products.annotate(lowest_price=Min('variants__price')).order_by('lowest_price') 
+    elif sort_option == 'highest_price':
+        products = products.annotate(lowest_price=Min('variants__price')).order_by('-lowest_price')
+    else: 
+        products = products.order_by('created_at')
+   
+    categories=Category.objects.all()
+    Brands=Brand.objects.all()
+    Variants = VariantSize.objects.values('size').distinct().order_by('size')
+    return render(request,'user/categorylist.html',
+                  {
+                      'products':products,
+                      'categories':categories,
+                      'Brands':Brands,
+                      'Variants':Variants,
+                      'sort':sort_option,
+                      'query':query
+                })
 
 
+@cache_control(private=True, no_cache=True)
 def product_details(request, product_id):
     product = get_object_or_404(ProductDetails, product_id=product_id, is_deleted=False)
     products=(
@@ -69,22 +124,70 @@ def product_details(request, product_id):
         )
 
     )  
+    coupons=Coupon.objects.filter(is_active=False)
     return render(request, 'user/productdetails.html', 
         {
             'product': product,
-            'products':products
+            'products':products,
+            'coupons':coupons
          })
 
 
 
 @never_cache
+@login_required(login_url='accounts:login_user')
 def account_details(request,userid):
+    if request.user.userid != userid:
+        return redirect('userss:error')
+
     user = get_object_or_404(Users, userid=userid)
  
     return render(request, 'user/accountdetails.html', {'user':user})
 
+
+
 @never_cache
+@login_required(login_url='accounts:login_user')
+def add_profile(request, userid):
+    user = get_object_or_404(Users, userid=userid)
+
+    if request.user.userid != user.userid:
+        return redirect('userss:error')
+
+    if request.method == 'POST':
+        profile_image = request.FILES.get('profile')
+
+        if profile_image:
+            user.profile = profile_image
+            user.save()
+            return redirect('userss:accountdetails', userid=userid)
+        else:
+            return render(request, 'user/accountdetails.html', {'user': user, 'error': 'No image uploaded.'})
+
+    return render(request, 'user/accountdetails.html', {'user': user})
+
+
+@never_cache
+@login_required(login_url='accounts:login_user')
+def delete_profile(request, userid):
+    user = get_object_or_404(Users, userid=userid)
+
+    if user.profile:
+        public_id = user.profile.public_id 
+        cloudinary.uploader.destroy(public_id)
+        user.profile = None
+        user.save()
+    messages.success(request, 'Profile image has been successfully deleted.')
+    return redirect('userss:accountdetails', userid=userid)
+
+
+
+@never_cache
+@login_required(login_url='accounts:login_user')
 def edit_account_details(request, userid):
+    if request.user.userid != userid:
+        return redirect('userss:error')
+
     userdetails = get_object_or_404(Users, userid=userid)
 
     if request.method == 'POST':
@@ -140,7 +243,11 @@ def edit_account_details(request, userid):
     return render(request, 'user/edit_account.html', {'user': userdetails})
 
 @never_cache
+@login_required(login_url='accounts:login_user')
 def reset_password(request, userid):
+    if request.user.userid != userid:
+        return redirect('userss:error')
+    
     user = get_object_or_404(Users, userid=userid)
 
     if request.method == 'POST':
@@ -177,21 +284,30 @@ def reset_password(request, userid):
 
         user.set_password(new_password)
         user.save()
-        messages.success(request, 'Your password has been reset successfully.')
-        return redirect('userss:accountdetails',userid=userid)
+        messages.success(request, 'Your password has been reset successfully.PLEASE LOGIN')
+        return redirect('accounts:login_user')
 
     return render(request, 'user/reset_password.html', {'user': user})
 
+
 @never_cache
+@login_required(login_url='accounts:login_user')
 def address_details(request, userid):
+    if request.user.userid != userid:
+        return redirect('userss:error')
+    
     user = get_object_or_404(Users, userid=userid)
-    addresses = Address.objects.filter(user=user)
+    addresses = Address.objects.filter(user=user,status=False)
 
     return render(request, 'user/address.html', {'addresses': addresses,'user':user})
 
 
 @never_cache
+@login_required(login_url='accounts:login_user')
 def add_address(request,userid):
+    if request.user.userid != userid:
+        return redirect('userss:error')
+    
     user_id=get_object_or_404(Users,userid=userid)
 
     if request.method=='POST':
@@ -259,14 +375,18 @@ def add_address(request,userid):
 def remove_address(request, id):
     address = get_object_or_404(Address, id=id) 
     user_id = address.user.userid  
-    address.delete() 
+    address.status=True
+    address.save()
     messages.success(request, 'Address has been successfully deleted.')
     return redirect('userss:addressdetails', userid=user_id) 
 
 
 @never_cache
+@login_required(login_url='accounts:login_user')
 def edit_address(request, id):
     address = get_object_or_404(Address, id=id)
+    if address.user != request.user:
+        return redirect('userss:error')
     user_id = address.user.userid 
 
     if request.method == 'POST':

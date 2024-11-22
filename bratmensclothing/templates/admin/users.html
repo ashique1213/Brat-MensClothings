@@ -16,6 +16,32 @@
     <!-- <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"> -->
 
     <style>
+
+        .pagination-container {
+            display: flex; /* Use flexbox for alignment */
+            justify-content: flex-end; /* Aligns child elements to the right */
+            margin-top: 20px; /* Adds space above the pagination */
+        }
+        
+        .pagination {
+            display: flex; /* Ensure pagination links are in a row */
+        }
+        
+        .step-links {
+            display: flex; /* Flexbox for step links to align correctly */
+            align-items: center; /* Center items vertically */
+        }
+        
+        .step-links a {
+            margin: 0 5px; /* Spacing between links */
+            text-decoration: none; /* Removes underline from links */
+        }
+        
+        .current {
+            margin: 0 10px; /* Spacing around current page text */
+            font-weight: bold; /* Makes the current page text bold */
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -84,11 +110,11 @@
                             <div class="sb-nav-link-icon"><i class="fas fa-box-open"></i></div>
                             Products
                         </a>
-                        <a class="nav-link" href="">
+                        <a class="nav-link" href="{% url 'order:order_details' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-shopping-cart"></i></div>
                             Orders
                         </a>
-                        <a class="nav-link" href="">
+                        <a class="nav-link" href="{% url 'coupon:coupon_details'%}">
                             <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
                             Coupons
                         </a>
@@ -110,7 +136,7 @@
         <div id="layoutSidenav_content">
             <main>
                 <div class="container-fluid px-4">
-                    <h1 class="mt-4">Users</h1>
+                    <h3 class="mt-4">Users</h3>
                     <ol class="breadcrumb mb-4">
                         <li class="breadcrumb-item"><a href="">Dashboard</a></li>
                         <li class="breadcrumb-item active">Users Table</li>
@@ -258,6 +284,28 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        <div class="pagination-container">
+                            <div class="pagination">
+                                <span class="step-links">
+                                    {% if users.has_previous %}
+                                        <a href="?page=1">&laquo; First</a>
+                                        <a href="?page={{ users.previous_page_number }}">Previous</a>
+                                    {% endif %}
+                            
+                                    <span class="current">
+                                        Page {{ users.number }} of {{ users.paginator.num_pages }}.
+                                    </span>
+                            
+                                    {% if users.has_next %}
+                                        <a href="?page={{ users.next_page_number }}">Next</a>
+                                        <a href="?page={{ users.paginator.num_pages }}">Last &raquo;</a>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+
+
                     </div>
                 </div>
             </main>

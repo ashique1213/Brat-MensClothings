@@ -1,0 +1,372 @@
+
+{% extends "user/base.html" %}
+
+{% block content %}
+
+
+<style>
+     /* Modal styles */
+     .custom-modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1000; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgba(0, 0, 0, 0.5); /* Black w/ opacity */
+    }
+
+    .modal-content {
+        background-color: #fff;
+        margin: 15% auto; /* 15% from the top and centered */
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%; /* Could be more or less, depending on screen size */
+        max-width: 500px; /* Maximum width of the modal */
+        border-radius: 5px;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .close {
+        cursor: pointer;
+        font-size: 20px;
+        color: #aaa;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        margin: 5px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .cancel-btn {
+        background-color: #000; /* Red */
+        color: white;
+    }
+
+    .delete-btn {
+        background-color: white; /* Green */
+        color: black;
+    }
+
+</style>
+<!--====== App Content ======-->
+ <div class="app-content">
+
+    <!--====== Section 1 ======-->
+    <div class="u-s-p-b-30">
+
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="container">
+                <div class="breadcrumb">
+                    <div class="breadcrumb__wrap">
+                        <ul class="breadcrumb__list">
+                            <li class="has-separator">
+
+                                <a href="">Home</a></li>
+                            <li class="is-marked">
+
+                                <a href="">My Account</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--====== End - Section 1 ======-->
+
+
+    <!--====== Section 2 ======-->
+    <div class="u-s-p-b-60">
+
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="dash">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-3 col-md-12">
+
+                            <!--====== Dashboard Features ======-->
+                            <div class="dash__box dash__box--bg-white dash__box--shadow u-s-m-b-30">
+                                <div class="dash__pad-1">
+
+                                    <span class="dash__text u-s-m-b-16">Hello, {{ user.username | upper }}</span>
+                                    <ul class="dash__f-list">
+
+                                        <li>
+
+                                            <a  href="{% url 'userss:accountdetails' user.userid %}">My Profile</a></li>
+                                        <li>
+
+                                            <a href="{% url 'userss:addressdetails' user.userid %}">Address Book</a></li>
+                                        <li class="dash-active" >
+
+                                            <a href="{% url 'order:view_orders' %}">My Orders</a></li>
+                                        <li>
+
+                                            <a href="">My Wishlist</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+
+                            <div class="dash__box dash__box--bg-white dash__box--shadow dash__box--w">
+                                <div class="dash__pad-1">
+                                    <ul class="dash__w-list">
+                                        <li>
+                                            <div class="dash__w-wrap">
+
+                                                <span class="dash__w-icon dash__w-icon-style-1"><i class="fas fa-cart-arrow-down"></i></span>
+
+                                                <span class="dash__w-text">0</span>
+
+                                                <span class="dash__w-name">Orders Placed</span></div>
+                                        </li>
+                                        <li>
+                                            <div class="dash__w-wrap">
+
+                                                <span class="dash__w-icon dash__w-icon-style-2"><i class="fas fa-times"></i></span>
+
+                                                <span class="dash__w-text">0</span>
+
+                                                <span class="dash__w-name">Cancel Orders</span></div>
+                                        </li>
+                                        <li>
+                                            <div class="dash__w-wrap">
+
+                                                <span class="dash__w-icon dash__w-icon-style-3"><i class="far fa-heart"></i></span>
+
+                                                <span class="dash__w-text">0</span>
+
+                                                <span class="dash__w-name">Wishlist</span></div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <!--====== End - Dashboard Features ======-->
+                        </div>
+
+                        <div class="col-lg-9 col-md-12">
+                            <h1 class="dash__h1 u-s-m-b-30">Order Details</h1>
+                            <div class="dash__box dash__box--shadow dash__box--radius dash__box--bg-white u-s-m-b-30">
+                                <div class="dash__pad-2">
+                                    
+                                    <div class="dash-l-r">
+                                        <div>
+                                            <div class="manage-o__text-2 u-c-secondary">Order #{{orderitem.order.tracking_number}}</div>
+                                            <div class="manage-o__text u-c-silver">Placed on {{orderitem.order.created_at}}</div>
+                                        </div>
+                                        {% if orderitem.status != 'Cancelled' %}
+                                        <div style="background-color: rgb(231, 180, 180); padding: 9px; border-radius: 20px;">
+                                            <a href="#" onclick="openConfirmCancelModal({{ orderitem.orderitem_id }})" style="font-weight: bold; font-size: 13px; color: rgb(197, 34, 34);">Cancel Order</a>
+                                        </div>
+                                        {% else %}
+                                        <div style="background-color: rgb(231, 180, 180); padding: 9px; border-radius: 20px;">
+                                            <a href="" style="font-weight: bold; font-size: 13px; color: rgb(197, 34, 34);">Order Cancelled</a>
+                                        </div>
+                                        {% endif %}
+
+                                        <div>
+                                            <div class="manage-o__text-2 u-c-silver">Total:
+
+                                                <span class="manage-o__text-2 u-c-secondary">₹{{orderitem.order.total_price}}</span> 
+                                            </div>
+                                            <div class="manage-o__text-2 u-c-silver">Coupon Applied:<br>
+
+                                                <span class="manage-o__text-2 u-c-secondary">{{orderitem.order.coupon_code | upper}}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dash__box dash__box--shadow dash__box--radius dash__box--bg-white u-s-m-b-30">
+                                <div class="dash__pad-2">
+                                    <div class="manage-o">
+                                        <div class="manage-o__header u-s-m-b-30">
+                                            <div class="manage-o__icon"><i class="fas fa-box u-s-m-r-5"></i>
+
+                                                <span class="manage-o__text">Package 1</span></div>
+                                        </div>
+                                        <!-- <div class="dash-l-r">
+                                            <div class="manage-o__text u-c-secondary">Delivered on 26 Oct 2016</div>
+                                            <div class="manage-o__icon"><i class="fas fa-truck u-s-m-r-5"></i>
+
+                                                <span class="manage-o__text">Standard</span></div>
+                                        </div> -->
+                                        <!-- <div class="manage-o__timeline">
+                                            <div class="timeline-row">
+                                                <div class="col-lg-4 u-s-m-b-30">
+                                                    <div class="timeline-step">
+                                                        <div class="timeline-l-i timeline-l-i--finish">
+
+                                                            <span class="timeline-circle"></span></div>
+
+                                                        <span class="timeline-text">Processing</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 u-s-m-b-30">
+                                                    <div class="timeline-step">
+                                                        <div class="timeline-l-i timeline-l-i--finish">
+
+                                                            <span class="timeline-circle"></span></div>
+
+                                                        <span class="timeline-text">Shipped</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 u-s-m-b-30">
+                                                    <div class="timeline-step">
+                                                        <div class="timeline-l-i">
+
+                                                            <span class="timeline-circle"></span></div>
+
+                                                        <span class="timeline-text">Delivered</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div> -->
+                                        <div class="manage-o__description">
+                                            <div class="description__container">
+                                                <div class="description__img-wrap">
+
+                                                    <img class="u-img-fluid" src="{{ orderitem.variants.product.image1.url }}" alt=""></div>
+                                                <div class="description-title">{{orderitem.variants.product.product_name |title}}</div>
+                                                <div class="description-title">- {{orderitem.variants.size}}</div>
+                                            </div>
+                                            
+                                            <div class="description__info-wrap">
+                                                <div>
+
+                                                    <span class="manage-o__text-2 u-c-silver">Quantity:
+
+                                                        <span class="manage-o__text-2 u-c-secondary">{{ orderitem.quantity}}</span></span></div>
+                                                <div>
+
+                                                    <span class="manage-o__text-2 u-c-silver">Total:
+
+                                                        <span class="manage-o__text-2 u-c-secondary">₹{{ orderitem.subtotal_price}}</span></span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="dash__box dash__box--bg-white dash__box--shadow u-s-m-b-30">
+                                        <div class="dash__pad-3">
+                                            <h2 class="dash__h2 u-s-m-b-8">Shipping Address</h2>
+                                            <h2 class="dash__h2 u-s-m-b-8">{{ orderitem.order.user.username|title }}</h2>
+
+                                            <span class="dash__text-2">
+                                                {{orderitem.order.shipping_address.address}}
+                                                <hr>
+                                                {{orderitem.order.shipping_address.street |capfirst}},
+                                                {{orderitem.order.shipping_address.landmark |capfirst}},
+                                                {{orderitem.order.shipping_address.city |capfirst }}
+                                                <br>
+                                                PIN: {{orderitem.order.shipping_address.pincode}}
+                                                {{orderitem.order.shipping_address.district |capfirst}},
+                                                {{orderitem.order.shipping_address.state |capfirst}}
+                                            </span>
+
+                                            <span class="dash__text-2">{{ orderitem.order.user.phone_number|upper }}</span>
+                                        </div>
+                                    </div>
+                                   
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="dash__box dash__box--bg-white dash__box--shadow u-h-100">
+                                        <div class="dash__pad-3">
+                                            <h2 class="dash__h2 u-s-m-b-8">Total Summary</h2>
+                                            <div class="dash-l-r u-s-m-b-8">
+                                                <div class="manage-o__text-2 u-c-secondary">SHIPPING</div>
+                                                <div class="manage-o__text-2 u-c-secondary">₹{{delivery_charge|floatformat:2}}</div>
+                                            </div>
+                                            <div class="dash-l-r u-s-m-b-8">
+                                                <div class="manage-o__text-2 u-c-secondary">Tax</div>
+                                                <div class="manage-o__text-2 u-c-secondary">₹{{tax |floatformat:2}}</div>
+                                            </div>
+                                            <div class="dash-l-r u-s-m-b-8">
+                                                <div class="manage-o__text-2 u-c-secondary">Total</div>
+                                                <div class="manage-o__text-2 u-c-secondary">₹{{ orderitem.subtotal_price}}</div>
+                                            </div>
+
+                                            <span class="dash__text-2">Paid by {{ orderitem.order.get_payment_type_display }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--====== End - Section Content ======-->
+    </div>
+    <!--====== End - Section 2 ======-->
+</div>
+<!--====== End - App Content ======-->
+
+<!-- Cancel Confirmation Modal -->
+<div id="cancelConfirmationModal" class="custom-modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5>Confirm Cancellation</h5>
+            <span class="close" onclick="closeCancelConfirmationModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            Are you sure you want to cancel this order?
+        </div>
+        <div class="modal-footer">
+            <button class="btn cancel-btn" onclick="closeCancelConfirmationModal()">No</button>
+            <button class="btn delete-btn" id="confirmCancelButton">Yes, Cancel Order</button>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    let orderIdToCancel; // Declare a variable to hold the order ID for cancellation
+
+    // Function to open the confirmation modal
+    function openConfirmCancelModal(orderId) {
+        orderIdToCancel = orderId; // Store the order ID
+        document.getElementById('cancelConfirmationModal').style.display = 'block'; // Show the modal
+    }
+
+    // Function to close the confirmation modal
+    function closeCancelConfirmationModal() {
+        document.getElementById('cancelConfirmationModal').style.display = 'none'; // Hide the modal
+    }
+
+    // Add an event listener to the confirm button
+    document.getElementById('confirmCancelButton').onclick = function () {
+        // Redirect to the cancel order URL
+        window.location.href = "{% url 'order:cancel_order' 0 %}".replace('0', orderIdToCancel);
+    };
+</script>
+
+
+{% endblock %}

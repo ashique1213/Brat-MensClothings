@@ -73,8 +73,8 @@ def signup_user(request):
         
         if pass1 == pass2:
             otp = generate_otp()
-            print(f"Generated OTP: {otp}")  # Print the OTP to console
-            otp_expiry = datetime.datetime.now() + datetime.timedelta(seconds=30)
+            print(f"Generated OTP: {otp}")  
+            otp_expiry = datetime.datetime.now() + datetime.timedelta(seconds=60)
 
             request.session['otp'] = otp
             request.session['otp_expiry'] = otp_expiry.timestamp()  # Store as timestamp
@@ -223,9 +223,9 @@ def login_user(request):
 
 
 
-def reset_password(request):
+# def reset_password(request):
 
-    return render(request,'user/reset_password.html')
+#     return render(request,'user/reset_password.html')
 
 
 @never_cache
@@ -258,18 +258,15 @@ def admin_login(request):
             admin = Users.objects.get(email=email)
         except Users.DoesNotExist:
             admin = None
-            print('User not found')  
         
         if admin is not None:
             admin = authenticate(request, username=admin.username, password=password)
 
             if admin is not None and admin.is_superuser:
                 login(request, admin)
-                print('logged in')
                 return redirect('admin_dashboard')
         
         error_message = "Invalid credentials or not a superuser."
-        print('Authentication failed')  
         return render(request, 'admin/admin_login.html', {'error_message': error_message})
 
     return render(request, 'admin/admin_login.html')
@@ -278,3 +275,140 @@ def admin_login(request):
 def admin_logout(request):
     logout(request)
     return redirect('accounts:admin_login')
+
+
+@never_cache
+def forgot_password(request):
+    if request.user.is_authenticated:
+        return redirect('accounts:home_user')
+
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        errors = {}
+
+        email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+        if not re.match(email_pattern, email):
+            errors['email_error'] = 'Invalid email format'
+        elif not Users.objects.filter(email=email).exists():
+            errors['email_error'] = 'Email does not exist'
+
+        if errors:
+            return JsonResponse({'status': 'error', 'errors': errors}, status=400)
+
+        otp = generate_otp()  # Generate OTP
+        print(f"Generated OTP: {otp}")  # Debug: Print generated OTP
+
+        otp_expiry = datetime.datetime.now() + datetime.timedelta(seconds=60)  # 5 minutes expiry
+        request.session['otp'] = otp
+        request.session['otp_expiry'] = otp_expiry.timestamp()
+        request.session['email'] = email
+
+        send_mail(
+            'Your OTP Code',
+            f'Your OTP code is {otp}',
+            settings.EMAIL_HOST_USER,
+            [email],
+            fail_silently=False,
+        )
+        return JsonResponse({'status': 'success', 'redirect_url': reverse('accounts:verify_otp'),'otp_expiry_time': otp_expiry.timestamp()})
+
+    return render(request, 'user/forgot/forgot_password.html')
+
+
+@never_cache
+def verify_otp(request):
+    if request.user.is_authenticated:
+        return redirect('accounts:home_user')
+
+    if request.method == 'POST':
+        entered_otp = request.POST.get('otp')
+        session_otp = request.session.get('otp')  
+        otp_expiry = request.session.get('otp_expiry')
+
+        errors = {}
+
+        if not session_otp or not otp_expiry:
+            errors['otp_error'] = 'OTP session has expired. Please request a new OTP.'
+        elif datetime.datetime.now().timestamp() > otp_expiry:
+            errors['otp_error'] = 'OTP has expired. Please request a new one.'
+        elif entered_otp != str(session_otp):  
+            errors['otp_error'] = 'Invalid OTP entered. Please try again.'
+        else:
+            return JsonResponse({'status': 'success', 'redirect_url': reverse('accounts:reset_new_password')})
+
+        if errors:
+            return JsonResponse({'status': 'error', 'errors': errors}, status=400)
+        
+    return render(request, 'user/forgot/reset_otp.html')
+
+
+def reset_resend_otp(request):
+    email = request.session.get('email')  # Retrieve email from session
+
+    if not email:
+        return JsonResponse({'status': 'error', 'message': 'Session expired. Please sign up again.'}, status=400)
+
+    if request.method == 'POST':
+        new_otp = generate_otp() 
+        print(f"new_otp : {new_otp}")
+        request.session['otp'] = new_otp
+        request.session['otp_expiry'] = (datetime.datetime.now() + datetime.timedelta(minutes=1)).timestamp()
+
+        try:
+            send_mail(
+                'Your New OTP Code',
+                f'Your new OTP code is {new_otp}',
+                settings.EMAIL_HOST_USER,
+                [email],
+                fail_silently=False,
+            )
+            return JsonResponse({'status': 'success', 'message': 'A new OTP has been sent to your email.'})
+    
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': 'Failed to resend OTP. Please try again.'}, status=500)
+        
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
+   
+
+
+@never_cache
+def reset_new_password(request):
+    if request.user.is_authenticated:
+        return redirect('accounts:home_user')
+
+    if request.method == 'POST':
+        new_password = request.POST.get('password1')
+        confirm_password = request.POST.get('password2')
+        
+        errors = {}
+
+        if new_password != confirm_password:
+            errors['password_error'] = 'Passwords do not match.'
+        if len(new_password) < 6:  # You can adjust the password policy as needed
+            errors['password_error'] = 'Password must be at least 6 characters long.'
+        if not re.search(r'[A-Z]', new_password):
+            errors.setdefault('password_error', []).append('Password must contain at least one uppercase letter')
+        if not re.search(r'[a-z]', new_password):
+            errors.setdefault('password_error', []).append('Password must contain at least one lowercase letter')
+        if not re.search(r'[0-9]', new_password):
+            errors.setdefault('password_error', []).append('Password must contain at least one number')
+        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', new_password):
+            errors.setdefault('password_error', []).append('Password must contain at least one special character')
+
+        if errors:
+            return JsonResponse({'status': 'error', 'errors': errors}, status=400)
+
+        # Assuming the user is identified by their email session or another means
+        email = request.session.get('email')  # Ensure you set this during OTP generation
+        user = Users.objects.get(email=email)
+        user.set_password(new_password)  # Use Django's built-in method to hash the password
+        user.save()
+
+        del request.session['otp']
+        del request.session['otp_expiry']
+
+        return JsonResponse({'status': 'success', 'redirect_url': reverse('accounts:login_user')})
+
+    return render(request, 'user/forgot/reset_forgot_pass.html')
+
+

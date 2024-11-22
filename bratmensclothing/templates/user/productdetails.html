@@ -26,13 +26,80 @@
     }
     
     .size-button:hover {
-        background-color: #333;
+        background-color: #000;
          /* Darker shade on hover */
     }
     .sele{
         color: black;
+        font-weight: bold;
         font-size: 14px;
     }
+
+    
+    .o-summary__item-wrap {
+        display: flex;
+        flex-wrap: wrap; /* Allow wrapping of coupon cards to the next row */
+        justify-content: flex-start; /* Align items to the start */
+        gap: 10px; /* Space between cards */
+    }
+    
+    .coupon-card {
+        background-color: #f9f9f9;
+        padding: 14px;
+        border-radius: 8px;
+        border: 1px solid #e1e1e1;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 250px; /* Adjust width to fit your layout */
+        max-height: 70px;
+    }
+    
+    .coupon-header {
+        font-size: 16px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 10px;
+    }
+    
+    .coupon-details {
+        font-size: 13px;
+        color: #000;
+    }
+    
+    .coupon-info {
+        margin-bottom: 8px;
+    }
+    
+    .coupon-info__title {
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .coupon-info__value {
+        color: #49c36e;
+        font-size: 13px;
+        font-weight: normal;
+    }
+    
+    .coupon-info__value:hover {
+        text-decoration: underline;
+        cursor: pointer;
+    }
+    
+    .alter-height {
+        height: 100px;
+    }
+    
+    .coupon-card-2{
+        background-color: #f9f9f9;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #e1e1e1;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        height: 60px;
+        width: 210%;
+        margin: 5px 1px;
+
+    } 
 </style>
         <!--====== App Content ======-->
         <div class="app-content">
@@ -88,10 +155,6 @@
                                             <img class="u-img-fluid" src="{{ product.image4.url }}" data-zoom-image="{{ product.image4.url }}" alt="">
                                         </div>
 
-                                        <!-- <div class="pd-o-img-wrap" data-src="{% static 'images/product/product-d-5.jpg' %}">
-                                            <img class="u-img-fluid" src="{% static 'images/product/product-d-5.jpg' %}" data-zoom-image="{% static 'images/product/product-d-5.jpg' %}" alt="">
-                                        </div> -->
-
                                     </div>
 
                                     <span class="pd-text">Click for larger zoom</span>
@@ -127,7 +190,8 @@
                             <div class="pd-detail  u-s-m-b-30">
                                 <div>
 
-                                    <span class="pd-detail__name ">{{ product.product_name }}</span></div>
+                                    <span class="pd-detail__name ">{{ product.product_name |title }}</span>
+                                </div>
                                 <div>
                                     <div class="pd-detail__inline">
                                         {% if product.variants.all %}
@@ -137,7 +201,8 @@
                                         <!-- <span class="pd-detail__price">₹ {{product.variants.all.price}} </span> -->
 
 
-                                        <span class="pd-detail__discount">(76% OFF)</span><del class="pd-detail__del">₹28.97</del></div>
+                                        <span class="pd-detail__discount">(76% OFF)</span><del class="pd-detail__del">₹28.97</del>
+                                    </div>
                                 </div>
                                 <div class="u-s-m-b-15">
                                     <div class="pd-detail__rating gl-rating-style"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
@@ -149,23 +214,14 @@
                                 <div class="u-s-m-b-15">
                                     <div class="pd-detail__inline">
                                          
-                                        <!-- {% if product.variants.all %}
-                                        {% with first_variant=product.variants.all.0 %}
-
-                                            <span class="pd-detail__stock">{{ first_variant.qty }} in stock</span>
-                                            <span class="pd-detail__left">Only {{ first_variant.qty }} left</span>
-                                        {% endwith %}
-                                        {% else %}
-                                        <span class="pd-detail__stock">No stock available</span>
-                                        {% endif %} -->
 
                                         {% if product.variants.all %}
                                         {% with first_variant=product.variants.all.0 %}
-                                            {% if first_variant.qty > 0 %}
+                                           
+                                        {% if first_variant.qty > 0 %}
                                                 <span class="pd-detail__stock" id="product-stock">{{ first_variant.qty }} in stock</span>
-                                                <span class="pd-detail__left">Only {{ first_variant.qty }} left</span>
                                             {% else %}
-                                                <span class="pd-detail__left" id="product-stock">Out of stock</span>
+                                                <span class="pd-detail__stock" id="product-stock">Out of stock</span>
                                             {% endif %}
                                         {% endwith %}
                                     {% endif %}
@@ -174,13 +230,13 @@
                                 </div>
                                 <div class="u-s-m-b-15">
 
-                                    <span class="pd-detail__preview-desc">{{ product.description }}</span></div>
+                                    <span class="pd-detail__preview-desc">{{ product.description |capfirst}}</span></div>
                                 <div class="u-s-m-b-15">
                                     <div class="pd-detail__inline">
 
                                         <span class="pd-detail__click-wrap"><i class="far fa-heart u-s-m-r-6"></i>
 
-                                            <a href="">Add to Wishlist</a>
+                                            <a href="{% url 'wishlist:add_to_wishlist' product.product_id %}">Add to Wishlist</a>
 
                                             </span></div>
                                 </div>
@@ -188,28 +244,7 @@
                                     <div class="pd-detail__inline">
 
                                         <span class="pd-detail__click-wrap">
-                                            <!-- <i class="far fa-envelope u-s-m-r-6"></i> -->
-
-                                            <!-- <div class="product-details">
-                                                <h3>Available Sizes:</h3>
-                                                <div class="size-buttons">
-                                                    {% for variant in product.variants.all %}
-                                                        <button 
-                                                            class="size-button" 
-                                                            data-price="{{ variant.price }}" 
-                                                            data-qty="{{ variant.qty }}"
-                                                            onclick="selectSize(this, '{{ variant.size }}')">
-                                                            {{ variant.size }}
-                                                        </button>
-                                                    {% endfor %}
-                                                </div>
-                                                <div id="selected-size" class="sele">Selected Size: None</div> 
-                                            </div>
-                                             -->
-                                            <!-- <span class="pd-detail__click-count">()</span> -->
-
-
-
+                                        
                                             <div class="size-buttons">
                                                 {% for variant in product.variants.all %}
                                                     <button 
@@ -225,9 +260,10 @@
                                             <div id="selected-size" class="sele">Selected Size: None</div> 
 
 
-                                            
-                                        </span></div>
+                                        </span>
+                                    </div>
                                 </div>
+
                                 <div class="u-s-m-b-15">
                                     <ul class="pd-social-list">
                                         <li>
@@ -251,27 +287,6 @@
 
                                 <div class="u-s-m-b-15">
                                     {% if product.variants.all %}
-                                <!-- 
-                                    <form class="pd-detail__form" method="post" action="{% url 'cart:addtocart' 0 %}">
-                                        {% csrf_token %}
-                                        <div class="pd-detail-inline-2">
-                                            <div class="u-s-m-b-15">
-
-                                                <div class="input-counter">
-
-                                                    <span class="input-counter__minus fas fa-minus"></span>
-
-                                                    <input class="input-counter__text input-counter--text-primary-style" name="quantity" type="text" value="1" data-min="1" data-max="6">
-
-                                                    <span class="input-counter__plus fas fa-plus"></span></div>
-                                            </div>
-                                            <div class="u-s-m-b-15">
-                                                <input type="hidden" id="selected-size-input" name="selected_size" value="">
-                                                
-                                                <button class="btn btn--e-brand-b-2" type="submit">Add to Cart</button></div>
-                                        </div>
-                                    </form> -->
-
                                     <form class="pd-detail__form" method="post" id="add-to-cart-form" action="">
                                         {% csrf_token %}
                                         <div class="pd-detail-inline-2">
@@ -294,25 +309,36 @@
                                     <p>No variants available for this product.</p>
                                     {% endif %}
                                 </div>
-                               
+                                    <div class="o-summary__item-wrap gl-scroll alter-height">
+                                        {% if coupons%}
+                                        {% for coupon in coupons %}
+                                        <div class="coupon-card">
+                                            <div class="coupon-details u-s-m-b-10">
+                                                <div class="coupon-info">
+                                                    <span class="coupon-info__value">
+                                                        THE <strong>{{ coupon.code|upper }}</strong> GET <strong>
+                                                            ₹{{ coupon.discount_amount|capfirst |floatformat:0 }}
+                                                        </strong> OFF FOR </span><br>
+                                                    <span>
+                                                        {% if coupon.category != 'None' %}
+                                                            <strong>{{ coupon.category | upper }}</strong> 
+                                                        {% endif %}
+                                                        Minimum Purchase: ₹{{ coupon.min_purchase_amount | floatformat:0 }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                        {% else %}
+                                        <div class="coupon-card-2">
+                                                <div class="coupon-info">
+                                                    <span class="coupon-info__value"><strong>NO COUPON AVAILABLE</strong> </span>
+                                                </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                            
 
-
-
-                                <div class="u-s-m-b-15">
-
-                                    <span class="pd-detail__label u-s-m-b-8">Product Policy:</span>
-                                    <ul class="pd-detail__policy-list">
-                                        <li><i class="fas fa-check-circle u-s-m-r-8"></i>
-
-                                            <span>Buyer Protection.</span></li>
-                                        <li><i class="fas fa-check-circle u-s-m-r-8"></i>
-
-                                            <span>Full Refund if you don't receive your order.</span></li>
-                                        <li><i class="fas fa-check-circle u-s-m-r-8"></i>
-
-                                            <span>Returns accepted if product not as described.</span></li>
-                                    </ul>
-                                </div>
                             </div>
 
                             
@@ -348,7 +374,7 @@
                                     <div class="tab-pane fade show active" id="pd-desc">
                                         <div class="pd-tab__desc " >
                                             <div class="u-s-m-b-15 ">
-                                                <p >{{ productdetails.description }}</p>
+                                                <p >{{ product.description |capfirst }}</p>
                                             </div>
                                           
                                             <div class="u-s-m-b-15">
@@ -360,22 +386,22 @@
                                                         <tbody>
                                                             <tr>
                                                                 <td>Occasion</td>
-                                                                <td>{{ product.occasion }}</td>
+                                                                <td>{{ product.occasion |title }}</td>
                                                             </tr>
                                                             <tr>
-                                                                <td>Color</td>
-                                                                <td>{{ product.color }}</td>
+                                                                <td>Color</td> 
+                                                                <td>{{ product.color |title }}</td>
                                                             </tr>  
                                                             <tr>
                                                                 <td>Fit</td>
-                                                                <td>{{ product.fit }}</td>
+                                                                <td>{{ product.fit |title }}</td>
                                                             </tr>
                                                             <tr>
                                                                 <tr>
                                                                     <td>Size available</td>
                                                                     <td>
                                                                         {% for variant in product.variants.all %}
-                                                                        {{ variant.size }}{% if not forloop.last %}, {% endif %}
+                                                                        {{ variant.size|title }}{% if not forloop.last %}, {% endif %}
                                                                             {% endfor %}
                                                                     </td>  <!-- Sizes in a single cell -->
                                                                 </tr>
@@ -710,7 +736,7 @@
 
                                         <div class="product-o__wrap">
 
-                                            <a class="aspect aspect--bg-grey aspect--square u-d-block" href="">
+                                            <a class="aspect aspect--bg-grey aspect--square u-d-block" href="{% url 'userss:product_details' product.product_id %}">
 
                                                 <img class="aspect__img" src="{{ product.image1.url }}" alt=""></a>
                                             <div class="product-o__action-wrap">
@@ -734,11 +760,11 @@
 
                                         <span class="product-o__category">
 
-                                            <a href="">{{ product.brand.brandname }}</a></span>
+                                            <a href="{% url 'userss:product_details' product.product_id %}">{{ product.brand.brandname }}</a></span>
 
                                         <span class="product-o__name">
 
-                                            <a href="">{{ product.product_name }}</a></span>
+                                            <a href="{% url 'userss:product_details' product.product_id %}">{{ product.product_name }}</a></span>
                                         <div class="product-o__rating gl-rating-style"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
 
                                             <span class="product-o__review">(20)</span></div>
@@ -763,20 +789,6 @@
         </div>
         <!--====== End - App Content ======-->
         <script>
-          //  function selectSize(button, size) {
-                // Get the price and quantity from the button's data attributes
-              //  const price = button.getAttribute('data-price');
-               // const qty = button.getAttribute('data-qty');
-            
-                // Update the displayed price and stock
-              //  document.getElementById('product-price').innerText = '₹ ' + price;
-                //const stockText = qty > 0 ? qty + ' in stock' : 'Out of stock';
-               // document.getElementById('product-stock').innerText = stockText;
-            
-                // Update the selected size display
-               // document.getElementById('selected-size').innerText = 'Selected Size: ' + size;
-            //}
-
 
             function selectSize(button, size) {
                 const price = button.getAttribute('data-price');
@@ -800,5 +812,13 @@
                 const form = document.getElementById('add-to-cart-form');
                 form.action = "{% url 'cart:addtocart' 0 %}".replace('0', variantId); // Update to your URL pattern
             }
+
+            document.getElementById('add-to-cart-form').addEventListener('submit', function(event) {
+                const selectedSize = document.getElementById('selected-size-input').value;
+                if (!selectedSize) {
+                    event.preventDefault(); 
+                    showToastMessage('Please select a size','error');
+                }
+            });
         </script>
 {% endblock %}

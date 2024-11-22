@@ -43,7 +43,8 @@ urlpatterns = [
     path('viewsizevariants/<int:product_id>/', views.view_sizevariants, name='view_sizevariants'),
     path('addsizevariants/<int:product_id>/', views.add_sizevariants, name='add_sizevariants'),
     path('editsizevariants/<int:variant_id>/', views.edit_sizevariants, name='edit_sizevariants'),
-    path('delete_sizevariant/<int:variant_id>/', views.delete_sizevariant, name='delete_sizevariant'),
+    path('variant/soft-delete/<int:variant_id>/', views.soft_delete_variant, name='soft_delete_variant'),
+    path('variant/restore/<int:variant_id>/', views.restore_variant, name='restore_variant'),
 
 
     

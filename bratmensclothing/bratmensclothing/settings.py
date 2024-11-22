@@ -52,6 +52,12 @@ INSTALLED_APPS = [
     'users',
     'dashboard',
     'cart',
+    'order',
+    'wishlist',
+    'coupon',
+    'cloudinary',
+    'cloudinary_storage',
+
 ]
 
 
@@ -188,3 +194,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+# import cloudinary.uploader
+# from cloudinary.utils import cloudinary_url
+import cloudinary
+
+cloudinary.config( 
+    cloud_name = os.getenv('cloud_name'), 
+    api_key = os.getenv('api_key'), 
+    api_secret = os.getenv('api_secret'),
+    DEFAULT_FOLDER= 'home/profile_pics',
+    secure=True,
+)
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'

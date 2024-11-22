@@ -86,7 +86,7 @@
                                         <button class="btn btn--e-transparent-brand-b-2" type="submit">LOGIN</button></div>
                                     <div class="u-s-m-b-30">
 
-                                        <a class="gl-link" href="">Lost Your Password?</a></div>
+                                        <a class="gl-link" href="{% url 'accounts:forgot_password' %}">Lost Your Password?</a></div>
                                 </div>
                                 <div class="u-s-m-b-30">
 
@@ -142,7 +142,10 @@
                             icon: 'error',
                             title: 'Access Denied',
                             text: 'Your account is blocked.',
-                            confirmButtonColor: '#000'
+                            confirmButtonColor: '#000',
+                            customClass: {
+                                icon: 'black-icon'
+                            }
                         });
                     } else if (xhr.status === 400) {
                         const errors = xhr.responseJSON.errors;
@@ -157,7 +160,10 @@
                             icon: 'error',
                             title: 'Oops...',
                             html: errorMessages,  // Display error messages from the server
-                            confirmButtonColor: '#000'
+                            confirmButtonColor: '#000',
+                            customClass: {
+                                icon: 'black-icon'
+                            }
                         });
                     }
                 }

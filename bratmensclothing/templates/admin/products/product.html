@@ -17,6 +17,34 @@
     <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"> -->
 
     <style>
+
+        .pagination-container {
+            display: flex; /* Use flexbox for alignment */
+            justify-content: flex-end; /* Aligns child elements to the right */
+            margin-top: 20px; /* Adds space above the pagination */
+        }
+        
+        .pagination {
+            display: flex; /* Ensure pagination links are in a row */
+        }
+        
+        .step-links {
+            display: flex; /* Flexbox for step links to align correctly */
+            align-items: center; /* Center items vertically */
+        }
+        
+        .step-links a {
+            margin: 0 5px; /* Spacing between links */
+            text-decoration: none; /* Removes underline from links */
+        }
+        
+        .current {
+            margin: 0 10px; /* Spacing around current page text */
+            font-weight: bold; /* Makes the current page text bold */
+        }
+
+        
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -84,11 +112,11 @@
                             <div class="sb-nav-link-icon"><i class="fas fa-box-open"></i></div>
                             Products
                         </a>
-                        <a class="nav-link" href="">
+                        <a class="nav-link" href="{% url 'order:order_details' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-shopping-cart"></i></div>
                             Orders
                         </a>
-                        <a class="nav-link" href="">
+                        <a class="nav-link" href="{% url 'coupon:coupon_details'%}">
                             <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
                             Coupons
                         </a>
@@ -135,7 +163,7 @@
         <div id="layoutSidenav_content">
             <main>
                 <div class="container-fluid px-4">
-                    <h1 class="mt-4">Products</h1>
+                    <h3 class="mt-4">Products</h3>
                     <ol class="breadcrumb mb-4">
                         <li class="breadcrumb-item"><a href="">Dashboard</a></li>
                         <li class="breadcrumb-item active">Products</li>
@@ -201,17 +229,17 @@
                                             <img src="{{ product.image1.url }}" alt="Current Image 1" width="100" class="mb-2">
                                         {% endif %}
                                         </td>
-                                        <td>{{ product.product_name }}</td>
-                                        <td>{{ product.description }}</td>
-                                        <td>{{ product.brand.brandname }}</td>
+                                        <td>{{ product.product_name |title}}</td>
+                                        <td>{{ product.description |capfirst }}</td>
+                                        <td>{{ product.brand.brandname |title }}</td>
                                         <td>
                                             {% for category in product.category.all %}
-                                                {{ category.category }}-{{ category.category_type }}{% if not forloop.last %}, {% endif %}
+                                                {{ category.category |title }}-{{ category.category_type }}{% if not forloop.last %}, {% endif %}
                                             {% endfor %}
                                         </td>
-                                        <td>{{ product.color }}</td>
-                                        <td>{{ product.occasion }}</td>
-                                        <td>{{ product.fit }}</td>
+                                        <td>{{ product.color |title }}</td>
+                                        <td>{{ product.occasion |title }}</td>
+                                        <td>{{ product.fit |title }}</td>
                                         
 
                                         <td>
@@ -287,6 +315,29 @@
                                 </tbody>
                             </table>
                         </div>
+
+
+                        <div class="pagination-container">
+                            <div class="pagination">
+                                <span class="step-links">
+                                    {% if products.has_previous %}
+                                        <a href="?page=1">&laquo; First</a>
+                                        <a href="?page={{ products.previous_page_number }}">Previous</a>
+                                    {% endif %}
+                            
+                                    <span class="current">
+                                        Page {{ products.number }} of {{ products.paginator.num_pages }}.
+                                    </span>
+                            
+                                    {% if products.has_next %}
+                                        <a href="?page={{ products.next_page_number }}">Next</a>
+                                        <a href="?page={{ products.paginator.num_pages }}">Last &raquo;</a>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+
+
                     </div>
                     
                 </div>
@@ -350,21 +401,35 @@
                         <select name="category" class="form-control form-select" required>
                             <option value="">Select Category</option>
                             {% for category in categories %}
-                                <option value="{{ category.category_id }}">{{ category.category_type }}-{{ category.category }}</option>
+                                <option value="{{ category.category_id }}">{{ category.category }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Color</label>
-                        <input type="text" name="color" class="form-control" required>
+                        <input type="text" name="color" class="form-control" value="{{ product.color }}" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Occasion</label>
-                        <input type="text" name="occasion" class="form-control" required>
+                        <select name="occasion" class="form-control" required>
+                            <option value="" disabled selected>Select an occasion</option>
+                            <option value="casual">Casual</option>
+                            <option value="formal">Formal</option>
+                            <option value="party">Party</option>
+                            <option value="business">Business</option>
+                            <option value="sports">Sports</option>
+                        </select>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Fit</label>
-                        <input type="text" name="fit" class="form-control" required>
+                        <select name="fit" class="form-control" required>
+                            <option value="" disabled selected>Select a fit</option>
+                            <option value="slim">Slim</option>
+                            <option value="regular">Regular</option>
+                            <option value="loose">Loose</option>
+                            <option value="relaxed">Relaxed</option>
+                            <option value="tailored">Tailored</option>
+                        </select>
                     </div>
 
                     <div class="modal-footer">
@@ -437,7 +502,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Product Name</label>
-                        <input type="text" name="product_name" class="form-control" value="{{ product.product_name }}" required>
+                        <input type="text" name="product_name" class="form-control" value="{{ product.product_name |title }}" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Product Description</label>
@@ -468,15 +533,15 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Color</label>
-                        <input type="text" name="color" class="form-control" value="{{ product.color }}" required>
+                        <input type="text" name="color" class="form-control" value="{{ product.color |title }}" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Occasion</label>
-                        <input type="text" name="occasion" class="form-control" value="{{ product.occasion }}" required>
+                        <input type="text" name="occasion" class="form-control" value="{{ product.occasion |title }}" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Fit</label>
-                        <input type="text" name="fit" class="form-control" value="{{ product.fit }}" required>
+                        <input type="text" name="fit" class="form-control" value="{{ product.fit |title }}" required>
                     </div>
                     
                 </div>

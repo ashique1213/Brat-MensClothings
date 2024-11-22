@@ -22,12 +22,17 @@ from django.conf.urls.static import static
 app_name = 'userss'
 
 urlpatterns = [
+    path('404/',views.error,name='error'),
     path('view_user/',views.view_user,name='view_user'),
     path('block-user/<int:userid>',views.block_user,name='block_user'),
     path('unblock-user/<int:userid>',views.unblock_user,name='unblock_user'),
     path('categorydetails/',views.category_details,name='category_details'),
     path('productdetails/<int:product_id>/',views.product_details,name='product_details'),
     
+    
+    
+    path('addprofile/<int:userid>',views.add_profile,name='addprofile'),
+    path('deleteprofile/<int:userid>',views.delete_profile,name='deleteprofile'),
     path('accountdetails/<int:userid>',views.account_details,name='accountdetails'),
     path('accountdetails/edit_account_dtails/<int:userid>',views.edit_account_details,name='edit_account_dtails'),
     path('accountdetails/resetpassword/<int:userid>',views.reset_password,name='resetpassword'),
@@ -38,4 +43,6 @@ urlpatterns = [
     path('removeaddress/<int:id>/', views.remove_address, name='removeaddress'),
     
     
-]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
+if settings.DEBUG:  
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

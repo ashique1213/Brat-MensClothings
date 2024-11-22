@@ -116,11 +116,12 @@
   }
 
   .toast-content {
-      background-color: #fff;
+      background-color: #d4d4d4;
       color: #fff;
+      font-weight:  bold;
       padding: 15px;
       border-radius: 5px;
-      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
       animation: fadeInOut 3s ease forwards;
   }
 
@@ -137,6 +138,7 @@
     </style>
   </head>
   <body class="config">
+    
     <div class="preloader is-active">
       <div class="preloader__wrap" >
         <img
@@ -199,21 +201,17 @@
               <!--====== End - Main Logo ======-->
 
               <!--====== Search Form ======-->
-              <form class="main-form">
+              <form class="main-form" method="GET" action="{% url 'userss:category_details' %}">
                 <label for="main-search"></label>
+                <input class="input-text input-text--border-radius input-text--style-1" 
+                       name="search" 
+                       value="{{ query }}" 
+                       type="text" 
+                       id="main-search" 
+                       placeholder="Search"/>
+                <button class="btn btn--icon fas fa-search main-search-button" type="submit"></button>
+            </form>
 
-                <input
-                  class="input-text input-text--border-radius input-text--style-1"
-                  type="text"
-                  id="main-search"
-                  placeholder="Search"
-                />
-
-                <button
-                  class="btn btn--icon fas fa-search main-search-button"
-                  type="submit"
-                ></button>
-              </form>
               <!--====== End - Search Form ======-->
 
               <!--====== Dropdown Main plugin ======-->
@@ -434,7 +432,7 @@
                       <a href=""><i class="fas fa-home u-c-brand"></i></a>
                     </li>
                     <li>
-                      <a href=""><i class="far fa-heart"></i></a>
+                      <a href="{% url 'wishlist:viewwishlist' %}"><i class="far fa-heart"></i></a>
                     </li>
                     <!-- wishlist -->
                     <li>
@@ -701,6 +699,7 @@
                 }, 3000); // Change this to adjust how long the toast is displayed
             });
         }); 
+
 
         $(document).ready(function() {
             // Show the preloader when the login button is clicked

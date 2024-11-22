@@ -48,8 +48,6 @@
         </div>
 <!--====== End - Section Intro ======-->
 
-
-
 <!--====== Section Content ======-->
 
         <div class="section__content">
@@ -80,12 +78,18 @@
 
                                     <div id="responseMessage"></div>
 
+                                    <p style="font-size: 10px; margin-left: 10px; color: #000;">Instructions</p>
+                                    <ul style="font-size: 10px; color: #000;">
+                                        <li>Username : Only letters are allowed (A-Z, a-z),No spaces or special characters.</li>
+                                        <li>Password : At least 6 characters | Upper & lowercase letters | 1 number & 1 special character.</li>
+                                    </ul>
+
                                     <div class="u-s-m-b-30">
 
                                         <label class="gl-label" for="reg-fname">NAME *</label>
 
-                                        <input class="input-text input-text--primary-style" type="text" required name="username" id="reg-fname" placeholder="First Name"></div>
-                                    <div class="u-s-m-b-30">
+                                        <input class="input-text input-text--primary-style" type="text" required name="username" id="reg-fname" placeholder="UserName"></div>
+                                        <div class="u-s-m-b-30">
 
                                         <label class="gl-label" for="reg-phone">PHONE </label>
 
@@ -101,7 +105,7 @@
                                         <label class="gl-label" for="reg-password">PASSWORD *</label>
 
                                         <input class="input-text input-text--primary-style" type="password" required name="password1"placeholder="Enter Password"></div>
-    
+                        
                                     <div class="u-s-m-b-30">
 
                                         <label class="gl-label" for="reg-password">RE-ENTER PASSWORD *</label>
@@ -114,7 +118,7 @@
 
                                     <button class="btn btn--e-transparent-brand-b-2" type="submit">CREATE</button></div>
 
-                                    <a class="gl-link" href="#">Return to Store</a>
+                                    <a class="gl-link" href="{% url 'accounts:home_user' %}">Return to Store</a>
                                 </form>
                             </div>
                         </div>

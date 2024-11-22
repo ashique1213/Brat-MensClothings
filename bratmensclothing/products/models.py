@@ -16,7 +16,7 @@ class Category(models.Model):
     updated_date = models.DateTimeField(auto_now=True) 
     is_deleted = models.BooleanField(default=False)
       
-
+ 
     def __str__(self):
         return self.category 
     
@@ -43,7 +43,7 @@ class ProductDetails(models.Model):
     color = models.CharField(max_length=30) 
     occasion = models.CharField(max_length=30) 
     fit = models.CharField(max_length=30)
-    brand = models.ForeignKey('Brand', on_delete=models.CASCADE)
+    brand = models.ForeignKey('Brand', on_delete=models.CASCADE,related_name='products')
     category = models.ManyToManyField('Category', related_name='product_list', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -56,8 +56,8 @@ class VariantSize(models.Model):
     variant_id = models.AutoField(primary_key=True)  
     size = models.CharField(max_length=10)
     qty = models.IntegerField()
-    price = models.IntegerField(null=True, blank=True)
-    status = models.BooleanField(default=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    is_deleted = models.BooleanField(default=False)
     product = models.ForeignKey(ProductDetails, related_name='variants', on_delete=models.CASCADE)
 
     def __str__(self):

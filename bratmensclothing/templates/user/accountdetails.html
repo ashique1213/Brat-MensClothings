@@ -3,6 +3,80 @@
 
 {% block content %}   
 {% load static %}
+
+
+<style>
+
+    .profile-container {
+        display: flex;
+        align-items: center;
+        gap: 12px; /* Spacing between image and form elements */
+        
+    }
+    
+    .profile-pic-container {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        overflow: hidden;
+        background-color: white; /* Dark background for contrast */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        margin-bottom: 10px;
+        border: 1px solid #000; /* Subtle border */
+        object-fit: cover;
+
+    }
+    
+    .profile-pic-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .placeholder {
+        font-size: 14px;
+        color: #bbb;
+        font-weight: bold;
+    }
+    
+    .add-button {
+        padding: 6px 10px;
+        font-size: 12px;
+        background-color: #000;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        margin-bottom: 10px;
+    }
+    
+    .add-button:hover {
+        background-color: #444; /* Darker shade on hover */
+        color: #fff;
+    }
+    
+    /* Custom style for the file input label */
+    .custom-upload-button {
+        padding: 4px 8px;
+        font-size: 12px;
+        background-color: #666;
+        color: #fff;
+        border-radius: 5px;
+        cursor: pointer;
+        text-align: center;
+        transition: background-color 0.3s ease;
+        border: 1px solid #666;
+    }
+    
+    .custom-upload-button:hover {
+        background-color: #444; /* Slightly lighter hover effect */
+    }
+    
+  </style>
    <!--====== App Content ======-->
    <div class="app-content">
 
@@ -55,7 +129,7 @@
                                             <a href="{% url 'userss:addressdetails' user.userid %}">Address Book</a></li>
                                         <li>
 
-                                            <a href="">My Orders</a></li>
+                                            <a href="{% url 'order:view_orders' %}">My Orders</a></li>
                                         <li>
 
                                             <a href="">My Wishlist</a></li>
@@ -69,8 +143,47 @@
                             <div class="dash__box dash__box--shadow dash__box--radius dash__box--bg-white u-s-m-b-30">
                                 <div class="dash__pad-2">
                                     <h1 class="dash__h1 u-s-m-b-14">My Profile</h1>
+                                    <!-- <span class="dash__text u-s-m-b-30">Look all your info, you could customize your profile.</span> -->
+                                    <div style="display: flex; align-items: center; gap: 10px;">
 
-                                    <span class="dash__text u-s-m-b-30">Look all your info, you could customize your profile.</span>
+
+                                        
+                                        <div class="profile-pic-container">
+                                            {% if user.profile %}
+                                            <img id="profile-pic" src="{{ user.profile.url }}" alt="">
+                                            {% else %}
+                                            <span class="placeholder">Profile</span>
+                                            <img id="profile-pic" src="" alt="" style="display: none;">
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <form action="{% url 'userss:addprofile' user.userid %}" method="post" enctype="multipart/form-data">
+                                            {% csrf_token %}
+                                            <input type="file" id="profile-upload" name="profile" accept="image/*" onchange="previewImage(event)" style="display: none;">
+                                            
+                                            {% if user.profile %}
+                                            <!-- <label for="profile-upload"  class="custom-upload-button">Update</label> -->
+                                            <a href="{% url 'userss:deleteprofile' user.userid %}" class="custom-upload-button">Remove</a>
+                                            {% else %}
+                                            <label for="profile-upload" class="custom-upload-button">Choose Profile</label>
+                                            {% endif %}
+                                            <button type="submit" id="uploadprofile" class="add-button">Upload</button>
+                                            <!-- <button type="" class="add-button">Remove</button> -->
+                                        </form>
+                                    </div>
+                                        
+                                    <!-- JavaScript for live image preview -->
+                                    <script>
+                                        function previewImage(event) {
+                                            var output = document.getElementById('profile-pic');
+                                            output.src = URL.createObjectURL(event.target.files[0]);
+                                            output.style.display = "block"; // Show image on preview
+                                            output.onload = function() {
+                                                URL.revokeObjectURL(output.src); // Free memory
+                                            };
+                                        }
+                                    </script>
+                                    
                                   
                                     <div class="row">
                                         <div   div class="col-lg-4 u-s-m-b-30">
@@ -118,6 +231,17 @@
 </div>
 <!--====== End - App Content ======-->
 
-
+<script>
+    $(document).ready(function() {
+        // Show the preloader when the login button is clicked
+        $('#removeprofile').click(function() {
+            $('.preloader').addClass('is-active');
+        });
+        $('#uploadprofile').click(function() {
+            $('.preloader').addClass('is-active');
+        });
+    });
+</script>
      
+
 {% endblock %}

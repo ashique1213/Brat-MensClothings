@@ -1,0 +1,162 @@
+{% extends "user/base.html" %}
+
+{% block content %}
+
+{% load socialaccount %}
+
+<!--====== Section 1 ======-->
+<div class="">
+
+    <!--====== Section Content ======-->
+    <div class="section__content">
+        <div class="container">
+            <div class="breadcrumb">
+                <div class="breadcrumb__wrap">
+                    <ul class="breadcrumb__list">
+                        <li class="has-separator">
+                            <a href="{% url 'accounts:home_user' %}">Home</a>
+                        </li>
+                        <li class="is-marked">
+                            <a href="">Reset</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--====== End - Section 1 ======-->
+   
+<!--====== Section 2 ======-->
+<div class="">
+    <!--====== Section Intro ======-->
+    <div class="section__intro u-s-p-b-40">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="section__text-wrap">
+                        <h2 class="section__heading u-c-secondary">SET NEW PASSWORD</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--====== End - Section Intro ======-->
+
+    <!--====== Section Content ======-->
+    <div class="section__content">
+        <div class="container">
+            <div class="row row--center">
+                <div class="col-lg-6 col-md-8 u-s-m-b-30">
+                    <div class="l-f-o">
+                        <div class="l-f-o__pad-box">
+                            <h1 class="gl-h1">RESET PASSWORD</h1>
+
+                            <span class="gl-text u-s-m-b-30">Create your new password here</span>
+                           
+                            <div id="error-message" class="u-s-m-b-30"></div> <!-- Error message area -->
+
+                            <form class="l-f-o__form" method="post" id="resetpassword" action="{% url 'accounts:reset_new_password' %}">
+                                {% csrf_token %}
+                               
+                                <div class="u-s-m-b-30">
+                                    <label class="gl-label">PASSWORD *</label>
+                                    <input class="input-text input-text--primary-style" name="password1" type="password" id="password1" placeholder="Enter Password">
+                                </div>
+                                <div class="u-s-m-b-30">
+                                    <label class="gl-label">RE-ENTER PASSWORD *</label>
+                                    <input class="input-text input-text--primary-style" name="password2" type="password" id="password2" placeholder="Re-enter Password">
+                                </div>
+
+                                <div class="gl-inline">
+                                    <div class="u-s-m-b-30">
+                                        <button class="btn btn--e-transparent-brand-b-2" type="submit">RESET</button>
+                                    </div>
+                                </div>
+                        
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--====== End - Section Content ======-->
+</div>
+<!--====== End - Section 2 ======-->
+
+<script>
+    $(document).ready(function() {
+        $('#resetpassword').on('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+            $('.preloader').addClass('is-active');
+    
+            // Client-side validation for password match
+            const password1 = $('#password1').val();
+            const password2 = $('#password2').val();
+            
+            if (password1 !== password2) {
+                $('.preloader').removeClass('is-active');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Password Mismatch',
+                    text: 'Please make sure both passwords match.',
+                    confirmButtonColor: '#000',
+                    customClass: {
+                        icon: 'black-icon'
+                    }
+                });
+                return;
+            }
+    
+            $.ajax({
+                type: 'POST',
+                url: '{% url "accounts:reset_new_password" %}',  // URL for the reset password view
+                data: $(this).serialize(),
+                dataType: 'json',
+                success: function(response) {
+                    $('.preloader').removeClass('is-active');
+    
+                    if (response.status === 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Password Reset Successfully!',
+                            text: 'Redirecting to login...',
+                            confirmButtonColor: '#000',
+                            customClass: {
+                                icon: 'black-icon'
+                            }
+                        }).then(() => {
+                            window.location.href = response.redirect_url;  // Redirect using the URL in the response
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    $('.preloader').removeClass('is-active');
+    
+                    if (xhr.status === 400) {
+                        const errors = xhr.responseJSON.errors;
+                        let errorMessages = '';
+                        for (let key in errors) {
+                            errorMessages += errors[key] + '<br>';
+                        }
+    
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            html: errorMessages,
+                            confirmButtonColor: '#000',
+                            customClass: {
+                                icon: 'black-icon'
+                            }
+                        });
+                    }
+                }
+            });
+        });
+    });
+    
+
+</script>
+
+{% endblock %}

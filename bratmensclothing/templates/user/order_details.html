@@ -1,5 +1,7 @@
 
+{% extends "user/base.html" %}
 
+{% block content %}
 
 
 
@@ -7,7 +9,7 @@
  <div class="app-content">
 
     <!--====== Section 1 ======-->
-    <div class="u-s-p-y-60">
+    <div class="u-s-p-b-30">
 
         <!--====== Section Content ======-->
         <div class="section__content">
@@ -17,10 +19,10 @@
                         <ul class="breadcrumb__list">
                             <li class="has-separator">
 
-                                <a href="index.html">Home</a></li>
+                                <a href="">Home</a></li>
                             <li class="is-marked">
 
-                                <a href="dash-my-order.html">My Account</a></li>
+                                <a href="">My Account</a></li>
                         </ul>
                     </div>
                 </div>
@@ -44,32 +46,25 @@
                             <div class="dash__box dash__box--bg-white dash__box--shadow u-s-m-b-30">
                                 <div class="dash__pad-1">
 
-                                    <span class="dash__text u-s-m-b-16">Hello, John Doe</span>
+                                    <span class="dash__text u-s-m-b-16">Hello, {{ user.username | upper }}</span>
                                     <ul class="dash__f-list">
+
                                         <li>
 
-                                            <a href="dashboard.html">Manage My Account</a></li>
+                                            <a href="{% url 'userss:accountdetails' user.userid %}">My Profile</a></li>
                                         <li>
 
-                                            <a href="dash-my-profile.html">My Profile</a></li>
+                                            <a href="{% url 'userss:addressdetails' user.userid %}">Address Book</a></li>
+                                        <li class="dash-active">
+
+                                            <a href="{% url 'order:view_orders' %}">My Orders</a></li>
                                         <li>
 
-                                            <a href="dash-address-book.html">Address Book</a></li>
-                                        <li>
-
-                                            <a href="dash-track-order.html">Track Order</a></li>
-                                        <li>
-
-                                            <a class="dash-active" href="dash-my-order.html">My Orders</a></li>
-                                        <li>
-
-                                            <a href="dash-payment-option.html">My Payment Options</a></li>
-                                        <li>
-
-                                            <a href="dash-cancellation.html">My Returns & Cancellations</a></li>
+                                            <a href="">My Wishlist</a></li>
                                     </ul>
                                 </div>
                             </div>
+
                             <div class="dash__box dash__box--bg-white dash__box--shadow dash__box--w">
                                 <div class="dash__pad-1">
                                     <ul class="dash__w-list">
@@ -78,7 +73,7 @@
 
                                                 <span class="dash__w-icon dash__w-icon-style-1"><i class="fas fa-cart-arrow-down"></i></span>
 
-                                                <span class="dash__w-text">4</span>
+                                                <span class="dash__w-text">0</span>
 
                                                 <span class="dash__w-name">Orders Placed</span></div>
                                         </li>
@@ -105,12 +100,14 @@
                             </div>
                             <!--====== End - Dashboard Features ======-->
                         </div>
+
+
                         <div class="col-lg-9 col-md-12">
                             <div class="dash__box dash__box--shadow dash__box--radius dash__box--bg-white u-s-m-b-30">
                                 <div class="dash__pad-2">
                                     <h1 class="dash__h1 u-s-m-b-14">My Orders</h1>
 
-                                    <span class="dash__text u-s-m-b-30">Here you can see all products that have been delivered.</span>
+                                    <span class="dash__text u-s-m-b-30">Here you can see all Orders </span>
                                     <form class="m-order u-s-m-b-30">
                                         <div class="m-order__select-wrapper">
 
@@ -123,18 +120,19 @@
                                                 <option>All Orders</option>
                                             </select></div>
                                     </form>
+                                    {% for item in order_items%}
                                     <div class="m-order__list">
                                         <div class="m-order__get">
                                             <div class="manage-o__header u-s-m-b-30">
                                                 <div class="dash-l-r">
                                                     <div>
-                                                        <div class="manage-o__text-2 u-c-secondary">Order #305423126</div>
-                                                        <div class="manage-o__text u-c-silver">Placed on 26 Oct 2016 09:08:37</div>
+                                                        <div class="manage-o__text-2 u-c-secondary">Order #{{item.order.tracking_number}}</div>
+                                                        <div class="manage-o__text u-c-silver">Placed on {{ item.order.created_at}}</div>
                                                     </div>
                                                     <div>
                                                         <div class="dash__link dash__link--brand">
-
-                                                            <a href="dash-manage-order.html">MANAGE</a></div>
+                                                            <a href="{% url 'order:manage_orders' item.orderitem_id %}">MANAGE</a>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -142,106 +140,80 @@
                                                 <div class="description__container">
                                                     <div class="description__img-wrap">
 
-                                                        <img class="u-img-fluid" src="images/product/electronic/product3.jpg" alt=""></div>
-                                                    <div class="description-title">Yellow Wireless Headphone</div>
+                                                        <img class="u-img-fluid" src="{{ item.variants.product.image1.url }}" alt=""></div>
+                                                    <div class="description-title">{{ item.variants.product.product_name |title}},</div>
+                                                    <div class="description-title">Size - {{ item.variants.size |title}}</div>
                                                 </div>
                                                 <div class="description__info-wrap">
-                                                    <div>
 
-                                                        <span class="manage-o__badge badge--processing">Processing</span></div>
-                                                    <div>
+                                                        <div>
 
+                                                            {% if item.status == 'Order Pending' %}
+                                                                <div>
+                                                                    <span class="manage-o__badge badge--processing">Processing</span>
+                                                                </div>
+                                                            {% elif item.status == 'Order confirmed' %}
+                                                                <div>
+                                                                    <span class="manage-o__badge badge--processing">Confirmed</span>
+                                                                </div>
+                                                            {% elif item.status == 'Shipped' %}
+                                                                <div>
+                                                                    <span class="manage-o__badge badge--processing">Shipped</span>
+                                                                </div>
+                                                            {% elif item.status == 'Out For Delivery' %}
+                                                                <div>
+                                                                    <span class="manage-o__badge badge--out-for-processing">Out for Delivery</span>
+                                                                </div>
+                                                            {% elif item.status == 'Delivered' %}
+                                                                <div>
+                                                                    <span class="manage-o__badge badge--shipped">Delivered</span>
+                                                                </div>
+                                                            {% elif item.status == 'Cancelled' %}
+                                                                <div>
+                                                                    <span class="manage-o__badge badge--delivered">Cancelled</span>
+                                                                </div>
+                                                            {% elif item.status == 'Requested Return' %}
+                                                                <div>
+                                                                    <span class="manage-o__badge badge--requested-processing">Return Requested</span>
+                                                                </div>
+                                                            {% elif item.status == 'Approve Returned' %}
+                                                                <div>
+                                                                    <span class="manage-o__badge badge--approve-processing">Return Approved</span>
+                                                                </div>
+                                                            {% elif item.status == 'Reject Returned' %}
+                                                                <div>
+                                                                    <span class="manage-o__badge badge--reject-delivered">Return Rejected</span>
+                                                                </div>
+                                                            {% else %}
+                                                                <div>
+                                                                    <span class="manage-o__badge badge--delivered">Unknown Status</span>
+                                                                </div>
+                                                            {% endif %}
+
+                           
                                                         <span class="manage-o__text-2 u-c-silver">Quantity:
 
-                                                            <span class="manage-o__text-2 u-c-secondary">1</span></span></div>
+                                                            <span class="manage-o__text-2 u-c-secondary">{{item.quantity}}</span>
+                                                        </span>
+                                                        </div>
                                                     <div>
 
-                                                        <span class="manage-o__text-2 u-c-silver">Total:
+                                                        <span class="manage-o__text-2 u-c-silver">Price:
 
-                                                            <span class="manage-o__text-2 u-c-secondary">$16.00</span></span></div>
+                                                            <span class="manage-o__text-2 u-c-secondary">₹{{item.subtotal_price}}</span></span></div>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="m-order__get">
-                                            <div class="manage-o__header u-s-m-b-30">
-                                                <div class="dash-l-r">
-                                                    <div>
-                                                        <div class="manage-o__text-2 u-c-secondary">Order #305423126</div>
-                                                        <div class="manage-o__text u-c-silver">Placed on 26 Oct 2016 09:08:37</div>
-                                                    </div>
-                                                    <div>
-                                                        <div class="dash__link dash__link--brand">
-
-                                                            <a href="dash-manage-order.html">MANAGE</a></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="manage-o__description">
-                                                <div class="description__container">
-                                                    <div class="description__img-wrap">
-
-                                                        <img class="u-img-fluid" src="images/product/women/product8.jpg" alt=""></div>
-                                                    <div class="description-title">New Dress D Nice Elegant</div>
-                                                </div>
-                                                <div class="description__info-wrap">
-                                                    <div>
-
-                                                        <span class="manage-o__badge badge--shipped">Shipped</span></div>
-                                                    <div>
-
-                                                        <span class="manage-o__text-2 u-c-silver">Quantity:
-
-                                                            <span class="manage-o__text-2 u-c-secondary">1</span></span></div>
-                                                    <div>
-
-                                                        <span class="manage-o__text-2 u-c-silver">Total:
-
-                                                            <span class="manage-o__text-2 u-c-secondary">$16.00</span></span></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="m-order__get">
-                                            <div class="manage-o__header u-s-m-b-30">
-                                                <div class="dash-l-r">
-                                                    <div>
-                                                        <div class="manage-o__text-2 u-c-secondary">Order #305423126</div>
-                                                        <div class="manage-o__text u-c-silver">Placed on 26 Oct 2016 09:08:37</div>
-                                                    </div>
-                                                    <div>
-                                                        <div class="dash__link dash__link--brand">
-
-                                                            <a href="dash-manage-order.html">MANAGE</a></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="manage-o__description">
-                                                <div class="description__container">
-                                                    <div class="description__img-wrap">
-
-                                                        <img class="u-img-fluid" src="images/product/men/product8.jpg" alt=""></div>
-                                                    <div class="description-title">New Fashion D Nice Elegant</div>
-                                                </div>
-                                                <div class="description__info-wrap">
-                                                    <div>
-
-                                                        <span class="manage-o__badge badge--delivered">Delivered</span></div>
-                                                    <div>
-
-                                                        <span class="manage-o__text-2 u-c-silver">Quantity:
-
-                                                            <span class="manage-o__text-2 u-c-secondary">1</span></span></div>
-                                                    <div>
-
-                                                        <span class="manage-o__text-2 u-c-silver">Total:
-
-                                                            <span class="manage-o__text-2 u-c-secondary">$16.00</span></span></div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                       
+                                       
                                     </div>
+
+                                    {% endfor %}
                                 </div>
                             </div>
                         </div>
+
+                        
                     </div>
                 </div>
             </div>
@@ -251,3 +223,6 @@
     <!--====== End - Section 2 ======-->
 </div>
 <!--====== End - App Content ======-->
+
+
+{% endblock %}
