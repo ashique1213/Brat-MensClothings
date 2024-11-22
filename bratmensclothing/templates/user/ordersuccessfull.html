@@ -6,7 +6,7 @@
 
 
 <!--====== App Content ======-->
-<div class="app-content">
+<div class="app-content u-s-p-y-60">
 
     <!--====== Section 1 ======-->
     <div class="u-s-p-y-60">
@@ -20,14 +20,14 @@
                             <div class="empty__wrap">
 
                                 <!-- Success Message for Order Placed -->
-                                <span class="empty__big-text">THANK YOU!</span>
+                                <span class="empty__big-text" style="font-size: 50px;">Order Successfull</span>
 
                                 <span class="empty__text-1">Your order has been successfully placed.</span>
                                 
                                 <!-- Optional Order Number Display -->
 
                                 <a class="empty__redirect-link btn--e-brand" href="{% url 'userss:category_details' %}">CONTINUE SHOPPING</a>
-                                <a class="empty__redirect-link btn--e-secondary" href="{% url 'order:view_orders' %}">VIEW ORDER DETAILS</a>
+                                <a class="empty__redirect-link btn--e-brand" href="{% url 'order:view_orders' %}">VIEW ORDER DETAILS</a>
                             </div>
                         </div>
                     </div>

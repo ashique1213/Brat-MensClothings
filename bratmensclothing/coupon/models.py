@@ -29,7 +29,7 @@ class CouponUser(models.Model):
     created_at = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username}-{self.coupon.code}"
+        return f"{self.user.username}-{self.coupon.code}"   
 
     def can_use(self):
         """Check if the coupon can still be used by the user (hasn't been used yet)."""

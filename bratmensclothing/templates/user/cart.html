@@ -92,6 +92,10 @@
             margin: 5px 1px;
     
         } 
+        .couponhead{
+            color: #49c36e;
+            font-weight: bold;
+        }
         
 </style>
 
@@ -149,6 +153,7 @@
 
                 <div class="row u-s-m-b-16">
                     <div class="col-lg-6">
+                        <span class="gl-text couponhead">Coupons Available For You</span>
                         <div class="o-summary__item-wrap gl-scroll alter-height"  style="display: grid;grid-template-columns: repeat(2, 1fr); gap: 10px; height: 130px;">
                             {% if coupons%}
                             {% for coupon in coupons %}
@@ -187,11 +192,14 @@
                                 <form class="c-f__form" style="width: 100%;" method="post" action="{% url 'coupon:apply_coupon' %}">
                                     {% csrf_token %}
                                     <div class="u-s-m-b-16">
+                                        
                                         {% if couponuser and couponuser.status %}
                                             <div class="u-s-m-b-15 form-inline">
                                                 <label for="coupon"></label>
                                                 <input class="input-text input-text--primary-style" name="couponcode" type="text" id="coupon" required value="{{ couponuser.coupon.code }}">
-                                                <a href="{% url 'coupon:remove_coupon' %}" class="btn btn--e-transparent-brand-b-2">REMOVE</a>                                            </div>
+                                                {% if couponuser.id %}
+                                                <a href="{% url 'coupon:remove_coupon' couponuser.id %}" class="btn btn--e-transparent-brand-b-2">REMOVE</a>
+                                                {% endif %}
                                         {% else %}
                                             <div class="u-s-m-b-15 form-inline">
                                                 <label for="coupon"></label>
@@ -228,6 +236,23 @@
                                                         <span class="out-of-stock-text">Out of Stock</span>
                                                     </div>
                                                     {% endif %}
+                                                    {% if cart_item.variant.product.is_deleted %}
+                                                    <div class="out-of-stock-overlay">
+                                                        <span class="out-of-stock-text">Product Unavailable</span>
+                                                    </div>
+                                                    {% endif %}
+                                                    {% if cart_item.variant.product.brand.is_deleted %}
+                                                    <div class="out-of-stock-overlay">
+                                                        <span class="out-of-stock-text">Product Unavailable</span>
+                                                    </div>
+                                                    {% endif %}
+                                                    {% for category in cart_item.variant.product.category.all %}
+                                                        {% if category.is_deleted %}
+                                                            <div class="out-of-stock-overlay">
+                                                                <span class="out-of-stock-text">Product Unavailable</span>
+                                                            </div>
+                                                        {% endif %}
+                                                    {% endfor %}
                                                 </div>
 
 
@@ -346,7 +371,29 @@
 
 {% else %}
 <!--====== App Content ======-->
-   <div class="app-content u-s-p-y-60" >
+   <div class="app-content u-s-p-b-30" >
+
+
+    <div class="u-s-p-b-30">
+
+        <!--====== Section Content ======-->
+        <div class="section__content">
+            <div class="container">
+                <div class="breadcrumb">
+                    <div class="breadcrumb__wrap">
+                        <ul class="breadcrumb__list">
+                            <li class="has-separator">
+
+                                <a href="{% url 'accounts:home_user' %}">Home</a></li>
+                            <li class="is-marked">
+
+                                <a href="">Cart</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!--====== Section 1 ======-->
     <div class="u-s-p-y-60">

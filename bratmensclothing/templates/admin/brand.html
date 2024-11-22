@@ -92,7 +92,7 @@
             <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
                 <div class="sb-sidenav-menu p-5">
                     <div class="nav">
-                        <a class="nav-link " href="{% url 'admin_dashboard' %}">
+                        <a class="nav-link " href="{% url 'dashboard:admin_dashboard' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                             Dashboard
                         </a>
@@ -120,11 +120,11 @@
                             <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
                             Coupons
                         </a>
-                        <a class="nav-link" href="">
+                        <a class="nav-link" href="{% url 'offer:view_offer'%}">
                             <div class="sb-nav-link-icon"><i class="fas fa-gift"></i></div>
                             Offers
                         </a>
-                        <a class="nav-link" href="">
+                        <a class="nav-link" href="{% url 'salesreport:view_salesreport' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-chart-line"></i></div>
                             Sales Report
                         </a>
@@ -138,10 +138,10 @@
         <div id="layoutSidenav_content">
             <main>
                 <div class="container-fluid px-4">
-                    <h3 class="mt-4">Brand</h3>
+                    <h4 class="mt-4">Brand</h4>
                     <ol class="breadcrumb mb-4">
-                        <li class="breadcrumb-item"><a href="">Dashboard</a></li>
-                        <li class="breadcrumb-item active">Brand</li>
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard:admin_dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item active"><a href="{% url 'products:view_brands' %}">Brand</a></li>
                     </ol>
 
                     {% if messages %}
@@ -169,25 +169,24 @@
                     {% endif %}
 
 
-                    <div class="d-flex justify-content-between mb-3">
+                    <!-- <div class="d-flex justify-content-between mb-3">
                         <div class="input-group ms-1">
                             <span class="input-group-text">
-                                <i class="fas fa-search"></i> <!-- Search Icon -->
+                                <i class="fas fa-search"></i>
                             </span>
                             <input type="text" id="" class="form-control" placeholder="Search Brand..." />
                         </div>
-                        <!-- Sort Option on the Right with Icon -->
                         <div class="input-group ms-1">
                             <span class="input-group-text">
-                                <i class="fas fa-filter"></i> <!-- FontAwesome filter icon -->
+                                <i class="fas fa-filter"></i> 
                             </span>
                             <select id="sortOption" class="form-select">
                                 <option value="">Sort by</option>
-                                <!-- <option value="name">Name</option>
-                                <option value="date">Start Date</option> -->
+                                <option value="name">Name</option>
+                                <option value="date">Start Date</option>
                             </select>
                         </div>
-                    </div>
+                    </div> -->
 
 
                     
@@ -197,8 +196,16 @@
                                 <i class="fas fa-list me-1"></i>
                                 <span>Brand Table</span>
                             </div>
+                            <div class="input-group ms-auto" style="max-width: 500px;">
+                                <form method="get" class="d-flex w-100">
+                                    <input type="text" id="search" name="search" value="{{ search_query }}" class="form-control border-dark" placeholder="Search brand..." />
+                                    <button class="btn btn-dark ms-2" type="submit">
+                                        <i class="fas fa-search"></i> <!-- Search Icon Inside the Button -->
+                                    </button>
+                                </form>
+                            </div>
                             <!-- <a href="" class="btn btn-dark">Add Brand</a> -->
-                            <a href="{% url 'products:add_brands' %}" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#addBrandModal">Add Brand</a>
+                            <a href="{% url 'products:add_brands' %}" class="btn btn-dark ms-1" data-bs-toggle="modal" data-bs-target="#addBrandModal">Add Brand</a>
 
 
                         </div>
@@ -390,6 +397,9 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
     <script>
 
         document.addEventListener("DOMContentLoaded", function() {
@@ -429,10 +439,16 @@
                 data: $(this).serialize(), // Serialize form data
                 success: function(response) {
                     if (response.success) {
-                        // Close the modal and reload the page
-                        alert(response.message);
-                        $('#addBrandModal').modal('hide');
-                        location.reload();
+                        Swal.fire({
+                            text: response.message,
+                            icon: 'success',
+                            timer: 1000,  // Auto-close after 2 seconds
+                            showConfirmButton: false  // Hide the "OK" button
+                        }).then(() => {
+                            $('#addBrandModal').modal('hide'); // Close the modal
+                            location.reload(); // Reload the page or update content dynamically
+                        });
+                        
                     } else {
                         // Display validation errors in the form
                         $.each(response.errors, function(key, value) {
@@ -456,9 +472,16 @@
                 data: form.serialize(), // Serialize form data
                 success: function(response) {
                     if (response.success) {
-                        // Close the modal for the current brand and reload the page if needed
-                        $(modalId).modal('hide');
-                        location.reload(); // Optionally reload or update content dynamically
+                        // Show success message with SweetAlert
+                        Swal.fire({
+                            text: response.message,
+                            icon: 'success',
+                            timer: 1000,  // Auto-close after 2 seconds
+                            showConfirmButton: false  // Hide the "OK" button
+                        }).then(() => {
+                            $(modalId).modal('hide'); // Close the modal for the current brand
+                            location.reload(); // Reload the page or update content dynamically
+                        });
                     } else {
                         // Display validation errors within the form
                         $.each(response.errors, function(key, value) {

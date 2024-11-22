@@ -90,7 +90,7 @@
             <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
                 <div class="sb-sidenav-menu p-5" >
                     <div class="nav">
-                        <a class="nav-link " href="{% url 'admin_dashboard' %}">
+                        <a class="nav-link " href="{% url 'dashboard:admin_dashboard' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                             Dashboard
                         </a>
@@ -118,11 +118,11 @@
                             <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
                             Coupons
                         </a>
-                        <a class="nav-link" href="">
+                        <a class="nav-link" href="{% url 'offer:view_offer'%}">
                             <div class="sb-nav-link-icon"><i class="fas fa-gift"></i></div>
                             Offers
                         </a>
-                        <a class="nav-link" href="">
+                        <a class="nav-link" href="{% url 'salesreport:view_salesreport' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-chart-line"></i></div>
                             Sales Report
                         </a>
@@ -136,32 +136,25 @@
         <div id="layoutSidenav_content">
             <main>
                 <div class="container-fluid px-4">
-                    <h3 class="mt-4">Users</h3>
+                    <h4 class="mt-4">Users</h4>
                     <ol class="breadcrumb mb-4">
-                        <li class="breadcrumb-item"><a href="">Dashboard</a></li>
-                        <li class="breadcrumb-item active">Users Table</li>
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard:admin_dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item active"> <a href="{% url 'userss:view_user' %}">Users Table</a></li>
                     </ol>
 
 
-                    <div class="d-flex justify-content-between mb-3">
+                    <!-- <div class="d-flex justify-content-between mb-3">
+                        
+                         Sort Option on the Right with Icon 
                         <div class="input-group ms-1">
                             <span class="input-group-text">
-                                <i class="fas fa-search"></i> <!-- Search Icon -->
-                            </span>
-                            <input type="text" id="" class="form-control" placeholder="Search Customers..." />
-                        </div>
-                        <!-- Sort Option on the Right with Icon -->
-                        <div class="input-group ms-1">
-                            <span class="input-group-text">
-                                <i class="fas fa-filter"></i> <!-- FontAwesome filter icon -->
+                                <i class="fas fa-filter">   </i> 
                             </span>
                             <select id="sortOption" class="form-select">
                                 <option value="">Sort by</option>
-                                <!-- <option value="name">Name</option> -->
-                                <!-- <option value="date">Start Date</option> -->
                             </select>
                         </div>
-                    </div>
+                    </div> -->
 
 
                     <div class="card mb-4">
@@ -170,7 +163,14 @@
                                 <i class="fas fa-users me-1"></i>
                                 <span>Users Table</span>
                             </div>
-
+                            <div class="input-group ms-auto" style="max-width: 500px;">
+                                <form method="get" class="d-flex w-100">
+                                    <input type="text" id="search" name="search" value="{{ search_query }}" class="form-control border-dark" placeholder="Search Users..." />
+                                    <button class="btn btn-dark ms-2" type="submit">
+                                        <i class="fas fa-search"></i> <!-- Search Icon Inside the Button -->
+                                    </button>
+                                </form>
+                            </div>
                             {% if messages %}
                             <div aria-live="polite" aria-atomic="true" style="position: relative;">
                                 <div id="toast-container" class="toast-container position-fixed end-0 translate-middle-y p-3" style="top: 150px;">
@@ -222,16 +222,16 @@
                                         </td> -->
                                         <td>
                                             {% if not user.is_active %}
-                                            <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#confirmBlockModal{{ user.userid }}" 
+                                            <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#confirmBlockModal{{ user.userid }}" 
                                                 data-action-url="{% url 'userss:block_user' user.userid %}" 
                                                 data-message="Are you sure you want to block {{ user.username }}?">
-                                                Block
+                                                Unblock
                                             </button>
                                             {% else %}
-                                            <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#confirmUnblockModal{{ user.userid }}" 
+                                            <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#confirmUnblockModal{{ user.userid }}" 
                                                 data-action-url="{% url 'userss:unblock_user' user.userid %}" 
                                                 data-message="Are you sure you want to unblock {{ user.username }}?">
-                                                Unblock
+                                                Block
                                             </button>
                                             {% endif %}
                                         

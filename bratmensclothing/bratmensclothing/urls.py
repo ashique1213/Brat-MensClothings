@@ -30,6 +30,10 @@ urlpatterns = [
     path('order/',include('order.urls')),
     path('wishlist/',include('wishlist.urls')),
     path('coupon/',include('coupon.urls')),
+    path('offer/',include('offer.urls')),
+    path('wallet/',include('wallet.urls')),
+    path('salesreport/',include('salesreport.urls')),
+    
 ]
 if settings.DEBUG: 
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

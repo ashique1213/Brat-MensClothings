@@ -10,6 +10,10 @@ from decimal import Decimal
 from django.core.paginator import Paginator
 from .models import Coupon,CouponUser
 from products.models import Category
+from offer.models import Product_Offers,Brand_Offers
+from django.utils import timezone
+from django.db.models import Q
+
 
 
 def is_staff(user):
@@ -21,22 +25,67 @@ def is_staff(user):
 def coupon_details(request):
     categories = Category.objects.filter(is_deleted=False)
 
-    coupons = Coupon.objects.all()
-    return render(request, 'admin/coupon.html', {'coupons': coupons,'categories':categories})
+    search_query=request.GET.get('search','') 
+
+    if search_query:
+        coupons = Coupon.objects.filter(
+           Q(code__icontains=search_query) | Q (category__icontains=search_query)
+        ).order_by('-created_at')
+    else:
+        coupons = Coupon.objects.all()
+    return render(request, 'admin/coupon.html', {'coupons': coupons,'categories':categories,'search_query':search_query})
 
 @never_cache
 def add_coupon(request):
     categories = Category.objects.filter(is_deleted=False)
 
     if request.method == 'POST':
-        code = request.POST.get('code')
+        code = request.POST.get('code').strip()
         category = request.POST.get('category')
-        discount_amount = request.POST.get('discount_amount')
+        discount_amount = request.POST.get('discount_amount').strip()
         min_purchase_amount = request.POST.get('min_purchase_amount')
         start_date = request.POST.get('start_date')
         end_date = request.POST.get('end_date')
         usage_limit = request.POST.get('usage_limit')
+
+        errors={}
+        if not code:
+            errors['code_error']='Coupon Code required'
+        elif len(code)<4:
+            errors['code_error']='Coupon code contain atleast 4 charecter'
+        elif Coupon.objects.filter(code__iexact=code).exists():
+            errors['code_error']='Coupon code already exits'
         
+        try:
+            discount_amount = Decimal (discount_amount) 
+            if discount_amount >= 200:
+                errors['discount_error'] = 'Discount amount must be less than 200'
+        except ValueError:
+            errors['discount_error'] = 'Discount amount must be a valid number'
+
+        if not min_purchase_amount:
+            errors['min_purchase_error'] = 'Min purchase amount is required.'
+        else:
+            try:
+                min_purchase_amount = float(min_purchase_amount)
+                if min_purchase_amount < 500:
+                    errors['min_purchase_error'] = 'Min purchase amount must be at least 500.'
+            except ValueError:
+                errors['min_purchase_error'] = 'Invalid min purchase amount format. It must be a valid number.'
+        
+        if not usage_limit:
+            errors['usage_limit_error'] = 'Usage limit is required.'
+        else:
+            try:
+                usage_limit = int(usage_limit)
+                if usage_limit < 1:
+                    errors['usage_limit_error'] = 'Usage limit must be at least 1.'
+            except ValueError:
+                errors['usage_limit_error'] = 'Invalid usage limit format. It must be a valid integer.'
+        if errors:
+            return JsonResponse({'success': False, 'errors': errors})
+        
+
         if code and discount_amount and min_purchase_amount and start_date and end_date and usage_limit:
             Coupon.objects.create(
                 code=code,
@@ -47,11 +96,8 @@ def add_coupon(request):
                 valid_to=end_date,
                 usage_limit=usage_limit
             )
-            messages.success(request, "Coupon added successfully!")
-        else:
-            messages.error(request, "Failed to add coupon. Please ensure all fields are filled.")
-        
-        return redirect('coupon:coupon_details')
+        return JsonResponse({'success': True, 'message': 'Brand added successfully!'})
+        # return redirect('coupon:coupon_details')
     
     return render(request, 'admin/coupon.html',{'categories':categories})
 
@@ -60,12 +106,51 @@ def edit_coupon(request, coupon_id):
 
     if request.method == 'POST':
         code = request.POST.get('code')
-        category = request.POST.get('category')
-        discount_amount = request.POST.get('discount_amount')
+        category = request.POST.get('category').strip()
+        discount_amount = request.POST.get('discount_amount').strip()
         min_purchase_amount = request.POST.get('min_purchase_amount')
         start_date = request.POST.get('start_date')
         end_date = request.POST.get('end_date')
         usage_limit = request.POST.get('usage_limit')
+
+        errors={}
+        if not code:
+            errors['code_error']='Coupon Code required'
+        elif len(code)<4:
+            errors['code_error']='Coupon code contain atleast 4 charecter'
+        elif Coupon.objects.filter(code__iexact=code).exclude(coupon_id=coupons.coupon_id).exists():
+            errors['code_error'] = 'Coupon code already exists'
+
+        try:
+            discount_amount = Decimal(discount_amount) 
+            if discount_amount >= 200:
+                errors['discount_error'] = 'Discount amount must be less than 200'
+        except ValueError:
+            errors['discount_error'] = 'Discount amount must be a valid number'        
+
+        
+        if not min_purchase_amount:
+            errors['min_purchase_error'] = 'Min purchase amount is required.'
+        else:
+            try:
+                min_purchase_amount = float(min_purchase_amount)
+                if min_purchase_amount < 500:
+                    errors['min_purchase_error'] = 'Min purchase amount must be at least 500.'
+            except ValueError:
+                errors['min_purchase_error'] = 'Invalid min purchase amount format. It must be a valid number.'
+
+        if not usage_limit:
+            errors['usage_limit_error'] = 'Usage limit is required.'
+        else:
+            try:
+                usage_limit = int(usage_limit)
+                if usage_limit < 1:
+                    errors['usage_limit_error'] = 'Usage limit must be at least 1.'
+            except ValueError:
+                errors['usage_limit_error'] = 'Invalid usage limit format. It must be a valid integer.'
+
+        if errors:
+            return JsonResponse({'success': False, 'errors': errors})
 
         coupons.code = code
         coupons.discount_amount = discount_amount
@@ -76,8 +161,8 @@ def edit_coupon(request, coupon_id):
         coupons.category = category
 
         coupons.save()
-
-        return redirect('coupon:coupon_details')  
+        return JsonResponse({'success': True, 'message': 'Coupon Updated successfully!'})
+        # return redirect('coupon:coupon_details')  
 
     return render(request, 'admin/edit_coupon.html', {'coupons': coupons})
 
@@ -100,62 +185,43 @@ def delete_coupon(request,coupon_id):
     return redirect('coupon:coupon_details')
     
 
-# @never_cache
-# def apply_coupon(request):
-#     if request.user.is_authenticated:
-#         user = request.user
-#         cart = get_object_or_404(Cart, user=user)
-#         cart_items = CartItem.objects.filter(cart=cart)
-        
-#         if request.method == 'POST':    
-#             code = request.POST.get('couponcode', '').strip()
-#             print("Coupon code entered:", code)
-
-#             try:
-#                 coupon = Coupon.objects.get(code__iexact=code)
-
-                
-#                 if CouponUser.objects.filter(user=user, status=True).exists():
-#                     messages.error(request, "You have already applied a coupon.")
-                    
-#                 else:
-#                     coupon_category = coupon.category
-
-#                     if coupon_category != 'None': 
-#                         all_same_category = all(
-#                             cart_item.variant.product.category == coupon_category
-#                             for cart_item in cart_items
-#                         )
-
-#                         if not all_same_category:
-#                             messages.error(request, "Coupon are not Available for all products")
-#                             return redirect('cart:viewcart')
-                    
-#                     total = sum(item.item_total for item in cart_items)
-
-#                     if total >= coupon.min_purchase_amount:
-#                         CouponUser.objects.create(user=user, coupon=coupon, status=True)
-#                         discount = min(total, coupon.discount_amount)
-#                         messages.success(request, f"Coupon applied! You saved {discount}.")
-#                     else:
-#                         messages.info(request, f"The minimum purchase amount is not met for this coupon.")
-            
-#             except Coupon.DoesNotExist:
-#                 messages.error(request, "Invalid coupon code. Please try again.")
-        
-#         return redirect('cart:viewcart')
-
-
-
-
-
-
 @never_cache
 def apply_coupon(request):
     if request.user.is_authenticated:
         user = request.user
         cart = get_object_or_404(Cart, user=user)
         cart_items = CartItem.objects.filter(cart=cart)
+
+        for cart_item in cart_items:
+            variant = cart_item.variant
+            product = variant.product
+
+
+            product_offer = Product_Offers.objects.filter(
+                product_id=product,
+                status=True,
+                started_date__lte=timezone.now(),
+                end_date__gte=timezone.now()
+            ).first()
+
+            brand_offer = Brand_Offers.objects.filter(
+                brand_id=product.brand,
+                status=True,
+                started_date__lte=timezone.now(),
+                end_date__gte=timezone.now()
+            ).first()
+
+            discounted_price = product.price
+
+            if product_offer:
+                discounted_price = product.price - product_offer.offer_price
+
+            if brand_offer:
+                brand_discounted_price = product.price - brand_offer.offer_price
+
+                discounted_price = min(discounted_price, brand_discounted_price)
+
+            cart_item.variant.product.price = discounted_price
 
         if request.method == 'POST':
             code = request.POST.get('couponcode', '').strip()
@@ -164,18 +230,16 @@ def apply_coupon(request):
             try:
                 coupon = Coupon.objects.get(code__iexact=code)
 
-                # Check if the user has already applied this coupon
-                # if CouponUser.objects.filter(user=user, coupon=coupon, status=True).exists():
-                #     messages.error(request, "You have already applied this coupon.")
                 if CouponUser.objects.filter(user=user, coupon=coupon, status=False).exists():
                     messages.error(request, "You have already applied this coupon.")
                 else:
                     coupon_category = coupon.category
 
-                    # Check if the coupon applies to the products' categories
+                    # Check if the coupon applicable to all products
                     if coupon_category != 'None':
                         all_same_category = all(
-                            cart_item.variant.product.category == coupon_category
+                            # cart_item.variant.product.category == coupon_category
+                            cart_item.variant.product.category.filter(category=coupon_category).exists()
                             for cart_item in cart_items
                         )
                         if not all_same_category:
@@ -183,42 +247,33 @@ def apply_coupon(request):
                             return redirect('cart:viewcart')
 
                     total = sum(item.item_total for item in cart_items)
+
                     
                     if total >= coupon.min_purchase_amount:
-                        # Create the CouponUser record to track the coupon application
+                        # Create the CouponUser 
                         CouponUser.objects.create(user=user, coupon=coupon, status=True)
                         discount = min(total, coupon.discount_amount)
                         messages.success(request, f"Coupon applied! You saved {discount}.")
                     else:
                         messages.info(request, f"The minimum purchase amount for this coupon is {coupon.min_purchase_amount}.")
+                        return redirect('cart:viewcart')
+                    
             except Coupon.DoesNotExist:
                 messages.error(request, "Invalid coupon code. Please try again.")
 
         return redirect('cart:viewcart')
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 @never_cache
-def remove_coupon(request):
+def remove_coupon(request, id):
     if request.user.is_authenticated:
         user = request.user
+
         try:
-            couponuser = CouponUser.objects.get(user=user)
+            couponuser = CouponUser.objects.get(id=id, user=user)
             couponuser.delete()  
             messages.success(request, "Coupon removed successfully.")
+            return redirect('cart:viewcart')
         except CouponUser.DoesNotExist:
-            messages.error(request, "No coupon applied to remove.")
-
+            messages.error(request, "Coupon not found")
     return redirect('cart:viewcart')

@@ -38,7 +38,7 @@ def add_to_wishlist(request, product_id):
 
 
 def remove_wishlist(request,variant_id):
-    product=Wishlist.objects.get(product_id=variant_id)
+    product=Wishlist.objects.filter(product_id=variant_id)
 
     product.delete()
     messages.success(request, "Item removed to your wishlist!")

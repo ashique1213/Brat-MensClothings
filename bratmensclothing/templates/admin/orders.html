@@ -167,7 +167,7 @@
             <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
                 <div class="sb-sidenav-menu p-5" >
                     <div class="nav">
-                        <a class="nav-link " href="{% url 'admin_dashboard' %}">
+                        <a class="nav-link " href="{% url 'dashboard:admin_dashboard' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                             Dashboard
                         </a>
@@ -195,11 +195,11 @@
                             <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
                             Coupons
                         </a>
-                        <a class="nav-link" href="">
+                        <a class="nav-link" href="{% url 'offer:view_offer'%}">
                             <div class="sb-nav-link-icon"><i class="fas fa-gift"></i></div>
                             Offers
                         </a>
-                        <a class="nav-link" href="">
+                        <a class="nav-link" href="{% url 'salesreport:view_salesreport' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-chart-line"></i></div>
                             Sales Report
                         </a>
@@ -239,33 +239,32 @@
         <div id="layoutSidenav_content">
             <main>
                 <div class="container-fluid px-4">
-                    <h3 class="mt-4">Orders</h3>
+                    <h4 class="mt-4">Orders</h4>
                     <ol class="breadcrumb mb-4">
-                        <li class="breadcrumb-item"><a href="">Dashboard</a></li>
-                        <li class="breadcrumb-item active">Orders</li>
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard:admin_dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item active"><a href="{% url 'order:order_details' %}">Orders</a></li>
                     </ol>
 
 
 
-                    <div class="d-flex justify-content-between mb-3">
+                    <!-- <div class="d-flex justify-content-between mb-3">
                         <div class="input-group ms-1">
                             <span class="input-group-text">
-                                <i class="fas fa-search"></i> <!-- Search Icon -->
+                                <i class="fas fa-search"></i>
                             </span>
                             <input type="text" id="" class="form-control" placeholder="Search Orders..." />
                         </div>
-                        <!-- Sort Option on the Right with Icon -->
                         <div class="input-group ms-1">
                             <span class="input-group-text">
-                                <i class="fas fa-filter"></i> <!-- FontAwesome filter icon -->
+                                <i class="fas fa-filter"></i> 
                             </span>
                             <select id="sortOption" class="form-select">
                                 <option value="">Sort by</option>
-                                <!-- <option value="name">Name</option>
-                                <option value="date">Start Date</option> -->
+                                <option value="name">Name</option>
+                                <option value="date">Start Date</option> 
                             </select>
                         </div>
-                    </div>
+                    </div> -->
 
 
 
@@ -275,7 +274,16 @@
                                 <i class="fas fa-shopping-cart me-1"></i>
                                 <span>Orders Table</span>
                             </div>
+                            <div class="input-group ms-auto" style="max-width: 500px;">
+                                <form method="get" class="d-flex w-100">
+                                    <input type="text" id="search" name="search" value="{{ search_query }}" class="form-control border-dark" placeholder="Search orders..." />
+                                    <button class="btn btn-dark ms-2" type="submit">
+                                        <i class="fas fa-search"></i> <!-- Search Icon Inside the Button -->
+                                    </button>
+                                </form>
+                            </div>
                         </div>
+                        
                         <div class="card-body">
                             <table id="productsTable" style="font-size: 14px;">
                                 <thead>
@@ -288,6 +296,7 @@
                                         <th>Size</th>
                                         <th>Price</th>
                                         <th>Payment Method</th>
+                                        <th>Payment Status</th>
                                         <th>Order Status</th>
                                         <th>Action</th>
                                     </tr>
@@ -295,7 +304,11 @@
                                 <tbody>
                                     {% for order in orders %}
                                     <tr>
-                                        <td><img src="{{ order.variants.product.image1.url }}" alt="Product Image" /></td>
+                                        <td>
+                                            <a href="{% url 'order:single_order' order.orderitem_id %}">
+                                                <img src="{{ order.variants.product.image1.url }}" alt="Product Image" />
+                                            </a>
+                                        </td>
                                         <td>{{order.order.user_id}}</td>
                                         <td>{{order.order.user.username |title}}</td>
                                         <td>#{{order.order.tracking_number}}</td>
@@ -303,35 +316,36 @@
                                         <td>{{order.variants.size|title}}</td>
                                         <td>₹{{order.subtotal_price}}</td>
                                         <td>{{order.order.payment_type}}</td>
+                                        <td>{{order.order.payment_status}}</td>
                                         <td style="font-weight: bold;">{{order.status}}</td>
 
                                         {% if order.status != 'Cancelled' %}
-                                                <td style="width: 10%;">
-                                                    <form action="" method="post" class="status-form" id="statusForm{{ order.orderitem_id }}">
-                                                        {% csrf_token %}
-                                                        <input type="hidden" name="order_id" value="{{ order.orderitem_id }}">
-                                                        <select name="status" class="status-dropdown" onchange="showConfirmationModal(this)">
-                                                            <option value="">{{ order.status }}</option>
-                                                            <option value="Order Pending" {% if order.status == 'Order Pending' %}selected{% endif %}>Order Pending</option>
-                                                            <option value="Order confirmed" {% if order.status == 'Order confirmed' %}selected{% endif %}>Order Confirmed</option>
-                                                            <option value="Shipped" {% if order.status == 'Shipped' %}selected{% endif %}>Shipped</option>
-                                                            <option value="Delivered" {% if order.status == 'Delivered' %}selected{% endif %}>Delivered</option>
-                                                            <option value="Cancelled" {% if order.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
-                                                        </select>
-                                                    </form>
-                                                </td>
-                                            {% else %}
-                                                <td style="width: 10%; font-weight: bold; color: red; text-align: center;">
-                                                    Cancelled
-                                                </td>
-                                            {% endif %}
+                                            <td style="width: 10%;">
+                                                <form action="" method="post" class="status-form" id="statusForm{{ order.orderitem_id }}">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="order_id" value="{{ order.orderitem_id }}">
+                                                    <select name="status" class="status-dropdown" onchange="showConfirmationModal(this)">
+                                                        <option value="" disabled selected>{{ order.status }}</option>
+                                                        <option value="Order Pending" {% if order.status == 'Order Pending' %}selected{% endif %}>Order Pending</option>
+                                                        <option value="Order Confirmed" {% if order.status == 'Order Confirmed' %}selected{% endif %}>Order Confirmed</option>
+                                                        <option value="Shipped" {% if order.status == 'Shipped' %}selected{% endif %}>Shipped</option>
+                                                        <option value="Out For Delivery" {% if order.status == 'Out For Delivery' %}selected{% endif %}>Out For Delivery</option>
+                                                        <option value="Delivered" {% if order.status == 'Delivered' %}selected{% endif %}>Delivered</option>
+                                                        <option value="Cancelled" {% if order.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                                                        <!-- <option value="Requested Return">Requested Return</option> -->
+                                                        <option value="Approve Returned" {% if order.status == 'Approve Returned' %}selected{% endif %}>Approve Returned</option>
+                                                        <option value="Reject Returned" {% if order.status == 'Reject Returned' %}selected{% endif %}>Reject Returned</option>
+                                                    </select>
+                                                </form>
+                                            </td>
+                                        {% else %}
+                                            <td style="width: 10%; font-weight: bold; color: red; text-align: center;">
+                                                Cancelled
+                                            </td>
+                                        {% endif %}
 
 
 
-                                          <!-- <option value="Out For Delivery" {% if order.status == 'Out For Delivery' %}selected{% endif %}>Out For Delivery</option> -->
-                                        <!-- <option value="Requested Return" {% if order.status == 'Requested Return' %}selected{% endif %}>Requested Return</option> -->
-                                            <!-- <option value="Approve Returned" {% if order.status == 'Approve Returned' %}selected{% endif %}>Approve Returned</option> -->
-                                        <!-- <option value="Reject Returned" {% if order.status == 'Reject Returned' %}selected{% endif %}>Reject Returned</option> -->
                                     </tr>
                                     {% endfor %}
                                    
@@ -414,25 +428,31 @@
 
         function showConfirmationModal(selectElement) {
             const status = selectElement.value;
+            console.log("fgd",selectElement.value)
             const orderId = selectElement.previousElementSibling.value; // Get the order ID
             
-            // Set confirmation message
+            // Set the confirmation message
             document.getElementById('confirmationMessage').innerText = `Are you sure you want to change the order status to "${status}"?`;
-
+        
             // Save the form ID to submit later
             selectedFormId = `statusForm${orderId}`;
-
-            // Show the modal
-            $('#confirmationModal').modal('show');
+        
+            // Show the modal using Bootstrap 5's JavaScript API
+            const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+            confirmationModal.show();
         }
-
+        
         // Handle confirmation button click
         document.getElementById('confirmActionButton').addEventListener('click', function() {
-            // Submit the form
-            document.getElementById(selectedFormId).submit();
+            // Submit the selected form
+            if (selectedFormId) {
+                document.getElementById(selectedFormId).submit();
+            }
+            // Hide the modal after confirmation
+            const confirmationModal = bootstrap.Modal.getInstance(document.getElementById('confirmationModal'));
+            confirmationModal.hide();
         });
-
-
+        
     </script>
 </body>
 </html>

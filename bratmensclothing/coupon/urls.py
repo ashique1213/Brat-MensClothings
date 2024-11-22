@@ -31,7 +31,7 @@ urlpatterns = [
     path('restore-coupon/<int:coupon_id>/', views.restore_coupon, name='restore_coupon'), 
 
     path('apply_coupon/',views.apply_coupon,name='apply_coupon'),
-    path('remove_coupon/',views.remove_coupon,name='remove_coupon')
+    path('remove_coupon/<int:id>',views.remove_coupon,name='remove_coupon')
 
 
     

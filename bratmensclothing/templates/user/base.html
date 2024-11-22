@@ -233,7 +233,7 @@
                       class="has-dropdown"
                       data-tooltip="tooltip"
                       data-placement="left"
-                      title="Account"
+                      title="Actions"
                     >
                       <a><i class="far fa-user-circle"></i></a>
 
@@ -270,7 +270,7 @@
                       class="has-dropdown"
                       data-tooltip="tooltip"
                       data-placement="left"
-                      title="Settings"
+                      title="Accounts Settings"
                     >
                       <a><i class="fas fa-user-cog"></i></a>
 
@@ -375,7 +375,7 @@
                     </li>
                     <li class="">
                       <a href="{% url 'userss:category_details' %}" id="categoriesLink"
-                        >CATEGORIES
+                        >PRODUCTS
                         <!-- <i class="fas fa-angle-down u-s-m-l-6"></i> -->
                       </a>
 
@@ -429,7 +429,7 @@
                     class="ah-list ah-list--design1 ah-list--link-color-secondary"
                   >
                     <li>
-                      <a href=""><i class="fas fa-home u-c-brand"></i></a>
+                      <a href="{% url 'wallet:view_wallet' %}"><i class="fas fa-wallet u-c-brand"></i></a>
                     </li>
                     <li>
                       <a href="{% url 'wishlist:viewwishlist' %}"><i class="far fa-heart"></i></a>

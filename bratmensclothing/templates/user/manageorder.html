@@ -130,41 +130,17 @@
                                     </ul>
                                 </div>
                             </div>
-
-
-                            <div class="dash__box dash__box--bg-white dash__box--shadow dash__box--w">
+                            {% if orderitem.status != 'Cancelled' %}
+                            <div class="dash__box dash__box--bg-white dash__box--shadow u-s-m-b-30">
                                 <div class="dash__pad-1">
-                                    <ul class="dash__w-list">
-                                        <li>
-                                            <div class="dash__w-wrap">
-
-                                                <span class="dash__w-icon dash__w-icon-style-1"><i class="fas fa-cart-arrow-down"></i></span>
-
-                                                <span class="dash__w-text">0</span>
-
-                                                <span class="dash__w-name">Orders Placed</span></div>
-                                        </li>
-                                        <li>
-                                            <div class="dash__w-wrap">
-
-                                                <span class="dash__w-icon dash__w-icon-style-2"><i class="fas fa-times"></i></span>
-
-                                                <span class="dash__w-text">0</span>
-
-                                                <span class="dash__w-name">Cancel Orders</span></div>
-                                        </li>
-                                        <li>
-                                            <div class="dash__w-wrap">
-
-                                                <span class="dash__w-icon dash__w-icon-style-3"><i class="far fa-heart"></i></span>
-
-                                                <span class="dash__w-text">0</span>
-
-                                                <span class="dash__w-name">Wishlist</span></div>
-                                        </li>
-                                    </ul>
+                                    <a href="{% url 'order:download_invoice' orderitem_id=orderitem.orderitem_id %}" style="color: black; font-weight: bold;" >
+                                        Download Invoice <i class="fas fa-download" style="color: black;"></i>
+                                    </a>
                                 </div>
                             </div>
+                            {% endif %}
+                            
+
                             <!--====== End - Dashboard Features ======-->
                         </div>
 
@@ -178,24 +154,48 @@
                                             <div class="manage-o__text-2 u-c-secondary">Order #{{orderitem.order.tracking_number}}</div>
                                             <div class="manage-o__text u-c-silver">Placed on {{orderitem.order.created_at}}</div>
                                         </div>
-                                        {% if orderitem.status != 'Cancelled' %}
-                                        <div style="background-color: rgb(231, 180, 180); padding: 9px; border-radius: 20px;">
+
+                                        {% if orderitem.status == 'Order Pending' %}
+                                        <div class="manage-o__badge badge--delivered" >
                                             <a href="#" onclick="openConfirmCancelModal({{ orderitem.orderitem_id }})" style="font-weight: bold; font-size: 13px; color: rgb(197, 34, 34);">Cancel Order</a>
                                         </div>
+                                        {% elif orderitem.status == 'Delivered' %}
+                                        <div class="manage-o__badge  badge--processing">
+                                            <a href="#" onclick="openConfirmReturnModal({{ orderitem.orderitem_id }})" style="font-weight: bold; font-size: 13px; color: rgb(9, 63, 128);">Return Order</a>
+                                        </div>
                                         {% else %}
-                                        <div style="background-color: rgb(231, 180, 180); padding: 9px; border-radius: 20px;">
-                                            <a href="" style="font-weight: bold; font-size: 13px; color: rgb(197, 34, 34);">Order Cancelled</a>
+                                        <div class="manage-o__badge badge--shipped">
+                                            <a href="" style="font-weight: bold; font-size: 13px; color: rgb(4, 99, 68);">{{orderitem.status}}</a>
                                         </div>
                                         {% endif %}
+                                        
+
 
                                         <div>
-                                            <div class="manage-o__text-2 u-c-silver">Total:
+                                        <!-- 
+                                            {% if orderitem.order.payment_status == 'Success' or orderitem.order.payment_status == 'Pending' %}
+                                            <span class="manage-o__text-2 u-c-silver">PAYMENT :</span>
+                                            <span class="manage-o__badge  badge--shipped ">{{orderitem.order.payment_status}}</span>
+                                            {% else %}
+                                            {% endif %} -->
+                                            {% if orderitem.order.payment_status == 'Failure' %}
+                                            <span class="manage-o__text-2 u-c-silver">PAYMENT :</span>
+                                            <a href="{% url 'order:retry_payment' orderitem.order.order_id %}"><span  class="manage-o__badge badge--processing">Retry</span> </a>
+                                            {% endif %}
+
+                                        </div>
+                                    
+                                        <div>
+                                            <div class="manage-o__text-2 u-c-silver">AMOUNT PAID
 
                                                 <span class="manage-o__text-2 u-c-secondary">₹{{orderitem.order.total_price}}</span> 
                                             </div>
-                                            <div class="manage-o__text-2 u-c-silver">Coupon Applied:<br>
-
-                                                <span class="manage-o__text-2 u-c-secondary">{{orderitem.order.coupon_code | upper}}</span>
+                                            <div class="manage-o__text-2 u-c-silver" style="font-size: 12px;">Coupon Applied:<br>
+                                                {% if orderitem.order.coupon_amount != 0 %}  
+                                                <span class="manage-o__text-2 u-c-secondary" style="font-size: 12px;" >{{orderitem.order.coupon_code | upper}}- ₹{{orderitem.order.coupon_amount}}</span>
+                                                {% else %}
+                                                <span class="manage-o__text-2 u-c-secondary" style="font-size: 12px;" >None</span>
+                                                {% endif %}
                                             </div>
                                         </div>
                                     </div>
@@ -209,50 +209,16 @@
 
                                                 <span class="manage-o__text">Package 1</span></div>
                                         </div>
-                                        <!-- <div class="dash-l-r">
-                                            <div class="manage-o__text u-c-secondary">Delivered on 26 Oct 2016</div>
-                                            <div class="manage-o__icon"><i class="fas fa-truck u-s-m-r-5"></i>
-
-                                                <span class="manage-o__text">Standard</span></div>
-                                        </div> -->
-                                        <!-- <div class="manage-o__timeline">
-                                            <div class="timeline-row">
-                                                <div class="col-lg-4 u-s-m-b-30">
-                                                    <div class="timeline-step">
-                                                        <div class="timeline-l-i timeline-l-i--finish">
-
-                                                            <span class="timeline-circle"></span></div>
-
-                                                        <span class="timeline-text">Processing</span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-lg-4 u-s-m-b-30">
-                                                    <div class="timeline-step">
-                                                        <div class="timeline-l-i timeline-l-i--finish">
-
-                                                            <span class="timeline-circle"></span></div>
-
-                                                        <span class="timeline-text">Shipped</span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-lg-4 u-s-m-b-30">
-                                                    <div class="timeline-step">
-                                                        <div class="timeline-l-i">
-
-                                                            <span class="timeline-circle"></span></div>
-
-                                                        <span class="timeline-text">Delivered</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div> -->
+                                        
                                         <div class="manage-o__description">
                                             <div class="description__container">
                                                 <div class="description__img-wrap">
 
                                                     <img class="u-img-fluid" src="{{ orderitem.variants.product.image1.url }}" alt=""></div>
-                                                <div class="description-title">{{orderitem.variants.product.product_name |title}}</div>
-                                                <div class="description-title">- {{orderitem.variants.size}}</div>
+                                                <div class="description-title">{{orderitem.variants.product.product_name |title}}
+                                                    <br> {{orderitem.variants.product.brand}} 
+                                                    <br>Size - {{orderitem.variants.size}}
+                                                </div>
                                             </div>
                                             
                                             <div class="description__info-wrap">
@@ -263,9 +229,9 @@
                                                         <span class="manage-o__text-2 u-c-secondary">{{ orderitem.quantity}}</span></span></div>
                                                 <div>
 
-                                                    <span class="manage-o__text-2 u-c-silver">Total:
+                                                    <span class="manage-o__text-2 u-c-silver">MRP:
 
-                                                        <span class="manage-o__text-2 u-c-secondary">₹{{ orderitem.subtotal_price}}</span></span></div>
+                                                        <span class="manage-o__text-2 u-c-secondary">₹{{ orderitem.variants.product.price}}</span></span></div>
                                             </div>
                                         </div>
                                     </div>
@@ -305,10 +271,10 @@
                                             </div>
                                             <div class="dash-l-r u-s-m-b-8">
                                                 <div class="manage-o__text-2 u-c-secondary">Tax</div>
-                                                <div class="manage-o__text-2 u-c-secondary">₹{{tax |floatformat:2}}</div>
+                                                <div class="manage-o__text-2 u-c-secondary">₹{{ tax |floatformat:2}}</div>
                                             </div>
                                             <div class="dash-l-r u-s-m-b-8">
-                                                <div class="manage-o__text-2 u-c-secondary">Total</div>
+                                                <div class="manage-o__text-2 u-c-secondary">Item total</div>
                                                 <div class="manage-o__text-2 u-c-secondary">₹{{ orderitem.subtotal_price}}</div>
                                             </div>
 
@@ -346,6 +312,23 @@
     </div>
 </div>
 
+<div id="returnConfirmationModal" class="custom-modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5>Confirm Return</h5>
+            <span class="close" onclick="closeReturnConfirmationModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            Are you sure you want to return this order?
+        </div>
+        <div class="modal-footer">
+            <button class="btn cancel-btn" onclick="closeReturnConfirmationModal()">No</button>
+            <button class="btn delete-btn" id="confirmReturnButton">Yes, Return Order</button>
+        </div>
+    </div>
+</div>
+
+
 
 <script>
     let orderIdToCancel; // Declare a variable to hold the order ID for cancellation
@@ -366,6 +349,26 @@
         // Redirect to the cancel order URL
         window.location.href = "{% url 'order:cancel_order' 0 %}".replace('0', orderIdToCancel);
     };
+      
+    let orderIdToReturn; // Declare a variable to hold the order ID for return
+
+    // Function to open the confirmation modal
+    function openConfirmReturnModal(orderId) {
+        orderIdToReturn = orderId; // Store the order ID for return
+        document.getElementById('returnConfirmationModal').style.display = 'block'; // Show the modal
+    }
+
+    // Function to close the confirmation modal
+    function closeReturnConfirmationModal() {
+        document.getElementById('returnConfirmationModal').style.display = 'none'; // Hide the modal
+    }
+
+    // Add an event listener to the confirm button
+    document.getElementById('confirmReturnButton').onclick = function () {
+        // Redirect to the return order URL
+        window.location.href = "{% url 'order:return_order' 0 %}".replace('0', orderIdToReturn);
+    };
+
 </script>
 
 

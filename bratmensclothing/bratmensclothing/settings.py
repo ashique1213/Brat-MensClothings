@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
-
+import razorpay
 # Load environment variables from the .env file
 load_dotenv()
 
@@ -55,8 +55,12 @@ INSTALLED_APPS = [
     'order',
     'wishlist',
     'coupon',
+    'offer',
+    'wallet',
+    'salesreport',
     'cloudinary',
     'cloudinary_storage',
+
 
 ]
 
@@ -170,7 +174,7 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
@@ -204,8 +208,13 @@ cloudinary.config(
     cloud_name = os.getenv('cloud_name'), 
     api_key = os.getenv('api_key'), 
     api_secret = os.getenv('api_secret'),
-    DEFAULT_FOLDER= 'home/profile_pics',
+    DEFAULT_FOLDER= 'home/',
     secure=True,
 )
+
+RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID')
+RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET')
+
+client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'

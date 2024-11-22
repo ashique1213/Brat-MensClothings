@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 80%;
+            max-width: 900px;
+            margin: 30px auto;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .invoice-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .invoice-header h1 {
+            margin: 0;
+            font-size: 25px;
+            color: #333;
+            font-weight: 700;
+        }
+        .invoice-header p {
+            font-size: 18px;
+            color: #777;
+        }
+        .company-info {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 5px;
+        }
+        .company-info h2 {
+            margin: 0;
+            font-size: 24px;
+            color: #333;
+            font-weight: 600;
+        }
+        .company-info p {
+            font-size: 14px;
+            color: #555;
+            margin: 3px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px; /* Add spacing between rows */
+        }
+        th {
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+            padding: 10px;
+            background-color: #f4f4f4;
+            border-radius: 5px;
+        }
+        td {
+            padding: 10px;
+            font-size: 12px;
+            color: #555;
+            background-color: #fff;
+            border-radius: 5px;
+        }
+        tr {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 16px;
+            color: #555;
+        }
+        .footer p {
+            margin: 5px 0;
+        }
+        .footer .note {
+            font-style: italic;
+        }
+
+        .order-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .order-detail-item {
+            flex: 1 1 100%; /* Full width on small screens */
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .order-detail-item strong {
+            font-size: 14px;
+            margin-left: 10px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .order-detail-item span {
+            font-size: 12px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .order-detail-item span:last-child {
+            margin-bottom: 0;
+        }
+        @media (min-width: 768px) {
+            .order-detail-item {
+                flex: 1 1 calc(50% - 20px); /* Two items per row on medium screens */
+            }
+        }
+    </style>
+    
+        </head>
+        <body>
+            <div class="container">
+                <div class="company-info">
+                    <h2>B.R.A.T Mens Clothings PVT</h2>
+                    <p>Email: <a href="mailto:bratmensclothings@gmail.com">bratmensclothings@gmail.com</a></p>
+                    <p>Website: <a href="http://www.bratmensclothings.com" target="_blank">www.bratmensclothings.com</a></p>
+                </div>
+
+                <div class="invoice-header">
+                    <h1>Invoice</h1>
+                    <p>Order Number: <strong>{{ order.tracking_number }}</strong></p>
+                </div>
+                
+                <div class="container mt-5">
+                    <!-- Order Details -->
+                    <div class="row">
+                        <div class="col-6 col-md-6 col-lg-4 mb-4">
+                            <div class="order-detail-item mb-3">
+                                <strong>Customer:</strong>
+                                <span>{{ order.user.username  |capfirst  }}</span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-6 col-lg-4 mb-4">
+                            <div class="order-detail-item mb-3">
+                                <strong>Payment Method:</strong>
+                                <span>{{ order.payment_type }}</span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-12 col-lg-4 mb-4">
+                            <div class="order-detail-item">
+                                <strong>Shipping Address:</strong>
+                                <span>{{ order.shipping_address  |capfirst }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+        <table>
+            <tr>
+                <th>Product Name</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Subtotal</th>
+            </tr>
+
+            {% for item in all_order_items %}
+            <tr>
+                {% if item.status != 'Cancelled' %}
+                <td>{{ item.variants.product.product_name |capfirst }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>MRP {{ item.price }}</td>
+                <td>MRP {{ item.subtotal_price }}</td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+
+            <tr>
+                <td colspan="4">&nbsp;</td>
+            </tr>
+            <tr>
+                <td colspan="3" style="text-align: right; font-weight: bold;">DELIVERY CHARGE</td>
+                <td>50.00</td>
+            </tr>
+
+            <tr>
+                <td colspan="3" style="text-align: right; font-weight: bold;">TOTAL + TAX</td>
+                <td>{{ order.total_price }}</td>
+            </tr>
+
+            <tr>
+                <td colspan="3" style="text-align: right; font-weight: bold;">GRAND TOTAL</td>
+                <td>{{ order.total_price }}</td>
+            </tr>
+            
+        </table>
+
+
+        <div class="footer">
+            <p><strong>Payment Method:</strong> {{ order.payment_type }}</p>
+            <p class="note"><strong>Note:</strong> Thank you for choosing us!</p>
+        </div>
+    </div>
+</body>
+</html>

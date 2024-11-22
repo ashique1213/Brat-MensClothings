@@ -50,6 +50,11 @@
             background-color: #f2f2f2;
         }
       
+        p.text-danger {
+            font-size: 10px;
+            margin-left: 5px;
+            color: red; /* Set the text color to red for error messages */
+          }
     </style>
 </head>
 <body class="sb-nav-fixed">
@@ -80,7 +85,7 @@
             <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
                 <div class="sb-sidenav-menu p-5" >
                     <div class="nav">
-                        <a class="nav-link " href="{% url 'admin_dashboard' %}">
+                        <a class="nav-link " href="{% url 'dashboard:admin_dashboard' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                             Dashboard
                         </a>
@@ -108,11 +113,11 @@
                             <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
                             Coupons
                         </a>
-                        <a class="nav-link" href="">
+                        <a class="nav-link" href="{% url 'offer:view_offer'%}">
                             <div class="sb-nav-link-icon"><i class="fas fa-gift"></i></div>
                             Offers
                         </a>
-                        <a class="nav-link" href="">
+                        <a class="nav-link" href="{% url 'salesreport:view_salesreport' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-chart-line"></i></div>
                             Sales Report
                         </a>
@@ -152,25 +157,24 @@
         <div id="layoutSidenav_content">
             <main>
                 <div class="container-fluid px-4">
-                    <h1 class="mt-4">Coupons</h1>
+                    <h4 class="mt-4">Coupons</h4>
                     <ol class="breadcrumb mb-4">
-                        <li class="breadcrumb-item"><a href="">Dashboard</a></li>
-                        <li class="breadcrumb-item active">Coupons</li>
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard:admin_dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item active"><a href="{% url 'coupon:coupon_details'%}">Coupons</a></li>
                     </ol>
 
 
 
-                    <div class="d-flex justify-content-between mb-3">
+                    <!-- <div class="d-flex justify-content-between mb-3">
                         <div class="input-group ms-1">
                             <span class="input-group-text">
-                                <i class="fas fa-search"></i> <!-- Search Icon -->
+                                <i class="fas fa-search"></i> 
                             </span>
                             <input type="text" id="" class="form-control" placeholder="Search Coupon..." />
                         </div>
-                        <!-- Sort Option on the Right with Icon -->
                         <div class="input-group ms-1">
                             <span class="input-group-text">
-                                <i class="fas fa-filter"></i> <!-- FontAwesome filter icon -->
+                                <i class="fas fa-filter"></i> 
                             </span>
                             <select id="sortOption" class="form-select">
                                 <option value="">Sort by</option>
@@ -178,7 +182,7 @@
                                 <option value="date">Start Date</option>
                             </select>
                         </div>
-                    </div>
+                    </div> -->
 
 
                     
@@ -188,7 +192,15 @@
                                 <i class="fas fa-tags me-1"></i>
                                 <span>Coupons Table</span>
                             </div>
-                            <button class="btn btn-dark" id="openAddCouponModal" data-bs-toggle="modal" data-bs-target="#addCouponModal">Add Coupons</button>
+                            <div class="input-group ms-auto" style="max-width: 500px;">
+                                <form method="get" class="d-flex w-100">
+                                    <input type="text" id="search" name="search" value="{{ search_query }}" class="form-control border-dark" placeholder="Search products..." />
+                                    <button class="btn btn-dark ms-2" type="submit">
+                                        <i class="fas fa-search"></i> <!-- Search Icon Inside the Button -->
+                                    </button>
+                                </form>
+                            </div>
+                            <button class="btn btn-dark ms-1" id="openAddCouponModal" data-bs-toggle="modal" data-bs-target="#addCouponModal">Add Coupons</button>
 
                         </div>
                         <div class="card-body">
@@ -204,7 +216,7 @@
                                         <th style="width: 14%;">End Date</th>
                                         <th style="width: 6%;">Limit</th>
                                         <th style="width: 8%;">Edit</th>
-                                        <th style="width: 8%;">Delete</th>
+                                        <!-- <th style="width: 8%;">Delete</th>  -->
                                         <th style="width: 10%;">Action</th>
                                     </tr>
                                 </thead>
@@ -224,9 +236,9 @@
                                                 Edit
                                             </button>
                                         </td>
-                                        <td>
+                                        <!-- <td>
                                             <a href="{% url 'coupon:delete_coupon' coupon.coupon_id %}" class="btn btn-danger btn-sm">Delete</a>
-                                        </td>
+                                        </td> -->
                                         <td>
                                             {% if not coupon.is_active %}
                                                 <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#confirmDeleteModal{{ coupon.coupon_id }}" 
@@ -313,11 +325,12 @@
                     {% csrf_token %}
                     <div class="mb-3">
                         <label for="coupon-code" class="col-form-label">Coupon Code</label>
-                        <input type="text" class="form-control" id="coupon-code" name="code">
+                        <input type="text" class="form-control" id="coupon-code" name="code" required>
+                        <p id="code_error" class="text-danger"></p> <!-- Error message container -->
                     </div>
                     <div class="mb-3">
                         <label for="coupon-category" class="col-form-label">Category if Any</label>
-                        <select class="form-control form-select" id="coupon-category" name="category">
+                        <select class="form-control form-select" id="coupon-category" name="category" required>
                             <option value="" {% if not coupon.category %}selected{% endif %}>-- Select Category --</option>
                             <option value="None" {% if coupon.category == "None" %}selected{% endif %}>None</option>
                             {% for category in categories %}
@@ -327,23 +340,26 @@
                     </div>
                     <div class="mb-3">
                         <label for="coupon-discount" class="col-form-label">Discount Amount</label>
-                        <input type="text" class="form-control" id="coupon-discount" name="discount_amount">
+                        <input type="number" class="form-control" id="coupon-discount" name="discount_amount" required> 
+                        <p id="discount_error" class="text-danger"></p> 
                     </div>
                     <div class="mb-3">
                         <label for="min-purchase" class="col-form-label">Minimum Purchase Amount</label>
-                        <input type="text" class="form-control" id="min-purchase" name="min_purchase_amount">
+                        <input type="number" class="form-control" id="min-purchase" name="min_purchase_amount" required>
+                        <p id="min_purchase_error" class="text-danger"></p> 
                     </div>
                     <div class="mb-3">
                         <label for="start-date" class="col-form-label">Start Date</label>
-                        <input type="date" class="form-control" id="start-date" name="start_date">
+                        <input type="date" class="form-control" id="start-date" name="start_date" required>
                     </div>
                     <div class="mb-3">
                         <label for="end-date" class="col-form-label">End Date</label>
-                        <input type="date" class="form-control" id="end-date" name="end_date">
+                        <input type="date" class="form-control" id="end-date" name="end_date" required>
                     </div>
                     <div class="mb-3">
                         <label for="usage-limit" class="col-form-label">Usage Limit</label>
-                        <input type="number" class="form-control" id="usage-limit" name="usage_limit">
+                        <input type="number" class="form-control" id="usage-limit" name="usage_limit" required>
+                        <p id="usage_limit_error" class="text-danger"></p> 
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -366,11 +382,12 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="editCouponForm{{ coupon.coupon_id }}" method="POST" action="{% url 'coupon:edit_coupon' coupon.coupon_id %}">
+                <form id="editCouponForm{{ coupon.coupon_id }}" data-coupon_id="{{ coupon.coupon_id }}"  method="POST" action="{% url 'coupon:edit_coupon' coupon.coupon_id %}">
                     {% csrf_token %}
                     <div class="mb-3">
                         <label for="edit-coupon-code{{ coupon.coupon_id }}" class="col-form-label">Coupon Code</label>
                         <input type="text" class="form-control" id="edit-coupon-code{{ coupon.coupon_id }}" name="code" value="{{ coupon.code }}" required>
+                        <p id="code_error" class="text-danger"></p> <!-- Error message container -->
                     </div>
                     <div class="mb-3">
                         <label for="edit-coupon-category{{ coupon.coupon_id }}" class="col-form-label">Category</label>
@@ -387,10 +404,13 @@
                     <div class="mb-3">
                         <label for="edit-coupon-discount{{ coupon.coupon_id }}" class="col-form-label">Discount Amount</label>
                         <input type="text" class="form-control" id="edit-coupon-discount{{ coupon.coupon_id }}" name="discount_amount" value="{{ coupon.discount_amount }}" required>
+                        <p id="discount_error" class="text-danger"></p> 
+
                     </div>
                     <div class="mb-3">
                         <label for="edit-min-purchase{{ coupon.coupon_id }}" class="col-form-label">Minimum Purchase</label>
                         <input type="text" class="form-control" id="edit-min-purchase{{ coupon.coupon_id }}" name="min_purchase_amount" value="{{ coupon.min_purchase_amount }}" required>
+                        <p id="min_purchase_error" class="text-danger"></p> 
                     </div>
                     <div class="mb-3">
                         <label for="edit-start-date{{ coupon.coupon_id }}" class="col-form-label">Start Date</label>
@@ -403,6 +423,7 @@
                     <div class="mb-3">
                         <label for="edit-usage-limit{{ coupon.coupon_id }}" class="col-form-label">Usage Limit</label>
                         <input type="number" class="form-control" id="edit-usage-limit{{ coupon.coupon_id }}" name="usage_limit" value="{{ coupon.usage_limit }}" required>
+                        <p id="usage_limit_error" class="text-danger"></p> 
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -430,6 +451,9 @@
       <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
       
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
   
   
       <script>
@@ -443,7 +467,77 @@
               });
           });
         
+
+          $('#addCouponForm').submit(function(e) {
+            e.preventDefault(); // Prevent default form submission
+
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'coupon:add_coupon' %}",
+                data: $(this).serialize(), // Serialize form data
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            text: response.message,
+                            icon: 'success',
+                            timer: 1000,  // Auto-close after 2 seconds
+                            showConfirmButton: false  // Hide the "OK" button
+                        }).then(() => {
+                            $('#addCouponModal').modal('hide'); // Close the modal
+                            location.reload(); // Reload the page or update content dynamically
+                        });                        
+                    } else {
+                        // Display validation errors in the form
+                        $.each(response.errors, function(key, value) {
+                            $('#' + key).text(value).show(); // Show each error
+                        });
+                    }
+                }
+            });
+        });
+
+
+        $(document).on('submit', 'form[id^="editCouponForm"]', function(e) {
+            e.preventDefault(); // Prevent default form submission
+        
+            const form = $(this); // Capture the specific form
+            const couponID = form.data('coupon_id'); // Get coupon ID from data attribute
+            const modalId = `#editCouponModal${couponID}`; // Construct modal ID for the current coupon
+        
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'coupon:edit_coupon' 0 %}".replace('0', couponID), // Replace '0' with the actual coupon ID
+                data: form.serialize(), // Serialize form data
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            text: response.message,
+                            icon: 'success',
+                            timer: 1000,  // Auto-close after 2 seconds
+                            showConfirmButton: false  // Hide the "OK" button
+                        }).then(() => {
+                            $(modalId).modal('hide'); // Close the modal for the current coupon
+                            location.reload(); // Reload the page or update content dynamically
+                        });
+                        
+                    } else {
+                        // Clear any previous errors
+                        form.find('.text-danger').text('');
+        
+                        // Display validation errors within the form
+                        $.each(response.errors, function(key, value) {
+                            form.find(`#${key}`).text(value).show(); // Show each error within form context
+                        });
+                    }
+                },
+
+            });
+        });
+        
+        
+        
         </script>
     
+
 </body>
 </html>

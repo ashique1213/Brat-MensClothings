@@ -16,7 +16,9 @@ from datetime import timedelta
 from django.conf import settings
 import datetime
 import time
+from offer.models import Brand_Offers,Product_Offers
 from django.db.models import Q
+from decimal import Decimal
 from django.views.decorators.cache import never_cache
 
         
@@ -240,6 +242,40 @@ def home_user(request):
         )
 
     )
+    for product in products:
+        product_offer = Product_Offers.objects.filter(
+            product_id=product,
+            status=True,
+            started_date__lte=timezone.now(),
+            end_date__gte=timezone.now()
+        ).first()
+        
+        brand_offer = Brand_Offers.objects.filter(
+            brand_id=product.brand,
+            status=True,
+            started_date__lte=timezone.now(),
+            end_date__gte=timezone.now()
+        ).first()
+        
+        final_price = product.price
+        discount_percentage = 0
+
+        if product_offer and brand_offer:
+            if product_offer.offer_price > brand_offer.offer_price:
+                final_price = product.price - product_offer.offer_price
+                discount_percentage = (product_offer.offer_price / product.price) * Decimal(100)
+            else:
+                final_price = product.price - brand_offer.offer_price
+                discount_percentage = (brand_offer.offer_price / product.price) * Decimal(100)
+        elif product_offer:
+            final_price = product.price - product_offer.offer_price
+            discount_percentage = (product_offer.offer_price / product.price) * Decimal(100)
+        elif brand_offer:
+            final_price = product.price - brand_offer.offer_price
+            discount_percentage = (brand_offer.offer_price / product.price) * Decimal(100)
+
+        product.final_price = final_price
+        product.discount_percentage = discount_percentage
     return render(request,'user/home.html',{'products':products})
 
 
@@ -249,8 +285,15 @@ def logout_user(request):
     logout(request)
     return redirect('accounts:login_user')
 
-
+def is_staff(user):
+    return user.is_staff
+   
+@never_cache
 def admin_login(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard:admin_dashboard')
+    
+    
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
@@ -264,7 +307,7 @@ def admin_login(request):
 
             if admin is not None and admin.is_superuser:
                 login(request, admin)
-                return redirect('admin_dashboard')
+                return redirect('dashboard:admin_dashboard')
         
         error_message = "Invalid credentials or not a superuser."
         return render(request, 'admin/admin_login.html', {'error_message': error_message})
@@ -273,6 +316,7 @@ def admin_login(request):
 
 @never_cache
 def admin_logout(request):
+    request.session.flush()
     logout(request)
     return redirect('accounts:admin_login')
 

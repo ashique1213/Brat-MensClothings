@@ -17,7 +17,6 @@
     <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"> -->
 
     <style>
-
         .pagination-container {
             display: flex; /* Use flexbox for alignment */
             justify-content: flex-end; /* Aligns child elements to the right */
@@ -62,6 +61,12 @@
             height: 50px;
             object-fit: cover;
         }
+
+        p.text-danger {
+            font-size: 10px;
+            margin-left: 5px;
+            color: red; /* Set the text color to red for error messages */
+          }
     </style>
 </head>
 <body class="sb-nav-fixed">
@@ -92,7 +97,7 @@
             <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
                 <div class="sb-sidenav-menu p-5" >
                     <div class="nav">
-                        <a class="nav-link " href="{% url 'admin_dashboard' %}">
+                        <a class="nav-link " href="{% url 'dashboard:admin_dashboard' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                             Dashboard
                         </a>
@@ -120,11 +125,11 @@
                             <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
                             Coupons
                         </a>
-                        <a class="nav-link" href="">
+                        <a class="nav-link" href="{% url 'offer:view_offer'%}">
                             <div class="sb-nav-link-icon"><i class="fas fa-gift"></i></div>
                             Offers
                         </a>
-                        <a class="nav-link" href="">
+                        <a class="nav-link" href="{% url 'salesreport:view_salesreport' %}">
                             <div class="sb-nav-link-icon"><i class="fas fa-chart-line"></i></div>
                             Sales Report
                         </a>
@@ -163,16 +168,16 @@
         <div id="layoutSidenav_content">
             <main>
                 <div class="container-fluid px-4">
-                    <h3 class="mt-4">Products</h3>
+                    <h4 class="mt-4">Products</h4>
                     <ol class="breadcrumb mb-4">
-                        <li class="breadcrumb-item"><a href="">Dashboard</a></li>
-                        <li class="breadcrumb-item active">Products</li>
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard:admin_dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item active"><a href="{% url 'products:viewproducts' %}">Products</a></li>
                     </ol>
 
-                    <div class="d-flex justify-content-between mb-3">
+                    <!-- <div class="d-flex justify-content-between mb-3">
                         <div class="input-group ms-1">
                             <span class="input-group-text">
-                                <i class="fas fa-search"></i> <!-- Search Icon -->
+                                <i class="fas fa-search"></i> 
                             </span>
                             <input type="text" id="searchProduct" class="form-control" placeholder="Search Products..." />
                         </div>
@@ -182,11 +187,11 @@
                             </span>
                             <select id="sortOption" class="form-select">
                                 <option value="">Sort by</option>
-                                <!-- <option value="name">Name</option> -->
-                                <!-- <option value="date">Start Date</option> -->
+                                <option value="name">Name</option>
+                                <option value="date">Start Date</option>
                             </select>
                         </div>
-                    </div>
+                    </div> -->
 
 
  
@@ -196,7 +201,15 @@
                                 <i class="fas fa-box me-1"></i>
                                 <span>Products Table</span>
                             </div>
-                            <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                            <div class="input-group ms-auto" style="max-width: 500px;">
+                                <form method="get" class="d-flex w-100">
+                                    <input type="text" id="search" name="search" value="{{ search_query }}" class="form-control border-dark" placeholder="Search products..." />
+                                    <button class="btn btn-dark ms-2" type="submit">
+                                        <i class="fas fa-search"></i> <!-- Search Icon Inside the Button -->
+                                    </button>
+                                </form>
+                            </div>
+                            <button type="button" class="btn btn-dark ms-1" data-bs-toggle="modal" data-bs-target="#addProductModal">
                                 Add Products
                             </button>
                         </div>
@@ -207,12 +220,12 @@
                                         <th>ID</th>
                                         <th>Images</th>
                                         <th>Name</th>
-                                        <th>Description</th>
                                         <th>Brand</th>
                                         <th>Category</th>
                                         <th>Color</th>
-                                        <th>Occasion</th>
-                                        <th>Fit</th>
+                                        <th>Price</th>
+                                        <!-- <th>Occasion</th> -->
+                                        <!-- <th>Fit</th> -->
                                         <th>Variant</th>
                                         <th>Edit</th>
                                         <th>Unlist</th>
@@ -226,20 +239,22 @@
                                         <td>{{ product.product_id }}</td>
                                         <td>
                                         {% if product.image1 %}
+                                        <a href="{% url 'products:single_product' product.product_id %}">
                                             <img src="{{ product.image1.url }}" alt="Current Image 1" width="100" class="mb-2">
+                                        </a>
                                         {% endif %}
                                         </td>
                                         <td>{{ product.product_name |title}}</td>
-                                        <td>{{ product.description |capfirst }}</td>
                                         <td>{{ product.brand.brandname |title }}</td>
                                         <td>
                                             {% for category in product.category.all %}
-                                                {{ category.category |title }}-{{ category.category_type }}{% if not forloop.last %}, {% endif %}
+                                                {{ category.category |title }}{% if not forloop.last %}, {% endif %}
                                             {% endfor %}
                                         </td>
                                         <td>{{ product.color |title }}</td>
-                                        <td>{{ product.occasion |title }}</td>
-                                        <td>{{ product.fit |title }}</td>
+                                        <td>{{ product.price |title }}</td>
+                                        <!-- <td>{{ product.occasion |title }}</td> -->
+                                        <!-- <td>{{ product.fit |title }}</td> -->
                                         
 
                                         <td>
@@ -312,7 +327,7 @@
                                         </td>
                                     </tr>
                                     {% endfor %}
-                                </tbody>
+                                </tbody> 
                             </table>
                         </div>
 
@@ -356,7 +371,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form method="post" action="{% url 'products:addproducts' %}" enctype="multipart/form-data">
+                <form method="post" id="addproductForm" action="{% url 'products:addproducts' %}" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="mb-3">
                         <label class="form-label">Images</label>
@@ -382,10 +397,12 @@
                     <div class="mb-3">
                         <label class="form-label">Product Name</label>
                         <input type="text" name="productname" class="form-control" required>
+                        <p id="productname" class="text-danger"></p> <!-- Error message container -->
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Product Description</label>
                         <textarea name="description" class="form-control" required></textarea>
+                        <p id="description" class="text-danger"></p> <!-- Error message container -->
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Brand</label>
@@ -408,6 +425,12 @@
                     <div class="mb-3">
                         <label class="form-label">Color</label>
                         <input type="text" name="color" class="form-control" value="{{ product.color }}" required>
+                        <p id="color" class="text-danger"></p> <!-- Error message container -->
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Price</label>
+                        <input type="text" name="price" class="form-control" value="{{ product.price }}" required>
+                        <p id="price" class="text-danger"></p> <!-- Error message container -->
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Occasion</label>
@@ -464,7 +487,7 @@
             </div>
 
             <div class="modal-body">
-                <form method="post" action="{% url 'products:editproduct' product.product_id %}" enctype="multipart/form-data">
+                <form method="post"  id="editproductForm" data-product_id="{{ product.product_id }}" action="{% url 'products:editproduct' product.product_id %}" enctype="multipart/form-data">
                     {% csrf_token %}
 
                     <div class="row">
@@ -503,10 +526,14 @@
                     <div class="mb-3">
                         <label class="form-label">Product Name</label>
                         <input type="text" name="product_name" class="form-control" value="{{ product.product_name |title }}" required>
+                        <p id="productname" class="text-danger"></p> <!-- Error message container -->
+
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Product Description</label>
                         <textarea name="description" class="form-control" required>{{ product.description }}</textarea>
+                        <p id="description" class="text-danger"></p> <!-- Error message container -->
+
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Brand</label>
@@ -534,6 +561,14 @@
                     <div class="mb-3">
                         <label class="form-label">Color</label>
                         <input type="text" name="color" class="form-control" value="{{ product.color |title }}" required>
+                        <p id="color" class="text-danger"></p> <!-- Error message container -->
+
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Price</label>
+                        <input type="number" name="price" class="form-control" value="{{ product.price  }}" required>
+                        <p id="price" class="text-danger"></p> <!-- Error message container -->
+
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Occasion</label>
@@ -575,6 +610,8 @@
 
     <!-- Include Cropper.js JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
     <script>
@@ -622,7 +659,12 @@
 
                 reader.readAsDataURL(file);
             } else {
-                alert('Please upload a valid image file.');
+                Swal.fire({
+                    icon: 'error',
+                    text: 'Please upload a valid image file.',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
             }
         }
 
@@ -683,6 +725,106 @@
                 cropperInstance = null;
             }
         });
+
+
+
+        $('#addproductForm').submit(function(e) {
+            e.preventDefault(); // Prevent default form submission
+        
+            // Clear previous error messages
+            $('#addproductForm .text-danger').text('').hide();
+            
+            const submitButton = $(this).find('button[type="submit"]'); // Target the submit button
+
+            // **Added portion: Add loader and disable the button**
+            submitButton.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Submitting...');
+            
+            
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'products:addproducts' %}",
+                data: new FormData(this), // Use FormData to handle file uploads
+                processData: false, 
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                         // Display success message with SweetAlert and reload the page
+                         Swal.fire({
+                            text: response.message,
+                            icon: 'success',
+                            timer: 1000,  // Time in milliseconds (2000ms = 2 seconds)
+                            showConfirmButton: false  // Hide the confirm button
+                        }).then(() => {
+                            $('#addProductModal').modal('hide');
+                            location.reload();
+                        });
+                        
+                    } else {
+                        // If errors, display them under respective fields
+                        $.each(response.errors, function(key, value) {
+                            $('#' + key).text(value).show(); // Show error message under each field
+                        });
+                    }
+                },   
+                complete: function() {
+                    // **Added portion: Reset button state**
+                    submitButton.prop('disabled', false).html('Submit');
+                    // **End of added portion**
+                }
+            });
+        });
+        
+        
+
+        $(document).on('submit', 'form[id^="editproductForm"]', function(e) {
+            e.preventDefault(); // Prevent default form submission
+        
+            const form = $(this); // Capture the specific form
+            const productID = form.data('product_id'); // Get product ID from data attribute
+            const modalId = `#editProductModal${productID}`; // Construct modal ID for the current product
+
+            const submitButton = form.find('button[type="submit"]'); // Target the submit button
+
+            // **Added portion: Add loader and disable the button**
+            submitButton.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...');
+        
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'products:editproduct' 0 %}".replace('0', productID), // Replace '0' with the actual product ID
+                data: form.serialize(), // Serialize form data
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            text: response.message,
+                            icon: 'success',
+                            timer: 1000,  // Set the timer to auto-close after 2 seconds (2000 ms)
+                            showConfirmButton: false, // Hide the "OK" button
+                        }).then(() => {
+                            $(modalId).modal('hide'); // Close the modal for the current product
+                            location.reload(); // Reload the page or update content dynamically
+                        });                         // This reload can be replaced by more specific content updates if needed
+                    } else {
+                        // If validation errors occurred:
+                        form.find('.text-danger').text(''); // Clear all previous error messages
+                        
+                        // Display validation errors within the form
+                        $.each(response.errors, function(key, value) {
+                            const errorElement = form.find(`#${key}`);
+                            errorElement.text(value).show(); // Display each error message
+        
+                            // Optional: Add CSS class to highlight form fields with errors
+                            form.find(`[name="${key}"]`).addClass('is-invalid'); // Highlight input field with invalid data
+                        });
+                    }
+                },
+            complete: function() {
+                // **Added portion: Reset button state**
+                submitButton.prop('disabled', false).html('Save Changes');
+                // **End of added portion**
+        }
+            });
+        });
+        
 
 
     </script>

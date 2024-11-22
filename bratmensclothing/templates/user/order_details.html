@@ -58,14 +58,19 @@
                                         <li class="dash-active">
 
                                             <a href="{% url 'order:view_orders' %}">My Orders</a></li>
-                                        <li>
+                                            <li>
 
-                                            <a href="">My Wishlist</a></li>
+                                                <a href="{% url 'wishlist:viewwishlist' %}">My Wishlist</a>
+                                            </li>
+                                            <li>
+    
+                                                <a href="{% url 'cart:viewcart' %}">My Cart</a>
+                                            </li>
                                     </ul>
                                 </div>
                             </div>
 
-                            <div class="dash__box dash__box--bg-white dash__box--shadow dash__box--w">
+                            <!-- <div class="dash__box dash__box--bg-white dash__box--shadow dash__box--w">
                                 <div class="dash__pad-1">
                                     <ul class="dash__w-list">
                                         <li>
@@ -97,30 +102,31 @@
                                         </li>
                                     </ul>
                                 </div>
-                            </div>
+                            </div> -->
                             <!--====== End - Dashboard Features ======-->
                         </div>
-
 
                         <div class="col-lg-9 col-md-12">
                             <div class="dash__box dash__box--shadow dash__box--radius dash__box--bg-white u-s-m-b-30">
                                 <div class="dash__pad-2">
                                     <h1 class="dash__h1 u-s-m-b-14">My Orders</h1>
 
-                                    <span class="dash__text u-s-m-b-30">Here you can see all Orders </span>
-                                    <form class="m-order u-s-m-b-30">
+                                    <!-- <form class="m-order u-s-m-b-30">
                                         <div class="m-order__select-wrapper">
 
-                                            <label class="u-s-m-r-8" for="my-order-sort">Show:</label><select class="select-box select-box--primary-style" id="my-order-sort">
+                                            <label class="u-s-m-r-8" for="my-order-sort">Show:</label>
+                                            <select class="select-box select-box--primary-style" id="my-order-sort">
                                                 <option selected>Last 5 orders</option>
                                                 <option>Last 15 days</option>
                                                 <option>Last 30 days</option>
                                                 <option>Last 6 months</option>
                                                 <option>Orders placed in 2018</option>
                                                 <option>All Orders</option>
-                                            </select></div>
-                                    </form>
-                                    {% for item in order_items%}
+                                            </select>
+                                        </div>
+                                    </form> -->
+                                {% if order_items %}
+                                    {% for item in order_items %}
                                     <div class="m-order__list">
                                         <div class="m-order__get">
                                             <div class="manage-o__header u-s-m-b-30">
@@ -148,47 +154,20 @@
 
                                                         <div>
 
-                                                            {% if item.status == 'Order Pending' %}
-                                                                <div>
-                                                                    <span class="manage-o__badge badge--processing">Processing</span>
-                                                                </div>
-                                                            {% elif item.status == 'Order confirmed' %}
-                                                                <div>
-                                                                    <span class="manage-o__badge badge--processing">Confirmed</span>
-                                                                </div>
-                                                            {% elif item.status == 'Shipped' %}
-                                                                <div>
-                                                                    <span class="manage-o__badge badge--processing">Shipped</span>
-                                                                </div>
-                                                            {% elif item.status == 'Out For Delivery' %}
-                                                                <div>
-                                                                    <span class="manage-o__badge badge--out-for-processing">Out for Delivery</span>
-                                                                </div>
-                                                            {% elif item.status == 'Delivered' %}
-                                                                <div>
-                                                                    <span class="manage-o__badge badge--shipped">Delivered</span>
-                                                                </div>
+                                                            {% if item.status == 'Delivered' %}
+                                                            <div>
+                                                                <span class="manage-o__badge badge--shipped">Delivered</span>
+                                                            </div>
                                                             {% elif item.status == 'Cancelled' %}
-                                                                <div>
-                                                                    <span class="manage-o__badge badge--delivered">Cancelled</span>
-                                                                </div>
-                                                            {% elif item.status == 'Requested Return' %}
-                                                                <div>
-                                                                    <span class="manage-o__badge badge--requested-processing">Return Requested</span>
-                                                                </div>
-                                                            {% elif item.status == 'Approve Returned' %}
-                                                                <div>
-                                                                    <span class="manage-o__badge badge--approve-processing">Return Approved</span>
-                                                                </div>
-                                                            {% elif item.status == 'Reject Returned' %}
-                                                                <div>
-                                                                    <span class="manage-o__badge badge--reject-delivered">Return Rejected</span>
-                                                                </div>
+                                                            <div>
+                                                                <span class="manage-o__badge badge--delivered">Cancelled</span>
+                                                            </div>
                                                             {% else %}
-                                                                <div>
-                                                                    <span class="manage-o__badge badge--delivered">Unknown Status</span>
-                                                                </div>
+                                                            <div>
+                                                                <span class="manage-o__badge badge--processing">{{item.status}}</span>
+                                                            </div>
                                                             {% endif %}
+
 
                            
                                                         <span class="manage-o__text-2 u-c-silver">Quantity:
@@ -198,7 +177,7 @@
                                                         </div>
                                                     <div>
 
-                                                        <span class="manage-o__text-2 u-c-silver">Price:
+                                                        <span class="manage-o__text-2 u-c-silver">MRP:
 
                                                             <span class="manage-o__text-2 u-c-secondary">₹{{item.subtotal_price}}</span></span></div>
                                                 </div>
@@ -209,11 +188,30 @@
                                     </div>
 
                                     {% endfor %}
+
+                                   {% else %} 
+                                   <span class="dash__text u-s-m-b-30">No orders yet</span>
+                                    {% endif %}
                                 </div>
                             </div>
-                        </div>
-
+                            <div class="pagination" style="font-size: 12px; color: black; font-weight: bold; text-align: center;">
+                                <span class="step-links">
+                                    {% if page_obj.has_previous %}
+                                        <a href="?page=1">&laquo; FIRST</a>
+                                        <a href="?page={{ page_obj.previous_page_number }}">PREVIOUS</a>
+                                    {% endif %}
                         
+                                    <span class="current">
+                                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                                    </span>
+                        
+                                    {% if page_obj.has_next %}
+                                        <a href="?page={{ page_obj.next_page_number }}">NEXT</a>
+                                        <a href="?page={{ page_obj.paginator.num_pages }}">LAST &raquo;</a>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -223,6 +221,8 @@
     <!--====== End - Section 2 ======-->
 </div>
 <!--====== End - App Content ======-->
+
+
 
 
 {% endblock %}
