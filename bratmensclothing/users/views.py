@@ -23,6 +23,8 @@ from coupon.models import Coupon
 import cloudinary.uploader
 from decimal import Decimal
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.db.models import Avg, IntegerField
+from django.db.models.functions import Cast
 
 
 def is_staff(user):
@@ -69,7 +71,6 @@ def unblock_user(request,userid):
     messages.success(request,'User Un-Blocked Succesfully')
     return redirect('userss:view_user')
 
- 
 
 @never_cache
 def category_details(request):
@@ -93,7 +94,7 @@ def category_details(request):
         )
         .annotate(
         total_quantity=Sum('variants__qty'),
-        average_rating=Avg('Rating__rating')
+        average_rating=Cast(Avg('Rating__rating'), IntegerField())
         )
     )
 

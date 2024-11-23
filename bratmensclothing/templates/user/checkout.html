@@ -261,20 +261,20 @@
                                         <td>SHIPPING</td>
                                         <td>₹{{delivery_charge|floatformat:2}}</td>
                                     </tr>
-                                    {% if discount %}
                                     <tr>
-                                        <td style="color: #49c36e; font-weight: bold;">DISCOUNT</td>
-                                        <td>₹{{ discount }}</td>
+                                        <td>SUBTOTAL</td>
+                                        <td>₹{{ total|floatformat:2 }}</td>
                                     </tr>
-                                    {% endif %}
                                     <tr>
                                         <td>TAX</td>
                                         <td>₹{{ tax|floatformat:2 }}</td>
                                     </tr>
+                                    {% if discount %}
                                     <tr>
-                                        <td>SUBTOTAL</td>
-                                        <td>₹{{ grand_total|floatformat:2 }}</td>
+                                        <td style="color: #49c36e; font-weight: bold;">DISCOUNT</td>
+                                        <td>- ₹{{ discount }}</td>
                                     </tr>
+                                    {% endif %}
                                     <tr>
                                         <td>GRAND TOTAL</td>
                                         <td>₹{{ grand_total|floatformat:2 }}</td>

@@ -116,7 +116,8 @@ def view_cart(request):
             'delivery_charge': delivery_charge,
             'coupons': coupons,
             'couponuser': couponuser,
-            'discount':coupon_discount
+            'discount':coupon_discount,
+            'total':total
         })
 
     return render(request, 'user/cart.html')

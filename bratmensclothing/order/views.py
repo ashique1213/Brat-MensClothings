@@ -141,7 +141,8 @@ def checkout(request):
                     'coupons':coupons,
                     'discount':coupon_discount,
                     'limit':limit,
-                    'wallet_balance':wallet_balance
+                    'wallet_balance':wallet_balance,
+                    'total':total
 
                 }) 
     return redirect('accounts:login_user') 
