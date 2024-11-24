@@ -75,7 +75,6 @@ def signup_user(request):
         
         if pass1 == pass2:
             otp = generate_otp()
-            print(f"Generated OTP: {otp}")  
             otp_expiry = datetime.datetime.now() + datetime.timedelta(seconds=60)
 
             request.session['otp'] = otp
@@ -156,7 +155,6 @@ def resend_otp(request):
 
     if email:
         otp = generate_otp()
-        print(f"Generated OTP: {otp}")
         otp_expiry = datetime.datetime.now() + datetime.timedelta(seconds=60)  # Expire in 60 seconds
 
         # Update session with new OTP and expiry
@@ -340,7 +338,6 @@ def forgot_password(request):
             return JsonResponse({'status': 'error', 'errors': errors}, status=400)
 
         otp = generate_otp()  # Generate OTP
-        print(f"Generated OTP: {otp}")  # Debug: Print generated OTP
 
         otp_expiry = datetime.datetime.now() + datetime.timedelta(seconds=60)  # 5 minutes expiry
         request.session['otp'] = otp
@@ -394,7 +391,6 @@ def reset_resend_otp(request):
 
     if request.method == 'POST':
         new_otp = generate_otp() 
-        print(f"new_otp : {new_otp}")
         request.session['otp'] = new_otp
         request.session['otp_expiry'] = (datetime.datetime.now() + datetime.timedelta(minutes=1)).timestamp()
 

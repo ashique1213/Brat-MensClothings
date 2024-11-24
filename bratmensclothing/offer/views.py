@@ -48,9 +48,6 @@ def add_product_offer(request):
         started_date = request.POST.get("start_date")
         end_date = request.POST.get("end_date")
 
-        print(f'{started_date}')
-        print(f'{end_date}')
-
         errors = {}
 
         if not offer_name:
@@ -94,8 +91,6 @@ def add_product_offer(request):
                     end_date=end_date,
                     status=True  
                 )
-                print(f'{started_date}')
-                print(f'{end_date}')
                 new_offer.save()
                 # messages.success(request, 'Offer added successfully!')
                 # return redirect('offer:view_product_offer')  

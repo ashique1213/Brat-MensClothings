@@ -225,7 +225,6 @@ def apply_coupon(request):
 
         if request.method == 'POST':
             code = request.POST.get('couponcode', '').strip()
-            print("Coupon code entered:", code)
 
             try:
                 coupon = Coupon.objects.get(code__iexact=code)

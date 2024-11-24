@@ -804,7 +804,6 @@ def cancel_order(request, orderitem_id):
 
         if order.items.filter(status='Cancelled').count() == order.items.count():
             full_refund_amount = order.total_price  
-            print(f'Full refund amount: {full_refund_amount}')
 
             if full_refund_amount > 0:
                 user_wallet, created = Wallet.objects.get_or_create(user_id=user)
@@ -896,7 +895,6 @@ def order_details(request):
         if order_id and action:
             order = get_object_or_404(OrderItem, orderitem_id=order_id)  
             current_status = order.status
-            print(F'{current_status}')
             if action in ALLOWED_TRANSITIONS.get(current_status, []):
                 order.status = action 
                 if action == 'Cancelled':

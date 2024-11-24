@@ -104,8 +104,7 @@ def add_category(request):
         category=request.POST.get('category')
         categorytype=request.POST.get('categorytype')
 
-        value=Category.objects.create(category=category,category_type=categorytype)
-        print(value)
+        Category.objects.create(category=category,category_type=categorytype)
         messages.success(request, 'Category added successfully!')  
         return redirect('products:view_category')
     return render(request,'admin/category.html')
@@ -460,7 +459,6 @@ def add_review(request, product_id):
             rating = request.POST.get('rating')
             review = request.POST.get('review')
 
-            print(f"Rating: {rating}, Review: {review}")
 
             if not rating or not rating.isdigit():
                 messages.error(request, "Invalid rating. Please select a valid number.")
