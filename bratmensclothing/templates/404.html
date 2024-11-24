@@ -1,42 +1,119 @@
-{% extends "user/base.html" %}
+{% load static %}
+<!DOCTYPE html>
+< class="no-js" lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!--[if IE
+      ]><meta http-equiv="X-UA-Compatible" content="IE=edge"
+    /><![endif]-->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
 
+    <meta
+      http-equiv="Cache-Control"
+      content="no-cache, no-store, must-revalidate"
+    />
+    <!-- HTTP 1.1 -->
+    <meta http-equiv="Pragma" content="no-cache" />
+    <!-- HTTP 1.0 -->
+    <meta http-equiv="Expires" content="0" />
+    <!-- Proxies -->
 
-{% block content %}  
-      
+    <link href="{% static 'images/favicon.png' %}" rel="shortcut icon" />
+    <title>brat.MensClothing</title>
+
+    <!--====== Google Font ======-->
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700,800"
+      rel="stylesheet"
+    />
+
+    <!--====== Vendor Css ======-->
+    <!-- <link rel="stylesheet" href="css/vendor.css"> -->
+    <link rel="stylesheet" href="{% static 'css/vendor.css' %}" />
+
+    <!--====== Utility-Spacing ======-->
+    <!-- <link rel="stylesheet" href="css/utility.css"> -->
+    <link rel="stylesheet" href="{% static 'css/utility.css' %}" />
+
+    <!--====== App ======-->
+    <!-- <link rel="stylesheet" href="css/app.css"> -->
+    <link rel="stylesheet" href="{% static 'css/app.css' %}" />
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- <link rel="stylesheet" href="{% static 'fontawesome/css/all.min.css' %}"> -->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"> -->
       
       <!--====== App Content ======-->
-        <div class="app-content u-s-p-y-60">
+  </head>
+  <body>
+    <div class="app-content u-s-p-y-60">
 
            
 
-            <!--====== Section 1 ======-->
-            <div class="u-s-p-y-60">
+        <!--====== Section 1 ======-->
+        <div class="u-s-p-y-60">
 
-                <!--====== Section Content ======--> 
-                <div class="section__content">
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-lg-12 col-md-12 u-s-m-b-30">
-                                <div class="empty">
-                                    <div class="empty__wrap">
+            <!--====== Section Content ======--> 
+            <div class="section__content">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 u-s-m-b-30">
+                            <div class="empty">
+                                <div class="empty__wrap">
 
-                                        <span class="empty__big-text">404</span>
+                                    <span class="empty__big-text">404</span>
 
-                                        <span class="empty__text-1">Looks like you're in wrong place.</span>
+                                    <span class="empty__text-1">Looks like you're in wrong place.</span>
 
-                                        <a class="empty__redirect-link btn--e-brand" href="{% url 'accounts:home_user' %}">GO TO HOME</a></div>
-                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <!--====== End - Section Content ======-->
             </div>
-
-            </div>
-            
-            <!--====== End - Section 1 ======-->
+            <!--====== End - Section Content ======-->
         </div>
-        <!--====== End - App Content ======-->
 
-{% endblock %}
+        </div>
+        
+        <!--====== End - Section 1 ======-->
+    </div>
+
+    
+  <!--====== Google Analytics: change UA-XXXXX-Y to be your site's ID ======-->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+  <script>
+    window.ga = function () {
+      ga.q.push(arguments);
+    };
+    ga.q = [];
+    ga.l = +new Date();
+    ga("create", "UA-XXXXX-Y", "auto");
+    ga("send", "pageview");
+  </script>
+  <script
+    src="https://www.google-analytics.com/analytics.js"
+    async
+    defer
+  ></script>
+
+  <!--====== Vendor Js ======-->
+  <script src="{% static 'js/vendor.js' %}"></script>
+
+  <!--====== jQuery Shopnav plugin ======-->
+  <script src="{% static 'js/jquery.shopnav.js' %}"></script>
+
+  <!--====== App ======-->
+  <script src="{% static 'js/app.js' %}"></script>
+
+  </body>
+       
+
+</html>
