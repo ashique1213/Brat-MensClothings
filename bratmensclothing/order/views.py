@@ -351,6 +351,13 @@ def place_order(request):
                         user_wallet.balance = Decimal(user_wallet.balance) - Decimal(grand_total)
                         user_wallet.save()
 
+                        if couponuser: 
+                            coupon = couponuser.coupon
+                            coupon.usage_limit -= 1
+                            coupon.save()  
+                            couponuser.status = False  
+                            couponuser.save() 
+
                         new_order = Order.objects.create(
                             user=user,
                             shipping_address=selected_address,
@@ -623,6 +630,9 @@ def verify_retry_payment(request):
             razorpay_signature = request.POST.get('razorpay_signature')
 
             order = Order.objects.get(order_id=order_id)
+            
+            order_item = OrderItem.objects.filter(order_id=order_id)
+
 
             client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
@@ -639,9 +649,9 @@ def verify_retry_payment(request):
                 order.payment_status = 'Success'
                 order.save()
 
-                # for item in order_items:
-                #     item.status="Order confirmed"
-                #     item.save()
+                for item in order_item:
+                    item.status="Order confirmed"
+                    item.save()
                 
                 # messages.success(request, 'Payment successfully completed.')
                 # return render(request, 'user/order_details.html', {'order': order,'order_items':order_items,'orders':orders})
@@ -895,6 +905,9 @@ def order_details(request):
                     variant.qty += order.quantity  
                     variant.save()  
                 
+                if action == 'Delivered':
+                    order.order.payment_status = 'Pending'
+                    order.order.save()
                 order.save() 
                 messages.success(request, f"Order status updated to {action}.")
                 return redirect('order:order_details') 

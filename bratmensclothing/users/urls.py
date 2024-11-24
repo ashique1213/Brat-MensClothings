@@ -41,6 +41,8 @@ urlpatterns = [
     path('addressdetails/editaddress/<int:id>',views.edit_address,name='editaddress'),
     path('removeaddress/<int:id>/', views.remove_address, name='removeaddress'),
     
+    path('about/', views.about, name='about'),
+    path('contact/', views.contact, name='contact'),
     
 ]
 if settings.DEBUG:  

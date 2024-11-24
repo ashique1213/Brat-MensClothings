@@ -303,14 +303,14 @@
                       data-placement="left"
                       title="Contact"
                     >
-                      <a href=""><i class="fas fa-phone-volume"></i></a>
+                      <a href="{% url 'userss:contact' %}"><i class="fas fa-phone-volume"></i></a>
                     </li>
                     <li
                       data-tooltip="tooltip"
                       data-placement="left"
                       title="Mail"
                     >
-                      <a href=""><i class="far fa-envelope"></i></a>
+                      <a href="{% url 'userss:contact' %}"><i class="far fa-envelope"></i></a>
                     </li>
                   </ul>
                   <!--====== End - List ======-->
@@ -396,7 +396,8 @@
                       <!--====== End - Dropdown ======-->
                     </li>
                     <li class="has-dropdown">
-                      <a>ABOUT<i class="fas u-s-m-l-6"></i></a>
+                      <a href="{% url 'userss:about' %}">ABOUT<i class="fas u-s-m-l-6"></i>
+                      </a>
                     </li>
                     <li>
                       <a href="/#value_of_the_day">VALUE OF THE DAY</a>

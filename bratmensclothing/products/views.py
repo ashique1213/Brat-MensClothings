@@ -397,7 +397,7 @@ def edit_sizevariants(request, variant_id):
         # Validate quantity field
         try:
             quantity = int(quantity) if quantity else None
-            if quantity is None or quantity <= 0:
+            if quantity is None or quantity < 0:
                 errors['quantity_error'] = 'Quantity must be a positive integer.'
         except (ValueError, TypeError):
             errors['quantity_error'] = 'Invalid quantity format.'

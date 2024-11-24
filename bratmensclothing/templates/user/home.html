@@ -162,65 +162,6 @@
         </div>
         <!--====== End - Section Intro ======-->
 
-        <!--====== Section Content ======-->
-        <!-- <div class="section__content">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="filter__grid-wrapper u-s-m-t-30">
-
-                            {% for product in products %}
-                            <div class="row">
-                                <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 u-s-m-b-30 filter__item ">
-                                    <div class="product-o product-o--hover-on product-o--radius">
-                                        <div class="product-o__wrap">
-
-                                            <a class="aspect aspect--bg-grey aspect--square u-d-block" href="">
-
-                                                <img class="aspect__img object-cover" src="{{ product.image1.url }}" alt=""></a>
-                                            <div class="product-o__action-wrap">
-                                                <ul class="product-o__action-list">
-                                                    <li>
-
-                                                        <a data-modal="modal" data-modal-id="#quick-look" data-tooltip="tooltip" data-placement="top" title="Quick View"><i class="fas fa-search-plus"></i></a></li>
-                                                    <li>
-
-                                                        <a data-modal="modal" data-modal-id="#add-to-cart" data-tooltip="tooltip" data-placement="top" title="Add to Cart"><i class="fas fa-plus-circle"></i></a></li>
-                                                    <li>
-
-                                                        <a href="" data-tooltip="tooltip" data-placement="top" title="Add to Wishlist"><i class="fas fa-heart"></i></a></li>
-                                                    
-                                                </ul>
-                                            </div>
-                                        </div>
-
-                                        <span class="product-o__category">
-
-                                            <a href="">{{ product.brand.brandname }}</a></span>
-
-                                        <span class="product-o__name">
-
-                                            <a href="">{{ product.product_name }}</a></span>
-                                        <div class="product-o__rating gl-rating-style"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
-
-                                        </div>
-                                        {% if product.variants.all %}
-                                        <span class="product-o__price">₹{{product.variants.all.0.price}}
-                                            <span class="product-o__discount">₹160.00</span></span>
-                                            {% endif %}
-
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div> -->
-
-
           <!--====== Section Content ======-->
           <div class="section__content">
             <div class="container">
@@ -232,26 +173,18 @@
 
                             <div class="product-o product-o--hover-on">
 
-                                <div class="product-o__wrap">
+                                <div class="product-o__wrap" >
 
                                     <a class="aspect aspect--bg-grey aspect--square u-d-block" href="{% url 'userss:product_details' product.product_id %}">
 
-                                        <img class="aspect__img" src="{{ product.image1.url }}" alt=""></a>
+                                        <img class="aspect__img" src="{{ product.image1.url }}" alt="">
+                                    </a>
                                     <div class="product-o__action-wrap">
                                         <ul class="product-o__action-list">
                                             <li>
 
-                                                <a data-modal="modal" data-modal-id="#quick-look" data-tooltip="tooltip" data-placement="top" title="Quick View"><i class="fas fa-search-plus"></i></a></li>
-                                            <li>
-
-                                                <a data-modal="modal" data-modal-id="#add-to-cart" data-tooltip="tooltip" data-placement="top" title="Add to Cart"><i class="fas fa-plus-circle"></i></a></li>
-                                            <li>
-
-                                                <a href="" data-tooltip="tooltip" data-placement="top" title="Add to Wishlist"><i class="fas fa-heart"></i></a></li>
-                                            <!-- <li>
-
-                                                <a href="" data-tooltip="tooltip" data-placement="top" title="Email me When the price drops"><i class="fas fa-envelope"></i></a>
-                                            </li> -->
+                                                <a href="{% url 'userss:product_details' product.product_id %}" data-modal="modal" data-modal-id="#quick-look" data-tooltip="tooltip" data-placement="top" title="Quick View"><i class="fas fa-search-plus"></i></a></li>
+                                          
                                         </ul>
                                     </div>
                                 </div>
@@ -328,7 +261,7 @@
 
                             <span class="banner-bg__text-block banner-bg__text-3 u-c-secondary">Enjoy Free Shipping when you buy 2 items and above!</span>
 
-                            <a class="banner-bg__shop-now btn--e-secondary" href="">Shop Now</a>
+                            <a class="banner-bg__shop-now btn--e-secondary" href="{% url 'userss:category_details' %}">Shop Now</a>
                         </div>
                     </div>
                 </div>
@@ -348,7 +281,7 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="section__text-wrap">
-                            <h1 class="section__heading u-c-secondary u-s-m-b-12">FEATURED PRODUCTS</h1>
+                            <h1 class="section__heading u-c-secondary u-s-m-b-12">VALUE OF THE DAY</h1>
 
                             <span class="section__span u-c-silver">FIND NEW FEATURED PRODUCTS</span>
                         </div>
@@ -374,16 +307,7 @@
                                     <ul class="product-o__action-list">
                                         <li>
 
-                                            <a data-modal="modal" data-modal-id="#quick-look" data-tooltip="tooltip" data-placement="top" title="Quick View"><i class="fas fa-search-plus"></i></a></li>
-                                        <li>
-
-                                            <a data-modal="modal" data-modal-id="#add-to-cart" data-tooltip="tooltip" data-placement="top" title="Add to Cart"><i class="fas fa-plus-circle"></i></a></li>
-                                        <li>
-
-                                            <a href="" data-tooltip="tooltip" data-placement="top" title="Add to Wishlist"><i class="fas fa-heart"></i></a></li>
-                                        <li>
-
-                                            <a href="" data-tooltip="tooltip" data-placement="top" title="Email me When the price drops"><i class="fas fa-envelope"></i></a></li>
+                                            <a href="{% url 'userss:category_details' %}" data-modal="modal" data-modal-id="#quick-look" data-tooltip="tooltip" data-placement="top" title="Go to Products"><i class="fas fa-search-plus"></i></a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -394,7 +318,7 @@
 
                             <span class="product-o__name">
 
-                                <a href="">White T-Shirt </a></span>
+                                <a href="">Olive T-Shirt </a></span>
                             <div class="product-o__rating gl-rating-style"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
 
                                 <span class="product-o__review">(23)</span></div>
@@ -415,16 +339,7 @@
                                     <ul class="product-o__action-list">
                                         <li>
 
-                                            <a data-modal="modal" data-modal-id="#quick-look" data-tooltip="tooltip" data-placement="top" title="Quick View"><i class="fas fa-search-plus"></i></a></li>
-                                        <li>
-
-                                            <a data-modal="modal" data-modal-id="#add-to-cart" data-tooltip="tooltip" data-placement="top" title="Add to Cart"><i class="fas fa-plus-circle"></i></a></li>
-                                        <li>
-
-                                            <a href="" data-tooltip="tooltip" data-placement="top" title="Add to Wishlist"><i class="fas fa-heart"></i></a></li>
-                                        <li>
-
-                                            <a href="" data-tooltip="tooltip" data-placement="top" title="Email me When the price drops"><i class="fas fa-envelope"></i></a></li>
+                                            <a href="{% url 'userss:category_details' %}" data-modal="modal" data-modal-id="#quick-look" data-tooltip="tooltip" data-placement="top" title="Go to Products"><i class="fas fa-search-plus"></i></a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -435,7 +350,40 @@
 
                             <span class="product-o__name">
 
-                                <a href="">White T-Shirt</a></span>
+                                <a href="">Olive T-Shirt</a></span>
+                            <div class="product-o__rating gl-rating-style"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+
+                                <span class="product-o__review">(23)</span></div>
+
+                            <span class="product-o__price">₹125.00
+
+                                <span class="product-o__discount">₹160.00</span></span>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 u-s-m-b-30">
+                        <div class="product-o product-o--hover-on u-h-100">
+                            <div class="product-o__wrap">
+
+                                <a class="aspect aspect--bg-grey aspect--square u-d-block" href="">
+
+                                    <img class="aspect__img object-cover" src="{% static 'images/product/image10.jpg' %}" alt=""></a>
+                                <div class="product-o__action-wrap">
+                                    <ul class="product-o__action-list">
+                                        <li>
+
+                                            <a href="{% url 'userss:category_details' %}"  data-modal="modal" data-modal-id="#quick-look" data-tooltip="tooltip" data-placement="top" title="Go to Products"><i class="fas fa-search-plus"></i></a></li>
+                                       
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <span class="product-o__category">
+
+                                <a href="">T-Shirt</a></span>
+
+                            <span class="product-o__name">
+
+                                <a href="">Olive T-Shirt</a></span>
                             <div class="product-o__rating gl-rating-style"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
 
                                 <span class="product-o__review">(23)</span></div>
@@ -456,16 +404,8 @@
                                     <ul class="product-o__action-list">
                                         <li>
 
-                                            <a data-modal="modal" data-modal-id="#quick-look" data-tooltip="tooltip" data-placement="top" title="Quick View"><i class="fas fa-search-plus"></i></a></li>
-                                        <li>
-
-                                            <a data-modal="modal" data-modal-id="#add-to-cart" data-tooltip="tooltip" data-placement="top" title="Add to Cart"><i class="fas fa-plus-circle"></i></a></li>
-                                        <li>
-
-                                            <a href="" data-tooltip="tooltip" data-placement="top" title="Add to Wishlist"><i class="fas fa-heart"></i></a></li>
-                                        <li>
-
-                                            <a href="" data-tooltip="tooltip" data-placement="top" title="Email me When the price drops"><i class="fas fa-envelope"></i></a></li>
+                                            <a href="{% url 'userss:category_details' %}" data-modal="modal" data-modal-id="#quick-look" data-tooltip="tooltip" data-placement="top" title="Go to Products"><i class="fas fa-search-plus"></i></a></li>
+                                       
                                     </ul>
                                 </div>
                             </div>
@@ -476,48 +416,7 @@
 
                             <span class="product-o__name">
 
-                                <a href="">White T-Shirt</a></span>
-                            <div class="product-o__rating gl-rating-style"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
-
-                                <span class="product-o__review">(23)</span></div>
-
-                            <span class="product-o__price">$125.00
-
-                                <span class="product-o__discount">$160.00</span></span>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 u-s-m-b-30">
-                        <div class="product-o product-o--hover-on u-h-100">
-                            <div class="product-o__wrap">
-
-                                <a class="aspect aspect--bg-grey aspect--square u-d-block" href="">
-
-                                    <img class="aspect__img object-cover" src="{% static 'images/product/image10.jpg' %}" alt=""></a>
-                                <div class="product-o__action-wrap">
-                                    <ul class="product-o__action-list">
-                                        <li>
-
-                                            <a data-modal="modal" data-modal-id="#quick-look" data-tooltip="tooltip" data-placement="top" title="Quick View"><i class="fas fa-search-plus"></i></a></li>
-                                        <li>
-
-                                            <a data-modal="modal" data-modal-id="#add-to-cart" data-tooltip="tooltip" data-placement="top" title="Add to Cart"><i class="fas fa-plus-circle"></i></a></li>
-                                        <li>
-
-                                            <a href="" data-tooltip="tooltip" data-placement="top" title="Add to Wishlist"><i class="fas fa-heart"></i></a></li>
-                                        <li>
-
-                                            <a href="" data-tooltip="tooltip" data-placement="top" title="Email me When the price drops"><i class="fas fa-envelope"></i></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-
-                            <span class="product-o__category">
-
-                                <a href="">T-Shirt</a></span>
-
-                            <span class="product-o__name">
-
-                                <a href="">White T-Shirt</a></span>
+                                <a href="">Olive T-Shirt</a></span>
                             <div class="product-o__rating gl-rating-style"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
 
                                 <span class="product-o__review">(23)</span></div>

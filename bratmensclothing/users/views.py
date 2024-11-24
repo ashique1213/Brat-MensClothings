@@ -606,4 +606,11 @@ def edit_address(request, id):
     return render(request, 'user/edit_address.html', {'address': address})
 
 
+@never_cache
+def about(req):
 
+    return render(req,'user/about_us.html')
+@never_cache
+def contact(req):
+
+    return render(req,'user/contact_us.html')
