@@ -34,8 +34,7 @@ def add_to_wishlist(request, product_id):
         return redirect('userss:category_details')
     else:
         messages.error(request, "You need to be logged in.")
-        return redirect('userss:login')
-
+        return redirect('accounts:login_user')
 
 def remove_wishlist(request,variant_id):
     product=Wishlist.objects.filter(product_id=variant_id)
