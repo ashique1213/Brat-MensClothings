@@ -84,8 +84,10 @@ def view_cart(request):
             coupon = couponuser.coupon
             if total < coupon.min_purchase_amount:
                 couponuser.delete() 
+                coupon_discount = Decimal('0.0')
                 messages.info(request, f"Coupon removed !! less than the minimum purchase amount.")
-                coupon_discount = Decimal('0.0')  
+                return redirect('cart:viewcart')
+  
                 
         if total >= (coupon.min_purchase_amount if couponuser else 0):
             discount = min(total, coupon_discount)

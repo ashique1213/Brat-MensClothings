@@ -287,14 +287,15 @@ def place_order(request):
             # Check if address or payment type is missing
             if not selected_address_id or not payment_type:
                 messages.error(request, 'Please select an address and payment method.')
-                return render(request, 'user/checkout.html', {
-                    'user': user,
-                    'addresses': addresses,
-                    'cart_items': cart_items,
-                    'tax': tax,
-                    'delivery_charge': delivery_charge,
-                    'grand_total': grand_total,
-                })
+                # return render(request, 'user/checkout.html', {
+                #     'user': user,
+                #     'addresses': addresses,
+                #     'cart_items': cart_items,
+                #     'tax': tax,
+                #     'delivery_charge': delivery_charge,
+                #     'grand_total': grand_total,
+                # })
+                return redirect('order:checkout')
 
             selected_address = Address.objects.get(id=selected_address_id)
 

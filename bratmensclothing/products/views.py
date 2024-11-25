@@ -484,5 +484,7 @@ def add_review(request, product_id):
             return redirect('userss:product_details', product_id=product_id)
 
         return redirect('userss:product_details', product_id=product_id)
+    
+    messages.error(request, "You need to Login.")
     return redirect('accounts:login_user')
 

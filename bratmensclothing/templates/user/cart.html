@@ -67,7 +67,7 @@
         
         .coupon-info__value {
             color: #49c36e;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: normal;
         }
         
@@ -164,7 +164,7 @@
                                             THE <strong>{{ coupon.code|upper }}</strong> GET <strong>
                                                 ₹{{ coupon.discount_amount|capfirst |floatformat:0 }}
                                             </strong> OFF FOR </span><br>
-                                        <span>
+                                        <span class="coupon-info__value" style="color: #000; font-size: 12px;">
                                             {% if coupon.category != 'None' %}
                                                 <strong>{{ coupon.category | upper }}</strong> 
                                             {% endif %}
