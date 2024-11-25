@@ -62,14 +62,16 @@
                             <span class="gl-text u-s-m-b-30">If you have an account with us, please log in.</span>
                             <form class="l-f-o__form" method="post" id="loginForm" action="{% url 'accounts:login_user' %}">
                                 {% csrf_token %}
-                                <!-- <div class="gl-s-api">
+
+                                <div class="gl-s-api">
                                     <div class="u-s-m-b-15">
-                                        <a href="{% provider_login_url 'google' %}" class="gl-s-api__btn gl-s-api__btn--gplus">
+                                        <a href="" class="gl-s-api__btn gl-s-api__btn--gplus">
                                             <i class="fab fa-google"></i>
                                             <span>Sign in with Google</span>
                                         </a>
                                     </div>
-                                </div> -->
+                                </div>
+
                                 <div class="u-s-m-b-30">
 
                                     <label class="gl-label" for="login-email">E-MAIL *</label>
