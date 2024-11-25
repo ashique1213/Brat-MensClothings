@@ -45,11 +45,13 @@ def signup_user(request):
             errors['username_error'] = 'Username should not contain numbers or spaces'
         if Users.objects.filter(username=username).exists():
             errors['username_error'] = 'Username already exists'
-
+ 
         if phone:  
             phone_pattern = r'^\+?[0-9]{10}$'  
             if not re.match(phone_pattern, phone):
                 errors['phone_error'] = 'Phone number must be exactly 10 digits'
+            elif Users.objects.filter(phone_number=phone).exists():
+                errors['phone_error'] = 'This phone number is already in use.'    
 
         email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         if not re.match(email_pattern, email):
