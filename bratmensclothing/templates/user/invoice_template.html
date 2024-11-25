@@ -164,45 +164,52 @@
                     </div>
                 </div>
 
-
-        <table>
-            <tr>
-                <th>Product Name</th>
-                <th>Quantity</th>
-                <th>Price</th>
-                <th>Subtotal</th>
-            </tr>
-
-            {% for item in all_order_items %}
-            <tr>
-                {% if item.status != 'Cancelled' %}
-                <td>{{ item.variants.product.product_name |capfirst }}</td>
-                <td>{{ item.quantity }}</td>
-                <td>MRP {{ item.price }}</td>
-                <td>MRP {{ item.subtotal_price }}</td>
-                {% endif %}
-            </tr>
-            {% endfor %}
-
-            <tr>
-                <td colspan="4">&nbsp;</td>
-            </tr>
-            <tr>
-                <td colspan="3" style="text-align: right; font-weight: bold;">DELIVERY CHARGE</td>
-                <td>50.00</td>
-            </tr>
-
-            <tr>
-                <td colspan="3" style="text-align: right; font-weight: bold;">TOTAL + TAX</td>
-                <td>{{ order.total_price }}</td>
-            </tr>
-
-            <tr>
-                <td colspan="3" style="text-align: right; font-weight: bold;">GRAND TOTAL</td>
-                <td>{{ order.total_price }}</td>
-            </tr>
-            
-        </table>
+                <table>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Subtotal</th>
+                    </tr>
+                
+                    {% for item in all_order_items %}
+                    <tr>
+                        {% if item.status != 'Cancelled' %}
+                        <td>{{ item.variants.product.product_name | capfirst }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>MRP {{ item.price }}</td>
+                        <td>MRP {{ item.subtotal_price }}</td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                    
+                    <tr>
+                        <td colspan="4">&nbsp;</td>
+                    </tr>
+                    
+                    {% if order.coupon_amount != 0 %}
+                    <tr>
+                        <td colspan="3" style="text-align: right; font-weight: bold;">COUPON DISCOUNT</td>
+                        <td>{{ order.coupon_amount }}</td>
+                    </tr>
+                    {% endif %}
+                    <tr>
+                        <td colspan="3" style="text-align: right; font-weight: bold;">DELIVERY CHARGE</td>
+                        <td>50.00</td>
+                    </tr>
+                
+                    <tr>
+                        <td colspan="3" style="text-align: right; font-weight: bold;">TOTAL + TAX</td>
+                        <td>{{ order.total_price }}</td>
+                    </tr>
+                
+                
+                    <tr>
+                        <td colspan="3" style="text-align: right; font-weight: bold;">GRAND TOTAL</td>
+                        <td>{{ order.total_price }}</td>
+                    </tr>
+                </table>
+                
 
 
         <div class="footer">
