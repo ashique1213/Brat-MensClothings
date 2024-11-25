@@ -138,8 +138,8 @@ AUTH_USER_MODEL = 'accounts.Users'
 
 ACCOUNT_EMAIL_VERIFICATION = 'none'  # Require email verification
 ACCOUNT_EMAIL_REQUIRED = True               # Email is required for signup
-LOGIN_REDIRECT_URL = '/'  
-LOGOUT_REDIRECT_URL = '/' 
+LOGIN_REDIRECT_URL = 'accounts:home_user'  
+LOGOUT_REDIRECT_URL = 'accounts:login_user' 
 
 
 AUTHENTICATION_BACKENDS = (
