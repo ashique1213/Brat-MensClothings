@@ -219,7 +219,11 @@
                                             <div class="description__container">
                                                 <div class="description__img-wrap">
 
-                                                    <img class="u-img-fluid" src="{{ orderitem.variants.product.image1.url }}" alt=""></div>
+                                                    <a href="{% url 'userss:product_details' orderitem.variants.product.product_id %}">
+
+                                                        <img class="u-img-fluid" src="{{ orderitem.variants.product.image1.url }}" alt="">
+                                                    </a>
+                                                </div>
                                                 <div class="description-title">{{orderitem.variants.product.product_name |title}}
                                                     <br> {{orderitem.variants.product.brand}} 
                                                     <br>Size - {{orderitem.variants.size}}
