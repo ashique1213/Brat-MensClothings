@@ -68,7 +68,7 @@
                                 {% csrf_token %}
                                 <div class="gl-s-api">
                                     <div class="u-s-m-b-15">
-                                        <a href="{% provider_login_url 'google' %}" class="gl-s-api__btn gl-s-api__btn--gplus bgg">
+                                        <a href="" class="gl-s-api__btn gl-s-api__btn--gplus bgg">
                                             <i class="fab fa-google"></i>
                                             <span>Sign in with Google</span>
                                         </a>
@@ -125,7 +125,6 @@
     
         $('#loginForm').on('submit', function(event) {
             event.preventDefault(); // Prevent the default form submission
-            $('.preloader').addClass('is-active');
     
             $.ajax({
                 type: 'POST',
