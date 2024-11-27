@@ -151,7 +151,7 @@
                                 icon: 'black-icon'
                             }
                         });
-                    } else if (xhr.status === 400 || xhr.status === 500) {
+                    } else if (xhr.status === 400) {
                         const errors = xhr.responseJSON.errors;
     
                         // Loop through errors and display them in SweetAlert
