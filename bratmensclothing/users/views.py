@@ -273,7 +273,13 @@ def product_details(request, product_id):
     )
     )
     
-    coupons = Coupon.objects.filter(is_active=False,usage_limit__gt=0)
+    # coupons = Coupon.objects.filter(is_active=False,usage_limit__gt=0)
+    coupons = Coupon.objects.filter(
+            is_active=False,                    
+            usage_limit__gt=0,                 
+            valid_from__lte=timezone.now().date(),
+            valid_to__gte=timezone.now().date()
+        )
     return render(request, 'user/productdetails.html', {
         'product': product,
         'products': products,
