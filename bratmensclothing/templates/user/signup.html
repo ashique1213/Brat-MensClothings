@@ -6,6 +6,12 @@
 
 {% load static %}
 
+<style>
+.bgg{
+    background-color: rgba(128, 128, 128, 0.532);
+}
+</style>
+
 
 <!--====== Section 1 ======-->
 <div class="">
@@ -57,14 +63,6 @@
                         <div class="l-f-o">
                             <div class="l-f-o__pad-box">
                                 <h1 class="gl-h1">PERSONAL INFORMATION</h1>
-                                    <div class="gl-s-api">
-                                        <div class="u-s-m-b-15">
-                                            <a class="gl-s-api__btn gl-s-api__btn--gplus" href="{% provider_login_url 'google' %}">
-                                                <i class="fab fa-google"></i>
-                                                <span>Sign in with Google</span>
-                                            </a>
-                                        </div>
-                                    </div>
                                 <form class="l-f-o__form" method="post" action="{% url 'accounts:signup_user' %}" id="signupForm">
                                     {% csrf_token %}
                                     <div class="gl-s-api">
@@ -74,6 +72,14 @@
                                                 <span>Signup with Google</span>
                                             </a>
                                         </div> -->
+                                        <div class="gl-s-api">
+                                            <div class="u-s-m-b-15">
+                                                <a class="gl-s-api__btn gl-s-api__btn--gplus bgg" href="">
+                                                    <i class="fab fa-google"></i>
+                                                    <span>Sign in with Google</span>
+                                                </a>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <div id="responseMessage"></div>
