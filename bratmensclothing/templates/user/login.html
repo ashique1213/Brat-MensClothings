@@ -125,6 +125,7 @@
     
         $('#loginForm').on('submit', function(event) {
             event.preventDefault(); // Prevent the default form submission
+            $('.preloader').addClass('is-active');
     
             $.ajax({
                 type: 'POST',
