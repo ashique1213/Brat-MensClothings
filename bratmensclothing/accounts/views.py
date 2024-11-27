@@ -43,7 +43,9 @@ def signup_user(request):
             errors['username_error'] = 'Username must be between 3 and 20 characters long'
         if any(char.isdigit() or char.isspace() for char in username):
             errors['username_error'] = 'Username should not contain numbers or spaces'
-        if Users.objects.filter(username=username).exists():
+        # if Users.objects.filter(username=username).exists():
+        #     errors['username_error'] = 'Username already exists'
+        if Users.objects.filter(username__icontains=username).exists():
             errors['username_error'] = 'Username already exists'
  
         if phone:  
