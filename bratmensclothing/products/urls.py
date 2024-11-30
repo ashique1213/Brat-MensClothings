@@ -47,8 +47,9 @@ urlpatterns = [
     path('variant/restore/<int:variant_id>/', views.restore_variant, name='restore_variant'),
 
     path('single_product/<int:product_id>/', views.single_product, name='single_product'),
-    path('add_review/<int:product_id>/', views.add_review, name='add_review'),
     
+    path('add_review/<int:product_id>/', views.add_review, name='add_review'),
+    path('delete_review/<int:id>/', views.delete_review, name='delete_review'),
 
 
     

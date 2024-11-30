@@ -532,6 +532,9 @@
                                                                                 <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                                                                             {% endif %}
                                                                             <span>({{ review.rating }})</span>
+                                                                            <a style="color: #000;" href="{% url 'products:delete_review' review.id %}">
+                                                                                <i class="fa fa-trash bg-dark" style="float:right;" ></i> 
+                                                                            </a>
                                                                         </div>
                                                                         <p class="review-o__text" style="text-align: justify;">{{ review.review }}</p>
                                                                     </div>

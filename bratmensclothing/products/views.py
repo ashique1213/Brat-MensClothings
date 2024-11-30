@@ -1,5 +1,6 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from .models import Brand,Category,ProductDetails,VariantSize,Review
+from accounts.models import Users
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.views.decorators.cache import never_cache
@@ -488,3 +489,14 @@ def add_review(request, product_id):
     messages.error(request, "You need to Login.")
     return redirect('accounts:login_user')
 
+
+def delete_review(request,id):
+    review=get_object_or_404(Review,id=id)
+    product=get_object_or_404(ProductDetails,product_id=review.product.product_id)
+    if review.user != request.user:
+        messages.info(request, "You are not allowed to delete this review.")
+        return redirect('userss:product_details',product.product_id)
+    review.delete()
+        
+    messages.success(request, "Review deleted successfully.")
+    return redirect('userss:product_details',product.product_id)
