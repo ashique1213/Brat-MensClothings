@@ -1,4 +1,4 @@
 .env
 *.pyc
 __pycache__
-ecommerce_env
+ecommerce_env/
