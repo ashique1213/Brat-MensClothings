@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import dj_database_url
 from pathlib import Path
 import os
 from dotenv import load_dotenv
@@ -115,6 +115,12 @@ DATABASES = {
     }
 }
 
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+DATABASES = {
+    "default": dj_database_url.parse('postgresql://bratmensclothings_user:B9jtwvgLM8DAzmz0XcUBt4hLNqly8YLV@dpg-cuqvtrd2ng1s73fc0m9g-a.oregon-postgres.render.com/bratmensclothings', conn_max_age=600, ssl_require=True)
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
