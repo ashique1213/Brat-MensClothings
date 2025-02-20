@@ -116,11 +116,13 @@ DATABASES = {
 }
 
 
+
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 DATABASES = {
-    "default": dj_database_url.parse('postgresql://bratmensclothings_user:B9jtwvgLM8DAzmz0XcUBt4hLNqly8YLV@dpg-cuqvtrd2ng1s73fc0m9g-a.oregon-postgres.render.com/bratmensclothings', conn_max_age=600, ssl_require=True)
+    "default": dj_database_url.config(default=DATABASE_URL, conn_max_age=600, ssl_require=True)
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
