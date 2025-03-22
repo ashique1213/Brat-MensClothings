@@ -33,7 +33,7 @@ class Order(models.Model):
     total_offer_discount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    razorpay_order_id=models.CharField(default='0',null=True, blank=True)
+    razorpay_order_id=models.CharField(max_length=255,default='0',null=True, blank=True)
 
 
     def __str__(self):

@@ -106,14 +106,7 @@ WSGI_APPLICATION = 'bratmensclothing.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 
-POSTGRES_LOCALLY = False  # Set this to True if running locally
-
-if os.getenv('ENVIRONMENT') == 'production' or POSTGRES_LOCALLY:
-    DATABASES = {
-        'default': dj_database_url.parse(os.getenv('DATABASE_URL'), conn_max_age=600)
-    }
-else:
-    DATABASES = {
+DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': os.getenv('DATABASE_NAME'),
@@ -123,8 +116,6 @@ else:
             'PORT': os.getenv('DATABASE_PORT'),
         }
     }
-
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
