@@ -150,7 +150,3 @@ The `.env` file stores sensitive configurations:
 This project is licensed under the MIT License. See the `LICENSE` file for details (if available in the repository).
 
 ---
-
-For issues or questions, open an issue on [GitHub](https://github.com/ashique1213/Brat-MensClothings) or contact the maintainer.
-
-*Generated on August 20, 2025, at 12:34 PM IST.*
