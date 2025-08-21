@@ -54,15 +54,15 @@ def signup_user(request):
 
         errors = {}
 
+        # Username validation: only alphabets, 4-20 characters
         if len(username) < 4 or len(username) > 20:
-            errors['username_error'] = 'Username must be between 3 and 20 characters long'
-        if any(char.isdigit() or char.isspace() for char in username):
-            errors['username_error'] = 'Username should not contain numbers or spaces'
-        # if Users.objects.filter(username=username).exists():
-        #     errors['username_error'] = 'Username already exists'
-        if Users.objects.filter(username__icontains=username).exists():
+            errors['username_error'] = 'Username must be between 4 and 20 characters long'
+        if not username.isalpha():
+            errors['username_error'] = 'Username must contain only alphabetic characters (a-z or A-Z)'
+        if Users.objects.filter(username__iexact=username).exists():
             errors['username_error'] = 'Username already exists'
- 
+
+        # Phone validation
         if phone:  
             phone_pattern = r'^\+?[0-9]{10}$'  
             if not re.match(phone_pattern, phone):
@@ -105,10 +105,17 @@ def signup_user(request):
 
             try:
                 send_mail(
-                    'Your OTP Code',
-                    f'Your OTP code is {otp}',
-                    settings.EMAIL_HOST_USER,
-                    [email],
+                    subject='Your OTP Code for Account Verification',
+                    message=(
+                        f"Dear {username},\n\n"
+                        f"Thank you for signing up with us! To complete your registration, please use the following One-Time Password:\n\n"
+                        f"OTP: {otp}\n\n"
+                        f"This OTP is valid for 60 seconds. Please enter it on the verification page to confirm your account."
+                        f"Best regards,\n"
+                        f"Brat Mens Clothings"
+                    ),
+                    from_email=settings.EMAIL_HOST_USER,
+                    recipient_list=[email],
                     fail_silently=False,
                 )
                 return JsonResponse({'status': 'success', 'redirect_url': reverse('accounts:otp_verify')})
