@@ -1,121 +1,115 @@
 {% extends "user/base.html" %}
 
-
 {% block content %}        
-         
 
 <style>
-    .filter_button{
+    .filter_button {
         color: white;
         background-color: black;
         padding: 10px 100px;
         font-weight: bold;
-        margin-top:10px ;
+        margin-top: 10px;
     }
-
+    .clear_button {
+        color: white;
+        background-color: #ff4d4d;
+        padding: 10px 100px;
+        font-weight: bold;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+    .price-range-slider {
+        margin: 15px 0;
+    }
+    .price-range-values {
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+        color: #333;
+    }
 </style>
-         <!--====== Section 1 ======-->
-         <div class="u-s-p-b-40">
 
-            <!--====== Section Content ======-->
-            <div class="section__content">
-                <div class="container">
-                    <div class="breadcrumb">
-                        <div class="breadcrumb__wrap">
-                            <ul class="breadcrumb__list">
-                                <li class="has-separator">
-                                    <a href="{% url 'accounts:home_user' %}">Home</a></li>
-                                <li class="is-marked">
-
-                                    <a href="{% url 'userss:category_details' %}">Category</a></li>
-                            </ul>
-                        </div>
-                    </div>
+<!--====== Section 1 ======-->
+<div class="u-s-p-b-40">
+    <div class="section__content">
+        <div class="container">
+            <div class="breadcrumb">
+                <div class="breadcrumb__wrap">
+                    <ul class="breadcrumb__list">
+                        <li class="has-separator">
+                            <a href="{% url 'accounts:home_user' %}">Home</a></li>
+                        <li class="is-marked">
+                            <a href="{% url 'userss:category_details' %}">Category</a></li>
+                    </ul>
                 </div>
             </div>
         </div>
-        <!--====== End - Section 1 ======-->
-   
+    </div>
+</div>
+<!--====== End - Section 1 ======-->
 
-
-
-<!--====== Section 1 ======-->
-<!-- <div class="u-s-p-y-90 "> -->
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-3 col-md-12">
-                <div class="shop-w-master">
-                    <h1 class="shop-w-master__heading u-s-m-b-30"><i class="fas fa-filter u-s-m-r-8"></i>
-                    <span>FILTERS</span></h1>
+<div class="container">
+    <div class="row">
+        <div class="col-lg-3 col-md-12">
+            <div class="shop-w-master">
+                <h1 class="shop-w-master__heading u-s-m-b-30"><i class="fas fa-filter u-s-m-r-8"></i>
+                <span>FILTERS</span></h1>
                 <form method="get" id="category-filter-form">
                     <div class="shop-w-master__sidebar sidebar--bg-snow">
-
                         <div class="u-s-m-b-30">
                             <div class="shop-w">
                                 <div class="shop-w__intro-wrap">
                                     <h1 class="shop-w__h">CATEGORY</h1>
-
                                     <span class="fas fa-minus collapsed shop-w__toggle" data-target="#s-shipping" data-toggle="collapse"></span>
                                 </div>
-
-                        
-                        <div class="shop-w__wrap collapse" id="s-shipping">
-                            <ul class="shop-w__list gl-scroll">
-                                {% for category in categories %}
-                                <li>
-                                    <div class="check-box">
-                                        <input type="checkbox" class="filter-checkbox" name="category" value="{{ category.category_id }}">
-                                        <div class="check-box__state check-box__state--primary">
-                                            <label class="check-box__label">{{ category.category|capfirst }}</label>
-                                        </div>
-                                    </div>
+                                <div class="shop-w__wrap collapse" id="s-shipping">
+                                    <ul class="shop-w__list gl-scroll">
+                                        {% for category in categories %}
+                                        <li>
+                                            <div class="check-box">
+                                                <input type="checkbox" class="filter-checkbox" name="category" value="{{ category.category_id }}" {% if category.category_id in selected_categories %}checked{% endif %}>
+                                                <div class="check-box__state check-box__state--primary">
+                                                    <label class="check-box__label">{{ category.category|capfirst }}</label>
+                                                </div>
+                                            </div>
                                         </li>
                                         {% endfor %}
                                     </ul>
                                 </div>
-                                
                             </div>
                         </div>
-                        
-                        
                         <div class="u-s-m-b-30">
                             <div class="shop-w">
                                 <div class="shop-w__intro-wrap">
                                     <h1 class="shop-w__h">BRANDS</h1>
-
                                     <span class="fas fa-minus collapsed shop-w__toggle" data-target="#s-manufacturer" data-toggle="collapse"></span>
                                 </div>
-                                
                                 <div class="shop-w__wrap collapse" id="s-manufacturer">
                                     <ul class="shop-w__list-2">
                                         {% for brand in Brands %}
                                         <li>
                                             <div class="list__content">
-                                                <input type="checkbox" class="filter-checkbox" name="brand" value="{{ brand.brand_id }}">
+                                                <input type="checkbox" class="filter-checkbox" name="brand" value="{{ brand.brand_id }}" {% if brand.brand_id in selected_brands %}checked{% endif %}>
                                                 <span>{{ brand.brandname|title }}</span>
                                             </div>
                                         </li>
                                         {% endfor %}
                                     </ul>
                                 </div>
-                                
-                                
                             </div>
                         </div>
                         <div class="u-s-m-b-30">
                             <div class="shop-w">
                                 <div class="shop-w__intro-wrap">
                                     <h1 class="shop-w__h">COLOR</h1>
-                                    
                                     <span class="fas fa-minus collapsed shop-w__toggle" data-target="#s-color" data-toggle="collapse"></span>
                                 </div>
-                                
                                 <div class="shop-w__wrap collapse" id="s-color">
                                     <ul class="shop-w__list gl-scroll">
                                         {% for color in colors %}
                                         <li>
                                             <div class="color__check">
-                                                <input type="checkbox" class="filter-checkbox" name="color" value="{{ color }}">
+                                                <input type="checkbox" class="filter-checkbox" name="color" value="{{ color }}" {% if color in selected_colors %}checked{% endif %}>
                                                 <label class="color__check-label" style="background-color: {{ color|safe }}"></label>
                                             </div>
                                             <span class="shop-w__total-text">{{ color }}</span>
@@ -123,23 +117,20 @@
                                         {% endfor %}
                                     </ul>
                                 </div>
-                                
                             </div>
                         </div>
                         <div class="u-s-m-b-30">
                             <div class="shop-w">
                                 <div class="shop-w__intro-wrap">
                                     <h1 class="shop-w__h">SIZE</h1>
-                                    
                                     <span class="fas fa-minus collapsed shop-w__toggle" data-target="#s-size" data-toggle="collapse"></span>
                                 </div>
-                                
                                 <div class="shop-w__wrap collapse" id="s-size">
                                     <ul class="shop-w__list gl-scroll">
                                         {% for variant in Variants %}
                                         <li>
                                             <div class="check-box">
-                                                <input type="checkbox" class="filter-checkbox" name="size" value="{{ variant.size }}">
+                                                <input type="checkbox" class="filter-checkbox" name="size" value="{{ variant.size }}" {% if variant.size in selected_sizes %}checked{% endif %}>
                                                 <div class="check-box__state check-box__state--primary">
                                                     <label class="check-box__label">{{ variant.size }}</label>
                                                 </div>
@@ -148,130 +139,118 @@
                                         {% endfor %}
                                     </ul>
                                 </div>
-                                
-                                
-                                
-                                <button type="submit" class="filter_button" >APPLY</button>
-                                
-                                
-                                
                             </div>
                         </div>
+                        <div class="u-s-m-b-30">
+                            <div class="shop-w">
+                                <div class="shop-w__intro-wrap">
+                                    <h1 class="shop-w__h">PRICE</h1>
+                                    <span class="fas fa-minus collapsed shop-w__toggle" data-target="#s-price" data-toggle="collapse"></span>
+                                </div>
+                                <div class="shop-w__wrap collapse" id="s-price">
+                                    <div class="price-range-slider">
+                                        <input type="range" name="min_price" id="min-price" min="0" max="10000" value="{{ min_price|default:0 }}" step="100">
+                                        <input type="range" name="max_price" id="max-price" min="0" max="10000" value="{{ max_price|default:10000 }}" step="100">
+                                        <div class="price-range-values">
+                                            <span>Min: ₹<span id="min-price-value">{{ min_price|default:0 }}</span></span>
+                                            <span>Max: ₹<span id="max-price-value">{{ max_price|default:10000 }}</span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="filter_button">APPLY</button>
+                        <button type="button" class="clear_button" onclick="clearFilters()">CLEAR</button>
                     </div>
                 </form>
-                </div>
             </div>
-            <div class="col-lg-9 col-md-12">
-                <div class="shop-p">
-                    <div class="shop-p__toolbar u-s-m-b-30">
-                        <div class="shop-p__tool-style">
-                            <form>
-                                <div class="tool-style__form-wrap">
-                                  
-
-                                    <div class="u-s-m-b-8">
-                                        <form method="GET" action="{% url 'userss:category_details' %}"> 
-                                            <input type="hidden" name="search" value="{{ query }}">
-                                            <select name="sort" class="select-box select-box--transparent-b-2" onchange="this.form.submit()">
-                                                <option value="newly_added" {% if sort == 'newly_added' %}selected{% endif %}>Sort By: Newly Added</option>
-                                                <option value="atoz" {% if sort == 'atoz' %}selected{% endif %}>Sort By: A to Z</option>
-                                                <option value="ztoa" {% if sort == 'ztoa' %}selected{% endif %}>Sort By: Z to A</option>
-                                                <option value="lowest_price" {% if sort == 'lowest_price' %}selected{% endif %}>Sort By: Lowest Price</option>
-                                                <option value="highest_price" {% if sort == 'highest_price' %}selected{% endif %}>Sort By: Highest Price</option>
-                                            </select>
-                                        </form>
-                                    </div>
-                                    
+        </div>
+        <div class="col-lg-9 col-md-12">
+            <div class="shop-p">
+                <div class="shop-p__toolbar u-s-m-b-30">
+                    <div class="shop-p__tool-style">
+                        <form>
+                            <div class="tool-style__form-wrap">
+                                <div class="u-s-m-b-8">
+                                    <form method="GET" action="{% url 'userss:category_details' %}"> 
+                                        <input type="hidden" name="search" value="{{ query }}">
+                                        <select name="sort" class="select-box select-box--transparent-b-2" onchange="this.form.submit()">
+                                            <option value="newly_added" {% if sort == 'newly_added' %}selected{% endif %}>Sort By: Newly Added</option>
+                                            <option value="atoz" {% if sort == 'atoz' %}selected{% endif %}>Sort By: A to Z</option>
+                                            <option value="ztoa" {% if sort == 'ztoa' %}selected{% endif %}>Sort By: Z to A</option>
+                                            <option value="lowest_price" {% if sort == 'lowest_price' %}selected{% endif %}>Sort By: Lowest Price</option>
+                                            <option value="highest_price" {% if sort == 'highest_price' %}selected{% endif %}>Sort By: Highest Price</option>
+                                        </select>
+                                    </form>
                                 </div>
-                            </form>
-                        </div>
+                            </div>
+                        </form>
                     </div>
-
-
-                    <div class="shop-p__collection">
-                        <div class="row is-grid-active">
-                            {% for product in products %}
-                            <div class="col-lg-4 col-md-6 col-sm-6">
-                                <div class="product-m" >
-                                    <div class="product-m__thumb">
-                                        
-                                        <a class="aspect aspect--bg-grey aspect--square u-d-block" href="{% url 'userss:product_details' product.product_id %}">
-                                            <img class="aspect__img" src="{{ product.image1.url }}" alt="" >
-                                        </a>
-                                        <div class="product-m__quick-look">
-                                            
-                                            <!-- <a class="fas fa-search" data-modal="modal" data-modal-id="#quick-look" data-tooltip="tooltip" data-placement="top" title="Quick Look"></a> -->
-                                        </div>
-                                            <div class="product-m__add-cart">
-                                                
-                                                <a class="btn--e-brand" data-modal="modal" data-modal-id="" href="{% url 'wishlist:add_to_wishlist' product.product_id %}">Add to Wishlist</a>
-                                            </div>
+                </div>
+                <div class="shop-p__collection">
+                    <div class="row is-grid-active">
+                        {% for product in products %}
+                        <div class="col-lg-4 col-md-6 col-sm-6">
+                            <div class="product-m">
+                                <div class="product-m__thumb">
+                                    <a class="aspect aspect--bg-grey aspect--square u-d-block" href="{% url 'userss:product_details' product.product_id %}">
+                                        <img class="aspect__img" src="{{ product.image1.url }}" alt="">
+                                    </a>
+                                    <div class="product-m__quick-look">
                                     </div>
-                                    
-                                    <div class="product-m__content">
-                                        <div class="product-m__category">
-                                            
-                                            <a href="{% url 'userss:product_details' product.product_id %}">{{ product.brand.brandname |title}}</a>
+                                    <div class="product-m__add-cart">
+                                        <a class="btn--e-brand" data-modal="modal" data-modal-id="" href="{% url 'wishlist:add_to_wishlist' product.product_id %}">Add to Wishlist</a>
+                                    </div>
+                                </div>
+                                <div class="product-m__content">
+                                    <div class="product-m__category">
+                                        <a href="{% url 'userss:product_details' product.product_id %}">{{ product.brand.brandname|title }}</a>
+                                    </div>
+                                    <div class="product-m__name">
+                                        <a href="{% url 'userss:product_details' product.product_id %}">{{ product.product_name|title }}</a>
+                                    </div>
+                                    <div class="product">
+                                        <div class="product-m__price">
+                                            {% if product.discount_percentage > 0 %}
+                                                <span class="product-m__price--discounted">₹{{ product.final_price }}</span>
+                                                <span class="pd-detail__discount">{{ product.discount_percentage|floatformat:0 }}% Off</span>
+                                                <del class="pd-detail__del">₹{{ product.price }}</del>
+                                            {% else %}
+                                                ₹{{ product.price }}
+                                                <del class="pd-detail__del">NO OFFERS</del>
+                                            {% endif %}
                                         </div>
-                                        <div class="product-m__name">
-                                            
-                                            <a href="{% url 'userss:product_details' product.product_id %}">{{ product.product_name |title}}</a></div>
-                                            
-                                            
-                                            <div class="product">
-                                                
-                                                <div class="product-m__price">
-                                                    {% if product.discount_percentage > 0 %}
-                                                        <!-- Display discounted price if there's a discount -->
-                                                        <span class="product-m__price--discounted">₹{{ product.final_price }}</span>
-                                                        <span class="pd-detail__discount">{{ product.discount_percentage|floatformat:0 }}% Off</span>
-                                                        <del class="pd-detail__del">₹{{ product.price }}</del>
-                                                        {% else %}
-                                                        <!-- Display original price if no discount is available -->
-                                                        ₹{{ product.price }}
-                                                        <del class="pd-detail__del">NO OFFERS</del>
-                                                    {% endif %}
-                                                </div>
-
-                                            </div>
-                                            <div style=>
-                                                
-                                            </div>
-                                            <div class="product-m__rating gl-rating-style">
-                                                    
-                                                {% if product.average_rating == 1.0 %}
-                                                    <i class="fas fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
-                                                {% elif product.average_rating == 1.5 %}
-                                                    <i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
-                                                {% elif product.average_rating == 2.0 %}
-                                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
-                                                {% elif product.average_rating == 2.5 %}
-                                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i><i class="far fa-star"></i><i class="far fa-star"></i>
-                                                {% elif product.average_rating == 3.0 %}
-                                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
-                                                {% elif product.average_rating == 3.5 %}
-                                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i><i class="far fa-star"></i>
-                                                {% elif product.average_rating == 4.0 %}
-                                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i>
-                                                {% elif product.average_rating == 4.5 %}
-                                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
-                                                {% elif product.average_rating == 5.0 %}
-                                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                                                {% else%}
-                                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                                                {% endif %}
-        
-                                                <span style="background-color: rgba(210, 220, 210, 0.804); color: black; padding: 0px 10px; width: 85px; font-weight: bold; border-radius: 50px; font-size: 11px; ">{{ product.total_quantity }} in stock</span>
-                                            </div>
-                                    
+                                    </div>
+                                    <div class="product-m__rating gl-rating-style">
+                                        {% if product.average_rating == 1.0 %}
+                                            <i class="fas fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+                                        {% elif product.average_rating == 1.5 %}
+                                            <i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+                                        {% elif product.average_rating == 2.0 %}
+                                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+                                        {% elif product.average_rating == 2.5 %}
+                                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+                                        {% elif product.average_rating == 3.0 %}
+                                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+                                        {% elif product.average_rating == 3.5 %}
+                                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i><i class="far fa-star"></i>
+                                        {% elif product.average_rating == 4.0 %}
+                                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i>
+                                        {% elif product.average_rating == 4.5 %}
+                                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                                        {% elif product.average_rating == 5.0 %}
+                                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                        {% else %}
+                                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                        {% endif %}
+                                        <span style="background-color: rgba(210, 220, 210, 0.804); color: black; padding: 0px 10px; width: 85px; font-weight: bold; border-radius: 50px; font-size: 11px;">{{ product.total_quantity }} in stock</span>
+                                    </div>
                                     <div class="product-m__hover">
                                         <div class="product-m__preview-description">
-                                            
-                                            <span>{{ product.description | capfirst}}</span></div>
-                                            <div class="product-m__wishlist">
-                                                
-                                                <a class="far fa-heart" href="{% url 'wishlist:add_to_wishlist' product.product_id %}" data-tooltip="tooltip" data-placement="top" title="Add to Wishlist"></a>
-                                            </div>
+                                            <span>{{ product.description|capfirst }}</span>
+                                        </div>
+                                        <div class="product-m__wishlist">
+                                            <a class="far fa-heart" href="{% url 'wishlist:add_to_wishlist' product.product_id %}" data-tooltip="tooltip" data-placement="top" title="Add to Wishlist"></a>
                                         </div>
                                     </div>
                                 </div>
@@ -279,41 +258,134 @@
                             </div>
                             {% endfor %}
                         </div>
+                        {% endfor %}
                     </div>
-
-                    <div class="u-s-p-y-60 shop-p__pagination">
-                        <!--====== Pagination ======-->
-                            <span class="step-links u-s-p-b-30" style="font-size: 12px; font-weight: bold;">
-                                {% if products.has_previous %}
-                                    <a href="?page=1">FIRST --</a>
-                                    <a href="?page={{ products.previous_page_number }}">PREVIOUS-</a>
-                                {% endif %}
-                        
-                                <span class="current">
-                                    Page {{ products.number }} of {{ products.paginator.num_pages }}
-                                </span>
-                        
-                                {% if products.has_next %}
-                                    <a href="?page={{ products.next_page_number }}">NEXT -- </a>
-                                    <a href="?page={{ products.paginator.num_pages }}">LAST</a>
-                                {% endif %}
-                            </span>
-                        
-                        <!--====== End - Pagination ======-->
-                    </div>
+                </div>
+                <div class="u-s-p-y-60 shop-p__pagination">
+                    <span class="step-links u-s-p-b-30" style="font-size: 12px; font-weight: bold;">
+                        {% if products.has_previous %}
+                            <a href="?page=1">FIRST --</a>
+                            <a href="?page={{ products.previous_page_number }}">PREVIOUS-</a>
+                        {% endif %}
+                        <span class="current">
+                            Page {{ products.number }} of {{ products.paginator.num_pages }}
+                        </span>
+                        {% if products.has_next %}
+                            <a href="?page={{ products.next_page_number }}">NEXT -- </a>
+                            <a href="?page={{ products.paginator.num_pages }}">LAST</a>
+                        {% endif %}
+                    </span>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<!--====== End - Section 1 ======-->
-<!-- <SCript>
-    document.querySelectorAll('.filter-checkbox').forEach((checkbox) => {
-        checkbox.addEventListener('change', function() {
-            document.getElementById('category-filter-form').submit();
-        });
-    });
-</SCript> -->
 
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const filterForm = document.getElementById('category-filter-form');
+    const minPriceInput = document.getElementById('min-price');
+    const maxPriceInput = document.getElementById('max-price');
+    const minPriceValue = document.getElementById('min-price-value');
+    const maxPriceValue = document.getElementById('max-price-value');
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Update price range display
+    if (minPriceInput && maxPriceInput) {
+        minPriceInput.addEventListener('input', function () {
+            minPriceValue.textContent = minPriceInput.value;
+            if (parseInt(minPriceInput.value) > parseInt(maxPriceInput.value)) {
+                maxPriceInput.value = minPriceInput.value;
+                maxPriceValue.textContent = minPriceInput.value;
+            }
+        });
+        maxPriceInput.addEventListener('input', function () {
+            maxPriceValue.textContent = maxPriceInput.value;
+            if (parseInt(maxPriceInput.value) < parseInt(minPriceInput.value)) {
+                minPriceInput.value = maxPriceInput.value;
+                minPriceValue.textContent = maxPriceInput.value;
+            }
+        });
+    }
+
+    // Handle filter form submission with AJAX
+    if (filterForm) {
+        filterForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(filterForm);
+            const queryParams = new URLSearchParams(formData).toString();
+
+            fetch(`{% url 'userss:category_details' %}?${queryParams}`, {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newContent = doc.querySelector('.shop-p__collection').innerHTML;
+                const newPagination = doc.querySelector('.shop-p__pagination').innerHTML;
+                document.querySelector('.shop-p__collection').innerHTML = newContent;
+                document.querySelector('.shop-p__pagination').innerHTML = newPagination;
+                showToastMessage('Filters applied successfully.', 'success');
+            })
+            .catch(error => {
+                showToastMessage('Error applying filters. Please try again.', 'error');
+                console.error('Error:', error);
+            });
+        });
+    }
+
+    // Handle clear filters
+    window.clearFilters = function () {
+        const checkboxes = filterForm.querySelectorAll('.filter-checkbox');
+        checkboxes.forEach(checkbox => checkbox.checked = false);
+        minPriceInput.value = 0;
+        maxPriceInput.value = 10000;
+        minPriceValue.textContent = 0;
+        maxPriceValue.textContent = 10000;
+        const formData = new FormData();
+        formData.append('search', '{{ query }}');
+        const queryParams = new URLSearchParams(formData).toString();
+
+        fetch(`{% url 'userss:category_details' %}?${queryParams}`, {
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newContent = doc.querySelector('.shop-p__collection').innerHTML;
+            const newPagination = doc.querySelector('.shop-p__pagination').innerHTML;
+            document.querySelector('.shop-p__collection').innerHTML = newContent;
+            document.querySelector('.shop-p__pagination').innerHTML = newPagination;
+            showToastMessage('Filters cleared successfully.', 'success');
+        })
+        .catch(error => {
+            showToastMessage('Error clearing filters. Please try again.', 'error');
+            console.error('Error:', error);
+        });
+    };
+});
+</script>
 
 {% endblock %}

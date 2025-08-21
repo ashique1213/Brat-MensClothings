@@ -74,27 +74,26 @@ def unblock_user(request,userid):
 
 @never_cache
 def category_details(request):
-    sort_option=request.GET.get('sort','')
+    sort_option = request.GET.get('sort', '')
     query = request.GET.get('search', '')
-
-
-
     selected_categories = request.GET.getlist('category')
     selected_brands = request.GET.getlist('brand')
     selected_colors = request.GET.getlist('color')
     selected_sizes = request.GET.getlist('size')
+    min_price = request.GET.get('min_price', 0)
+    max_price = request.GET.get('max_price', 10000)
 
-    products=(
+    products = (
         ProductDetails.objects.select_related('brand')
-        .prefetch_related('category','variants','Rating')
+        .prefetch_related('category', 'variants', 'Rating')
         .filter(
             Q(is_deleted=False),
             Q(brand__is_deleted=False),
             Q(category__is_deleted=False)
         )
         .annotate(
-        total_quantity=Sum('variants__qty'),
-        average_rating=Cast(Avg('Rating__rating'), IntegerField())
+            total_quantity=Sum('variants__qty'),
+            average_rating=Cast(Avg('Rating__rating'), IntegerField())
         )
     )
 
@@ -112,20 +111,29 @@ def category_details(request):
     # Filter by sizes
     if selected_sizes:
         products = products.filter(variants__size__in=selected_sizes)
-   
+    
+    if min_price and max_price:
+        try:
+            min_price = float(min_price)
+            max_price = float(max_price)
+            products = products.filter(price__gte=min_price, price__lte=max_price)
+        except ValueError:
+            pass  # Ignore invalid price values
+
     if query:
         query_terms = query.split()
         q_filter = Q()
-        
+
         for term in query_terms:
-            q_filter |= (Q(product_name__icontains=term) |
-                         Q(description__icontains=term) |
-                         Q(color__icontains=term) |
-                         Q(occasion__icontains=term) |
-                         Q(fit__icontains=term)|
-                         Q(brand__brandname__icontains=term)|
-                         Q(category__category__icontains=term))
-                         
+            q_filter |= (
+                Q(product_name__icontains=term) |
+                Q(description__icontains=term) |
+                Q(color__icontains=term) |
+                Q(occasion__icontains=term) |
+                Q(fit__icontains=term) |
+                Q(brand__brandname__icontains=term) |
+                Q(category__category__icontains=term)
+            )
         products = products.filter(q_filter)
 
     if sort_option == 'newly_added':
@@ -178,10 +186,8 @@ def category_details(request):
         product.final_price = final_price
         product.discount_percentage = discount_percentage
 
-
-        
-    categories=Category.objects.all()
-    Brands=Brand.objects.all()
+    categories = Category.objects.all()
+    Brands = Brand.objects.all()
     Variants = VariantSize.objects.values('size').distinct().order_by('size')
     colors = ProductDetails.objects.values_list('color', flat=True).distinct()
 
@@ -195,20 +201,21 @@ def category_details(request):
     except EmptyPage:
         paginated_products = paginator.page(paginator.num_pages)
 
-    return render(request,'user/categorylist.html',
-                  {
-                      'products':paginated_products,
-                      'categories':categories,
-                      'Brands':Brands,
-                      'Variants':Variants,
-                      'sort':sort_option,
-                      'query':query,
-                      'colors':colors,
-                      'selected_categories': selected_categories,
-                      'selected_brands': selected_brands,
-                      'selected_colors': selected_colors,
-                      'selected_sizes': selected_sizes,
-                })
+    return render(request, 'user/categorylist.html', {
+        'products': paginated_products,
+        'categories': categories,
+        'Brands': Brands,
+        'Variants': Variants,
+        'sort': sort_option,
+        'query': query,
+        'colors': colors,
+        'selected_categories': selected_categories,
+        'selected_brands': selected_brands,
+        'selected_colors': selected_colors,
+        'selected_sizes': selected_sizes,
+        'min_price': min_price,
+        'max_price': max_price,
+    })
 
 
 @cache_control(private=True, no_cache=True)
