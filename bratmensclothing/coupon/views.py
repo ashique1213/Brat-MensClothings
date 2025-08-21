@@ -230,7 +230,7 @@ def apply_coupon(request):
                 coupon = Coupon.objects.get(code__iexact=code)
 
                 if CouponUser.objects.filter(user=user, coupon=coupon, status=False).exists():
-                    messages.error(request, "You have already applied this coupon.")
+                    return JsonResponse({'success': False, 'message': 'You have already applied this coupon.'})
                 else:
                     coupon_category = coupon.category
 
@@ -242,26 +242,22 @@ def apply_coupon(request):
                             for cart_item in cart_items
                         )
                         if not all_same_category:
-                            messages.error(request, "Coupon is not available for all products in the cart.")
-                            return redirect('cart:viewcart')
+                            return JsonResponse({'success': False, 'message': 'Coupon is not available for all products in the cart.'})
 
                     total = sum(item.item_total for item in cart_items)
 
-                    
                     if total >= coupon.min_purchase_amount:
                         # Create the CouponUser 
                         CouponUser.objects.create(user=user, coupon=coupon, status=True)
                         discount = min(total, coupon.discount_amount)
-                        messages.success(request, f"Coupon applied! You saved {discount}.")
+                        return JsonResponse({'success': True, 'message': f'Coupon applied! You saved {discount}.'})
                     else:
-                        messages.info(request, f"The minimum purchase amount for this coupon is {coupon.min_purchase_amount}.")
-                        return redirect('cart:viewcart')
-                    
+                        return JsonResponse({'success': False, 'message': f'The minimum purchase amount for this coupon is {coupon.min_purchase_amount}.'})
+
             except Coupon.DoesNotExist:
-                messages.error(request, "Invalid coupon code. Please try again.")
+                return JsonResponse({'success': False, 'message': 'Invalid coupon code. Please try again.'})
 
-        return redirect('cart:viewcart')
-
+        return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
 @never_cache
 def remove_coupon(request, id):
@@ -270,9 +266,9 @@ def remove_coupon(request, id):
 
         try:
             couponuser = CouponUser.objects.get(id=id, user=user)
-            couponuser.delete()  
-            messages.success(request, "Coupon removed successfully.")
-            return redirect('cart:viewcart')
+            couponuser.delete()
+            return JsonResponse({'success': True, 'message': 'Coupon removed successfully.'})
         except CouponUser.DoesNotExist:
-            messages.error(request, "Coupon not found")
-    return redirect('cart:viewcart')
+            return JsonResponse({'success': False, 'message': 'Coupon not found.'})
+
+    return JsonResponse({'success': False, 'message': 'User not authenticated.'})

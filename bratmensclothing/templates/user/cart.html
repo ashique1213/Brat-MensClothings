@@ -2,7 +2,6 @@
 
 {% block content %}
 
-
 <style>
     .table-p__img-wrap {
         position: relative; /* Ensure child elements can be positioned relative to this */
@@ -24,9 +23,6 @@
         text-align: center; /* Center text */
     }
      
-    
-
-    
     .form-inline {
         display: flex;
         gap: 10px;
@@ -42,82 +38,71 @@
         margin: 5px 0;
     }
     
-        
-        .coupon-header {
-            font-size: 16px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 10px;
-        }
-        
-        .coupon-details {
-            font-size: 13px;
-            color: #000;
-        }
-        
-       
-        .coupon-info {
-            margin-bottom: 8px;
-        }
-        
-        .coupon-info__title {
-            font-weight: bold;
-            color: #333;
-        }
-        
-        .coupon-info__value {
-            color: #49c36e;
-            font-size: 12px;
-            font-weight: normal;
-        }
-        
-        .coupon-info__value:hover {
-            text-decoration: underline;
-            cursor: pointer;
-        }
-        
-        .alter-height {
-            height: 100px;
-        }
+    .coupon-header {
+        font-size: 16px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 10px;
+    }
     
+    .coupon-details {
+        font-size: 13px;
+        color: #000;
+    }
     
-        .coupon-card-2{
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #e1e1e1;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            height: 60px;
-            width: 210%;
-            margin: 5px 1px;
+    .coupon-info {
+        margin-bottom: 8px;
+    }
     
-        } 
-        .couponhead{
-            color: #49c36e;
-            font-weight: bold;
-        }
-        
+    .coupon-info__title {
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .coupon-info__value {
+        color: #49c36e;
+        font-size: 12px;
+        font-weight: normal;
+    }
+    
+    .coupon-info__value:hover {
+        text-decoration: underline;
+        cursor: pointer;
+    }
+    
+    .alter-height {
+        height: 100px;
+    }
+    
+    .coupon-card-2 {
+        background-color: #f9f9f9;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #e1e1e1;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        height: 60px;
+        width: 210%;
+        margin: 5px 1px;
+    } 
+    .couponhead {
+        color: #49c36e;
+        font-weight: bold;
+    }
 </style>
 
 {% if cart_items %}
-
-   <!--====== App Content ======-->
+<!--====== App Content ======-->
 <div class="app-content">
-
     <!--====== Section 1 ======-->
     <div class="u-s-p-b-30">
-
-        <!--====== Section Content ======-->
         <div class="section__content">
             <div class="container">
                 <div class="breadcrumb">
                     <div class="breadcrumb__wrap">
                         <ul class="breadcrumb__list">
                             <li class="has-separator">
-
                                 <a href="">Home</a></li>
                             <li class="is-marked">
-
                                 <a href="">Cart</a></li>
                         </ul>
                     </div>
@@ -127,17 +112,15 @@
     </div>
     <!--====== End - Section 1 ======-->
 
-
     <!--====== Section 2 ======-->
     <div class="u-s-p-b-60">
-
         <!--====== Section Intro ======-->
         <div class="section__intro u-s-p-b-30">
             <div class="container">
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="section__text-wrap"> 
-                            <h1 class="section__heading u-c-secondary">Shoping Cart</h1>
+                            <h1 class="section__heading u-c-secondary">Shopping Cart</h1>
                         </div>
                     </div>
                 </div>
@@ -145,17 +128,14 @@
         </div>
         <!--====== End - Section Intro ======-->
 
-
         <!--====== Section Content ======-->
         <div class="section__content">
             <div class="container">
-
-
                 <div class="row u-s-m-b-16">
                     <div class="col-lg-6">
                         <span class="gl-text couponhead">Coupons Available For You</span>
-                        <div class="o-summary__item-wrap gl-scroll alter-height"  style="display: grid;grid-template-columns: repeat(2, 1fr); gap: 10px; height: 130px;">
-                            {% if coupons%}
+                        <div class="o-summary__item-wrap gl-scroll alter-height" style="display: grid;grid-template-columns: repeat(2, 1fr); gap: 10px; height: 130px;">
+                            {% if coupons %}
                             {% for coupon in coupons %}
                             <div class="coupon-card">
                                 <div class="coupon-details u-s-m-b-10">
@@ -176,12 +156,11 @@
                             {% endfor %}
                             {% else %}
                             <div class="coupon-card-2">
-                                    <div class="coupon-info">
-                                        <span class="coupon-info__value"><strong>NO COUPON AVAILABLE</strong> </span>
-                                    </div>
+                                <div class="coupon-info">
+                                    <span class="coupon-info__value"><strong>NO COUPON AVAILABLE</strong> </span>
+                                </div>
                             </div>
                             {% endif %}
-
                         </div>
                     </div>
                 
@@ -189,16 +168,15 @@
                         <div class="msg">
                             <div class="c-f u-s-m-b-16">
                                 <span class="gl-text u-s-m-b-16">Enter your coupon code if you have one.</span>
-                                <form class="c-f__form" style="width: 100%;" method="post" action="{% url 'coupon:apply_coupon' %}">
+                                <form class="c-f__form" style="width: 100%;" id="coupon-form">
                                     {% csrf_token %}
                                     <div class="u-s-m-b-16">
-                                        
                                         {% if couponuser and couponuser.status %}
                                             <div class="u-s-m-b-15 form-inline">
                                                 <label for="coupon"></label>
                                                 <input class="input-text input-text--primary-style" name="couponcode" type="text" id="coupon" required value="{{ couponuser.coupon.code }}">
                                                 {% if couponuser.id %}
-                                                <a href="{% url 'coupon:remove_coupon' couponuser.id %}" class="btn btn--e-transparent-brand-b-2">REMOVE</a>
+                                                <a href="#" class="btn btn--e-transparent-brand-b-2 remove-coupon" data-id="{{ couponuser.id }}">REMOVE</a>
                                                 {% endif %}
                                         {% else %}
                                             <div class="u-s-m-b-15 form-inline">
@@ -209,14 +187,12 @@
                                         {% endif %}
                                     </div>
                                 </form>
-                                
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="row">
-                    <!-- Cart Items Section -->
                     <div class="col-lg-7 col-md-12 u-s-m-b-30">
                         {% for cart_item in cart_items %}
                         <div class="table-responsive mb-4">
@@ -225,12 +201,8 @@
                                     <tr>
                                         <td>
                                             <div class="table-p__box d-flex">
-                                                <!-- <div class="table-p__img-wrap me-3">
-                                                    <img class="u-img-fluid" src="{{ cart_item.variant.product.image1.url }}" alt="{{ cart_item.variant.product.product_name }}">
-                                                </div> -->
                                                 <div class="table-p__img-wrap me-3 position-relative">
                                                     <img class="u-img-fluid" src="{{ cart_item.variant.product.image1.url }}" alt="{{ cart_item.variant.product.product_name }}">
-                                                    
                                                     {% if cart_item.variant.qty == 0 %}
                                                     <div class="out-of-stock-overlay">
                                                         <span class="out-of-stock-text">Out of Stock</span>
@@ -254,8 +226,6 @@
                                                         {% endif %}
                                                     {% endfor %}
                                                 </div>
-
-
                                                 <div class="table-p__info">
                                                     <span class="table-p__name">
                                                         <a href="">{{ cart_item.variant.product.product_name }}</a>
@@ -272,20 +242,9 @@
                                                 </div>
                                             </div>
                                         </td>
-
                                         <td class="text-center">
                                             <span class="table-p__price">₹<span class="item-total" data-id="{{ cart_item.cartitem_id }}">{{ cart_item.item_total }}</span></span>
                                         </td>
-
-                                        <!-- <td class="text-center" >
-                                            <div class="table-p__input-counter-wrap">
-                                                <div class="input-counter">
-                                                    <span class="input-counter__minus fas fa-minus" data-id="{{ cart_item.cartitem_id }}"></span>
-                                                    <input class="input-counter__text input-counter--text-primary-style" type="text" value="{{ cart_item.quantity }}" data-min="1" data-max="6" data-id="{{ cart_item.cartitem_id }}">
-                                                    <span class="input-counter__plus fas fa-plus" data-id="{{ cart_item.cartitem_id }}"></span>
-                                                </div>
-                                            </div>
-                                        </td> -->
                                         <td class="text-center">
                                             <div class="table-p__input-counter-wrap">
                                                 <div class="input-counter">
@@ -295,9 +254,6 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        
-
-                                        
                                         <td class="text-center">
                                             <a class="far fa-trash-alt table-p__delete-link" href="{% url 'cart:delete_item' cart_item.cartitem_id %}"></a>
                                         </td>
@@ -307,8 +263,6 @@
                         </div>
                         {% endfor %}
                     </div>
-        
-                    <!-- Summary and Checkout Section with Sticky Positioning -->
                     <div class="col-lg-5 col-md-12">
                         <div class="sticky-top" style="top: 20px;">
                             <div class="o-summary__section u-s-m-b-30">
@@ -317,13 +271,11 @@
                                         <tbody>
                                             <tr>
                                                 <td>SHIPPING</td>
-                                                <td>₹{{delivery_charge|floatformat:2 }}</td>
+                                                <td>₹{{ delivery_charge|floatformat:2 }}</td>
                                             </tr>
-
-                                            
                                             <tr>
                                                 <td>SUBTOTAL</td>
-                                                <td>₹{{ total |floatformat:2 }}</td>
+                                                <td>₹{{ total|floatformat:2 }}</td>
                                             </tr>
                                             <tr>
                                                 <td>TAX</td>
@@ -349,13 +301,10 @@
                             </div>
                         </div>
                     </div>
-        
-                    <!-- Route Box Section -->
                     <div class="col-lg-12 mt-4">
                         <div class="route-box d-flex justify-content-between">
                             <a class="route-box__link" href="{% url 'userss:category_details' %}"><i class="fas fa-long-arrow-alt-left"></i> CONTINUE SHOPPING</a>
                             <div>
-                                <!-- <a class="route-box__link me-3" href=""><i class="fas fa-trash"></i> CLEAR CART</a> -->
                                 <a class="route-box__link" href=""><i class="fas fa-sync"></i> UPDATE CART</a>
                             </div>
                         </div>
@@ -365,7 +314,6 @@
         </div> 
         <!--====== End - Section Content ======-->
     </div>
-    <!--====== End - Section 2 ======-->
 </div>
 <!--====== End - App Content ======-->
 
@@ -383,10 +331,8 @@
                     <div class="breadcrumb__wrap">
                         <ul class="breadcrumb__list">
                             <li class="has-separator">
-
                                 <a href="{% url 'accounts:home_user' %}">Home</a></li>
                             <li class="is-marked">
-
                                 <a href="">Cart</a></li>
                         </ul>
                     </div>
@@ -432,71 +378,152 @@
 
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const minusButtons = document.querySelectorAll('.input-counter__minus');
-        const plusButtons = document.querySelectorAll('.input-counter__plus');
+document.addEventListener('DOMContentLoaded', function () {
+    // Prevent multiple event listener attachments by checking a flag
+    if (window.cartEventsInitialized) return;
+    window.cartEventsInitialized = true;
 
-        function updateCartItemQuantity(cartItemId, quantity) {
-            fetch(`/cart/update/${cartItemId}/`, {
+    const minusButtons = document.querySelectorAll('.input-counter__minus');
+    const plusButtons = document.querySelectorAll('.input-counter__plus');
+    const couponForm = document.getElementById('coupon-form');
+    const removeCouponLinks = document.querySelectorAll('.remove-coupon');
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Handle cart item quantity update
+    function updateCartItemQuantity(cartItemId, quantity) {
+        fetch(`/cart/update/${cartItemId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: JSON.stringify({ quantity: quantity })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const itemTotalElement = document.querySelector(`.item-total[data-id="${cartItemId}"]`);
+                itemTotalElement.textContent = ' ' + data.new_total;
+                showToastMessage('Quantity updated successfully.', 'success');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showToastMessage(data.error, 'error');
+            }
+        })
+        .catch(error => {
+            showToastMessage('Error updating quantity. Please try again.', 'error');
+            console.error('Error:', error);
+        });
+    }
+
+    minusButtons.forEach(button => {
+        // Remove existing listeners to prevent duplicates
+        const newButton = button.cloneNode(true);
+        button.parentNode.replaceChild(newButton, button);
+        newButton.addEventListener('click', function () {
+            const input = newButton.nextElementSibling;
+            const cartItemId = newButton.getAttribute('data-id');
+            let quantity = parseInt(input.value);
+            if (quantity > 1) {
+                quantity--;
+                input.value = quantity;
+                updateCartItemQuantity(cartItemId, quantity);
+            }
+        });
+    });
+
+    plusButtons.forEach(button => {
+        // Remove existing listeners to prevent duplicates
+        const newButton = button.cloneNode(true);
+        button.parentNode.replaceChild(newButton, button);
+        newButton.addEventListener('click', function () {
+            const input = newButton.previousElementSibling;
+            const cartItemId = newButton.getAttribute('data-id');
+            let quantity = parseInt(input.value);
+            if (quantity < parseInt(input.dataset.max)) {
+                quantity++;
+                input.value = quantity;
+                updateCartItemQuantity(cartItemId, quantity);
+            }
+        });
+    });
+
+    // Handle coupon form submission
+    if (couponForm) {
+        couponForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(couponForm);
+            const couponCode = formData.get('couponcode');
+
+            fetch("{% url 'coupon:apply_coupon' %}", {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken'), // Ensure this function works
+                    'X-CSRFToken': getCookie('csrftoken'),
                 },
-                body: JSON.stringify({ quantity: quantity })
+                body: formData
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    const itemTotalElement = document.querySelector(`.item-total[data-id="${cartItemId}"]`);
-                    itemTotalElement.textContent = ' ' + data.new_total; // Update the displayed total for the specific item
+                    showToastMessage(data.message, 'success');
+                    setTimeout(() => location.reload(), 1000);
                 } else {
-                    console.error(data.error); // Log error for debugging
+                    showToastMessage(data.message, 'error');
                 }
             })
-            .catch(error => console.error('Error:', error));
-        }
-
-        minusButtons.forEach(button => {
-            button.addEventListener('click', function () {
-                const input = button.nextElementSibling;
-                const cartItemId = button.getAttribute('data-id');
-                let quantity = parseInt(input.value);
-
-                    updateCartItemQuantity(cartItemId, quantity);
-                    location.reload();
-                }
-            );
+            .catch(error => {
+                showToastMessage('Error applying coupon. Please try again.', 'error');
+                console.error('Error:', error);
+            });
         });
+    }
 
-        plusButtons.forEach(button => {
-            button.addEventListener('click', function () {
-                const input = button.previousElementSibling;
-                const cartItemId = button.getAttribute('data-id');
-                let quantity = parseInt(input.value);
+    // Handle coupon removal
+    removeCouponLinks.forEach(link => {
+        // Remove existing listeners to prevent duplicates
+        const newLink = link.cloneNode(true);
+        link.parentNode.replaceChild(newLink, link);
+        newLink.addEventListener('click', function (e) {
+            e.preventDefault();
+            const couponId = newLink.getAttribute('data-id');
 
-               
-                    updateCartItemQuantity(cartItemId, quantity);
-                    location.reload();
+            fetch(`{% url 'coupon:remove_coupon' 0 %}`.replace('0', couponId), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
                 }
-            );
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToastMessage(data.message, 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToastMessage(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                showToastMessage('Error removing coupon. Please try again.', 'error');
+                console.error('Error:', error);
+            });
         });
-
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
     });
+});
 </script>
 
 {% endblock %}
