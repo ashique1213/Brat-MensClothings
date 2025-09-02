@@ -23,7 +23,7 @@ app_name = 'wallet'
 
 urlpatterns = [
    
-    path('view_wallet/', views.view_wallet, name='view_wallet'),  
+    path('wallet/', views.view_wallet, name='view_wallet'),  
     
     
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
