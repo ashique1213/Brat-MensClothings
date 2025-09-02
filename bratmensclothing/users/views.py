@@ -25,6 +25,7 @@ from decimal import Decimal
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Avg, IntegerField
 from django.db.models.functions import Cast
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 
 
 def is_staff(user):
@@ -121,20 +122,23 @@ def category_details(request):
             pass  # Ignore invalid price values
 
     if query:
-        query_terms = query.split()
-        q_filter = Q()
+        search_vector = (
+            SearchVector('product_name', weight='A') +
+            SearchVector('description', weight='C') +
+            SearchVector('color', weight='B') +
+            SearchVector('occasion', weight='B') +
+            SearchVector('fit', weight='C') +
+            SearchVector('brand__brandname', weight='A') +
+            SearchVector('category__category', weight='B')
+        )
+        search_query = SearchQuery(query)
 
-        for term in query_terms:
-            q_filter |= (
-                Q(product_name__icontains=term) |
-                Q(description__icontains=term) |
-                Q(color__icontains=term) |
-                Q(occasion__icontains=term) |
-                Q(fit__icontains=term) |
-                Q(brand__brandname__icontains=term) |
-                Q(category__category__icontains=term)
-            )
-        products = products.filter(q_filter)
+        products = (
+            products
+            .annotate(rank=SearchRank(search_vector, search_query))
+            .filter(rank__gte=0.1)   # filter weak matches
+            .order_by('-rank')       # highest match first
+        )
 
     if sort_option == 'newly_added':
         products = products.order_by('-created_at')  
