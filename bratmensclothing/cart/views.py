@@ -34,7 +34,7 @@ def view_cart(request):
         user = request.user
         cart = Cart.objects.filter(user=user).first()
         if cart:
-            cart_items = CartItem.objects.filter(cart=cart)
+            cart_items = CartItem.objects.filter(cart=cart).order_by('cartitem_id')
 
             for cart_item in cart_items:
                 variant = cart_item.variant
