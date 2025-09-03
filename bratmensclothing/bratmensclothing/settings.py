@@ -165,7 +165,8 @@ ACCOUNT_EMAIL_VERIFICATION = 'none'  # Require email verification
 ACCOUNT_EMAIL_REQUIRED = True               # Email is required for signup
 LOGIN_REDIRECT_URL = 'accounts:home_user'  
 LOGOUT_REDIRECT_URL = 'accounts:login_user' 
-
+SOCIALACCOUNT_LOGIN_ON_GET = True 
+SOCIALACCOUNT_AUTO_SIGNUP = True 
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend', 
