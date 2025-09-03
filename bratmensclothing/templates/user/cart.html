@@ -250,7 +250,7 @@
                                             <div class="table-p__input-counter-wrap">
                                                 <div class="input-counter">
                                                     <span class="input-counter__minus fas fa-minus" data-id="{{ cart_item.cartitem_id }}" {% if cart_item.variant.qty == 0 %}style="opacity: 0.5; pointer-events: none;"{% endif %}></span>
-                                                    <input class="input-counter__text input-counter--text-primary-style" type="text" value="{{ cart_item.quantity }}" data-min="1" data-max="6" data-id="{{ cart_item.cartitem_id }}" {% if cart_item.variant.qty == 0 %}disabled{% endif %}>
+                                                    <input class="input-counter__text input-counter--text-primary-style" type="text" value="{{ cart_item.quantity }}" data-min="1" data-max="6" data-stock="{{ cart_item.variant.qty }}" data-id="{{ cart_item.cartitem_id }}" {% if cart_item.variant.qty == 0 %}disabled{% endif %}>
                                                     <span class="input-counter__plus fas fa-plus" data-id="{{ cart_item.cartitem_id }}" {% if cart_item.variant.qty == 0 %}style="opacity: 0.5; pointer-events: none;"{% endif %}></span>
                                                 </div>
                                             </div>
@@ -556,14 +556,23 @@ document.addEventListener('DOMContentLoaded', function () {
             const input = newButton.previousElementSibling;
             const cartItemId = newButton.getAttribute('data-id');
             let quantity = parseInt(input.value);
-            if (quantity < parseInt(input.dataset.max)) {
+            const maxQty = parseInt(input.dataset.max);
+            const stock = parseInt(input.dataset.stock);  // get stock
+
+            if (quantity < maxQty && quantity < stock) {
                 quantity++;
                 input.value = quantity;
                 updateCartItemQuantity(cartItemId, quantity);
+            } else {
+                if (quantity >= stock) {
+                    showToastMessage(`Only ${stock} item(s) available in stock.`, 'error');
+                } else {
+                    showToastMessage(`Maximum ${maxQty} items allowed per order.`, 'error');
+                }
             }
         });
     });
-    
+
     // Attach event listeners for remove coupon links
     function attachRemoveCouponListeners() {
         const removeCouponLinks = document.querySelectorAll('.remove-coupon');
