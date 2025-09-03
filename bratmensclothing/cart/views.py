@@ -16,6 +16,7 @@ from coupon.models import Coupon,CouponUser
 from decimal import Decimal
 from offer.models import Product_Offers,Brand_Offers
 from django.utils import timezone
+from django.contrib.messages import get_messages
 
 
 @never_cache
@@ -24,102 +25,131 @@ def view_cart(request):
     grand_total = Decimal('0.0')
     tax = Decimal('0.0')
     delivery_charge = Decimal('50.0')
-    coupon_discount = Decimal('0.0')  
+    coupon_discount = Decimal('0.0')
     couponuser = None
+    total = Decimal('0.0')
+    coupons = []
 
     if request.user.is_authenticated:
         user = request.user
-
         cart = Cart.objects.filter(user=user).first()
-        cart_items=CartItem.objects.filter(cart=cart)
+        if cart:
+            cart_items = CartItem.objects.filter(cart=cart)
 
-        # cart_items = cart.items.filter(
-        #     variant__product__is_deleted=False,
-        #     variant__product__category__is_deleted=False,  
-        #     variant__product__brand__is_deleted=False  
-        #     ) if cart else []
+            for cart_item in cart_items:
+                variant = cart_item.variant
+                product = variant.product
 
-        for cart_item in cart_items:
-            variant = cart_item.variant
-            product = variant.product
+                product_offer = Product_Offers.objects.filter(
+                    product_id=product,
+                    status=True,
+                    started_date__lte=timezone.now(),
+                    end_date__gte=timezone.now()
+                ).first()
 
+                brand_offer = Brand_Offers.objects.filter(
+                    brand_id=product.brand,
+                    status=True,
+                    started_date__lte=timezone.now(),
+                    end_date__gte=timezone.now()
+                ).first()
 
-            product_offer = Product_Offers.objects.filter(
-                product_id=product,
-                status=True,
-                started_date__lte=timezone.now(),
-                end_date__gte=timezone.now()
-            ).first()
+                discounted_price = product.price
 
-            brand_offer = Brand_Offers.objects.filter(
-                brand_id=product.brand,
-                status=True,
-                started_date__lte=timezone.now(),
-                end_date__gte=timezone.now()
-            ).first()
+                if product_offer:
+                    discounted_price = product.price - product_offer.offer_price
 
-            discounted_price = product.price
+                if brand_offer:
+                    brand_discounted_price = product.price - brand_offer.offer_price
+                    discounted_price = min(discounted_price, brand_discounted_price)
 
-            if product_offer:
-                discounted_price = product.price - product_offer.offer_price
+                cart_item.variant.product.price = discounted_price
 
-            if brand_offer:
-                brand_discounted_price = product.price - brand_offer.offer_price
+            try:
+                couponuser = CouponUser.objects.get(user=user, status=True)
+                coupon_discount = couponuser.coupon.discount_amount
+            except CouponUser.DoesNotExist:
+                couponuser = None
 
-                discounted_price = min(discounted_price, brand_discounted_price)
+            total = sum(item.item_total for item in cart_items)
 
-            cart_item.variant.product.price = discounted_price
+            if couponuser:
+                coupon = couponuser.coupon
+                if total < coupon.min_purchase_amount:
+                    couponuser.delete()
+                    coupon_discount = Decimal('0.0')
+                    messages.info(request, "Coupon removed! Total is less than the minimum purchase amount.")
 
-        try:
-            
-            couponuser = CouponUser.objects.get(user=user, status=True)  # Only get active couponuser
-            coupon_discount = couponuser.coupon.discount_amount
-            
-        except CouponUser.DoesNotExist:
-            couponuser = None
+            if total >= (coupon.min_purchase_amount if couponuser else 0):
+                discount = min(total, coupon_discount)
+                total_after_discount = total - discount
+            else:
+                total_after_discount = total
 
-        total = sum(item.item_total for item in cart_items)
+            tax_rate = Decimal('0.02')
+            tax = total_after_discount * tax_rate
+            grand_total = total_after_discount + tax + delivery_charge
 
-        if couponuser:
-            coupon = couponuser.coupon
-            if total < coupon.min_purchase_amount:
-                couponuser.delete() 
-                coupon_discount = Decimal('0.0')
-                messages.info(request, f"Coupon removed !! less than the minimum purchase amount.")
-                return redirect('cart:viewcart')
-  
-                
-        if total >= (coupon.min_purchase_amount if couponuser else 0):
-            discount = min(total, coupon_discount)
-            total_after_discount = total - discount
-        else:
-            total_after_discount = total
+            used_coupon_ids = CouponUser.objects.filter(user=user).values_list('coupon_id', flat=True)
+            coupons = Coupon.objects.filter(
+                ~Q(coupon_id__in=used_coupon_ids),
+                is_active=False,
+                usage_limit__gt=0,
+                valid_from__lte=timezone.now().date(),
+                valid_to__gte=timezone.now().date()
+            )
 
-        tax_rate = Decimal('0.02')
-        tax = total_after_discount * tax_rate
-        grand_total = total_after_discount + tax + delivery_charge
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            # Capture messages from the Django messages framework
+            storage = get_messages(request)
+            message_list = [{'message': message.message, 'level': message.level_tag} for message in storage]
 
-        # coupons = Coupon.objects.filter(is_active=False,usage_limit__gt=0)
-
-        used_coupon_ids = CouponUser.objects.filter(user=user).values_list('coupon_id', flat=True)
-        coupons = Coupon.objects.filter(
-            ~Q(coupon_id__in=used_coupon_ids),  
-            is_active=False,                    
-            usage_limit__gt=0,                 
-            valid_from__lte=timezone.now().date(),
-            valid_to__gte=timezone.now().date()
-        )
+            return JsonResponse({
+                'success': True,
+                'subtotal': float(total),
+                'tax': float(tax),
+                'discount': float(coupon_discount),
+                'grand_total': float(grand_total),
+                'cart_items': [
+                    {
+                        'cartitem_id': item.cartitem_id,
+                        'quantity': item.quantity,
+                        'item_total': float(item.item_total)
+                    } for item in cart_items
+                ],
+                'couponuser': {
+                    'id': couponuser.id if couponuser else None,
+                    'code': couponuser.coupon.code if couponuser else None,
+                    'status': couponuser.status if couponuser else False
+                },
+                'coupons': [
+                    {
+                        'code': coupon.code,
+                        'discount_amount': float(coupon.discount_amount),
+                        'min_purchase_amount': float(coupon.min_purchase_amount),
+                        'category': coupon.category
+                    } for coupon in coupons
+                ],
+                'messages': message_list
+            })
 
         return render(request, 'user/cart.html', {
             'cart_items': cart_items,
             'grand_total': grand_total,
             'tax': tax,
-            'cart': cart if request.user.is_authenticated else None,
+            'cart': cart,
             'delivery_charge': delivery_charge,
             'coupons': coupons,
             'couponuser': couponuser,
-            'discount':coupon_discount,
-            'total':total
+            'discount': coupon_discount,
+            'total': total
+        })
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': False,
+            'message': 'User not authenticated or no cart items.',
+            'messages': []
         })
 
     return render(request, 'user/cart.html')
@@ -171,10 +201,19 @@ def delete_item(request,cartitem_id):
 @require_POST
 def update_cart_item(request, cart_item_id):
     data = json.loads(request.body)
-    quantity = data.get('quantity')
+    quantity = int(data.get('quantity', 0))
 
     try:
         cart_item = CartItem.objects.get(cartitem_id=cart_item_id)
+        variant = cart_item.variant
+
+        #  Check stock
+        if quantity > variant.qty:
+            return JsonResponse({
+                'success': False,
+                'error': f"Quantity exceeds available stock. Only {variant.qty} left."
+            }, status=400)
+
         cart_item.quantity = quantity
         cart_item.save()
 
