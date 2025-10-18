@@ -1038,22 +1038,31 @@ def single_order(request,orderitem_id):
 
 @never_cache
 def download_invoice(request, orderitem_id):
-    order_item = get_object_or_404(OrderItem, orderitem_id=orderitem_id)  
-    order = order_item.order
-    all_order_items = OrderItem.objects.filter(order=order)
+    try:
+        order_item = get_object_or_404(OrderItem, orderitem_id=orderitem_id)
+        order = order_item.order
+        all_order_items = OrderItem.objects.filter(order=order)
 
-    # Generate html content for the invoice using a template
-    html_content = render_to_string('user/invoice_template.html', {'order': order, 'all_order_items': all_order_items})
+        html_content = render_to_string('user/invoice_template.html', {
+            'order': order,
+            'all_order_items': all_order_items
+        })
 
-    # then create a response object to serve the PDF file
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="invoice_{order.tracking_number}.pdf"'
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="invoice_{order.tracking_number}.pdf"'
 
-    # Create the PDF from the HTML content
-    pisa_status = pisa.CreatePDF(html_content, dest=response)
+        try:
+            pisa_status = pisa.CreatePDF(html_content, dest=response)
+            if pisa_status.err:
+                return HttpResponse('Error generating PDF', status=500)
+        except Exception as e:
+            return HttpResponse('Error generating PDF', status=500)
 
-    # Check for errors during PDF creation
-    if pisa_status.err:
-        return HttpResponse('Error generating PDF', status=500)
+        return response
 
-    return response
+    except OrderItem.DoesNotExist:
+        messages.error(request, 'Order item not found.')
+        return redirect('order:view_orders')
+    except Exception as e:
+        messages.error(request, 'An unexpected error occurred while generating the invoice.')
+        return redirect('order:view_orders')
