@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.urls import path
 from . import views
+from users.views import add_address
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -24,7 +25,7 @@ app_name = 'order'
 urlpatterns = [
    
     path('checkout/', views.checkout, name='checkout'),  
-    path('add_address_checkout/<int:userid>', views.add_address_checkout, name='add_address_checkout'),  
+    path('add_address_checkout/<int:userid>/', add_address, kwargs={'from_checkout': True}, name='add_address_checkout'),
     path('place-order/', views.place_order, name='place_order'),    
     path('verify-payment/', views.verify_payment, name='verify_payment'),  
     path('order_success/', views.order_success, name='order_success'),    

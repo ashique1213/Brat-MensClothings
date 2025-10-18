@@ -26,6 +26,7 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Avg, IntegerField
 from django.db.models.functions import Cast
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
+from django.http import JsonResponse
 
 
 def is_staff(user):
@@ -476,27 +477,27 @@ def address_details(request, userid):
 
 @never_cache
 @login_required(login_url='accounts:login_user')
-def add_address(request,userid):
+def add_address(request, userid, from_checkout=False):
     if request.user.userid != userid:
         return redirect('userss:error')
-    
-    user_id=get_object_or_404(Users,userid=userid)
 
-    if request.method=='POST':
-        address=request.POST.get('address').strip()
-        street=request.POST.get('street').strip()
-        landmark=request.POST.get('landmark').strip()
-        city=request.POST.get('city').strip()
-        pincode=request.POST.get('pincode').strip()
-        district=request.POST.get('district').strip()
-        state=request.POST.get('state').strip()
-        
+    user = get_object_or_404(Users, userid=userid)
+
+    if request.method == 'POST':
+        address = request.POST.get('address', '').strip()
+        street = request.POST.get('street', '').strip()
+        landmark = request.POST.get('landmark', '').strip()
+        city = request.POST.get('city', '').strip()
+        pincode = request.POST.get('pincode', '').strip()
+        district = request.POST.get('district', '').strip()
+        state = request.POST.get('state', '').strip()
+
         errors = {}
 
         if not address:
             errors['address_error'] = 'Address is required.'
         elif len(address) < 10:
-            errors['address_error'] = 'Address must be at least 100 characters long.'
+            errors['address_error'] = 'Address must be at least 10 characters long.'
 
         if not street:
             errors['street_error'] = 'Street is required.'
@@ -506,16 +507,15 @@ def add_address(request,userid):
         if not landmark:
             errors['landmark_error'] = 'Landmark is required.'
         elif len(landmark) < 3:
-            landmark['landmark_error'] = 'Landmark must be at least 3 characters long.'
+            errors['landmark_error'] = 'Landmark must be at least 3 characters long.'
 
         if not city:
             errors['city_error'] = 'City is required.'
         elif len(city) < 3:
             errors['city_error'] = 'City must be at least 3 characters long.'
 
-        pincode_regex = RegexValidator(regex=r'^\d{6}$', message='Pincode must be a 6-digit number.')
         try:
-            pincode_regex(pincode)
+            RegexValidator(regex=r'^\d{6}$', message='Pincode must be a 6-digit number.')(pincode)
         except ValidationError:
             errors['pincode_error'] = 'Pincode must be a valid 6-digit number.'
 
@@ -525,7 +525,9 @@ def add_address(request,userid):
             errors['state_error'] = 'State must be at least 3 characters long.'
 
         if errors:
-            return render(request, 'user/add_address.html', {'errors': errors, 'user':user_id})
+            if from_checkout:
+                return JsonResponse({'success': False, 'errors': errors})
+            return render(request, 'user/add_address.html', {'errors': errors, 'user': user})
 
         Address.objects.create(
             address=address,
@@ -535,12 +537,17 @@ def add_address(request,userid):
             pincode=pincode,
             district=district,
             state=state,
-            user=user_id
+            user=user
         )
+
+        if from_checkout:
+            return JsonResponse({'success': True})
+
         messages.success(request, 'Address added successfully.')
-        return redirect('userss:addressdetails',userid=userid)
-    
-    return render(request,'user/add_address.html',{'user':user_id})
+        return redirect('userss:addressdetails', userid=userid)
+
+    template = 'user/checkout.html' if from_checkout else 'user/add_address.html'
+    return render(request, template, {'user': user})
 
 
 @never_cache
