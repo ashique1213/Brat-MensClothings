@@ -217,163 +217,196 @@ def add_address_checkout(request, userid):
 @never_cache
 def place_order(request):
     if request.user.is_authenticated:
-        grand_total = Decimal('0.0')
-        tax = Decimal('0.0')
-        delivery_charge = Decimal('50.0')
-
-        user = request.user
-        addresses = Address.objects.filter(user=user)
-        cart = get_object_or_404(Cart, user=user)
-        cart_items = CartItem.objects.filter(cart=cart)       
-
-        if not cart_items.exists():
-            return redirect('cart:viewcart')
-
-        total_offer_discount=0
-        for cart_item in cart_items:
-            variant = cart_item.variant
-            product = variant.product
-
-            product_offer = Product_Offers.objects.filter(
-                product_id=product,
-                status=True,
-                started_date__lte=timezone.now(),
-                end_date__gte=timezone.now()
-            ).first()
-
-            brand_offer = Brand_Offers.objects.filter(
-                brand_id=product.brand,
-                status=True,
-                started_date__lte=timezone.now(),
-                end_date__gte=timezone.now()
-            ).first()
-
-            discounted_price = product.price
-
-            if product_offer:
-                discounted_price = product.price - product_offer.offer_price
-                total_offer_discount+=product_offer.offer_price
-            if brand_offer:
-                brand_discounted_price = product.price - brand_offer.offer_price
-                total_offer_discount+=brand_offer.offer_price
-
-
-                discounted_price = min(discounted_price, brand_discounted_price)
-
-            cart_item.variant.product.price = discounted_price
-        
-        # Initialize coupon variables
-        couponuser = None
-        coupon_discount = Decimal('0.0')
-        total = sum(item.item_total for item in cart_items)
-        
-        # Check for active coupon
         try:
-            couponuser = CouponUser.objects.get(user=user, status=True)
-            coupon_discount = couponuser.coupon.discount_amount
-            total_after_discount = total - min(total, coupon_discount)
-        except CouponUser.DoesNotExist:
-            total_after_discount = total  # No discount if no active coupon
-        
-        tax_rate = Decimal('0.02')
-        tax = total_after_discount * tax_rate
-        grand_total = total_after_discount + tax + delivery_charge
+            grand_total = Decimal('0.0')
+            tax = Decimal('0.0')
+            delivery_charge = Decimal('50.0')
 
-        if request.method == 'POST':
-            selected_address_id = request.POST.get('address')
-            payment_type = request.POST.get('optradio')
+            user = request.user
+            addresses = Address.objects.filter(user=user)
+            cart = get_object_or_404(Cart, user=user)
+            cart_items = CartItem.objects.filter(cart=cart)
 
-            # Check if address or payment type is missing
-            if not selected_address_id or not payment_type:
-                messages.error(request, 'Please select an address and payment method.')
-                # return render(request, 'user/checkout.html', {
-                #     'user': user,
-                #     'addresses': addresses,
-                #     'cart_items': cart_items,
-                #     'tax': tax,
-                #     'delivery_charge': delivery_charge,
-                #     'grand_total': grand_total,
-                # })
-                return redirect('order:checkout')
+            if not cart_items.exists():
+                messages.error(request, 'Your cart is empty.')
+                return redirect('cart:viewcart')
 
-            selected_address = Address.objects.get(id=selected_address_id)
+            total_offer_discount = Decimal('0.0')
+            for cart_item in cart_items:
+                variant = cart_item.variant
+                product = variant.product
 
+                product_offer = Product_Offers.objects.filter(
+                    product_id=product,
+                    status=True,
+                    started_date__lte=timezone.now(),
+                    end_date__gte=timezone.now()
+                ).first()
 
-            if payment_type == 'Razorpay':
-                client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-                
-                payment_data = {
-                    "amount": int(float(grand_total) * 100), 
-                    "currency": "INR", 
-                    "payment_capture": 1
-                }
-                
-                try:
-                    razorpay_order = client.order.create(data=payment_data)
-                except razorpay.errors.BadRequestError:
-                    messages.error(request, 'Error creating Razorpay order. Please try again.')
+                brand_offer = Brand_Offers.objects.filter(
+                    brand_id=product.brand,
+                    status=True,
+                    started_date__lte=timezone.now(),
+                    end_date__gte=timezone.now()
+                ).first()
+
+                discounted_price = product.price
+                if product_offer:
+                    discounted_price = product.price - product_offer.offer_price
+                    total_offer_discount += product_offer.offer_price
+                if brand_offer:
+                    brand_discounted_price = product.price - brand_offer.offer_price
+                    total_offer_discount += brand_offer.offer_price
+                    discounted_price = min(discounted_price, brand_discounted_price)
+
+                cart_item.variant.product.price = discounted_price
+
+            couponuser = None
+            coupon_discount = Decimal('0.0')
+            total = sum(item.item_total for item in cart_items)
+            try:
+                couponuser = CouponUser.objects.get(user=user, status=True)
+                coupon_discount = couponuser.coupon.discount_amount
+                total_after_discount = total - min(total, coupon_discount)
+            except CouponUser.DoesNotExist:
+                total_after_discount = total
+            except Exception as e:
+                total_after_discount = total
+
+            tax_rate = Decimal('0.02')
+            tax = total_after_discount * tax_rate
+            grand_total = total_after_discount + tax + delivery_charge
+
+            if request.method == 'POST':
+                selected_address_id = request.POST.get('address')
+                payment_type = request.POST.get('optradio')
+
+                if not selected_address_id or not payment_type:
+                    messages.error(request, 'Please select an address and payment method.')
                     return redirect('order:checkout')
-                request.session['pending_order_details'] = {
-                    "user": user.userid,
-                    "shipping_address": selected_address.id,
-                    "payment_type": payment_type,
-                    "total_price":float(grand_total), 
-                    "coupon_code": couponuser.coupon.code if couponuser else 0, 
-                    "coupon_amount":int(float(couponuser.coupon.discount_amount)) if couponuser else 0,
-                    "total_offer_discount":float(total_offer_discount) if total_offer_discount else 0,
-                    
 
-                }
+                try:
+                    selected_address = Address.objects.get(id=selected_address_id)
+                except Address.DoesNotExist:
+                    messages.error(request, 'Selected address not found.')
+                    return redirect('order:checkout')
 
-                return render(request, 'user/payment.html', {
-                    "razorpay_order_id": razorpay_order['id'],
-                    "razorpay_key_id": settings.RAZORPAY_KEY_ID,
-                    "amount": payment_data["amount"]
-                })
-            
+                if payment_type == 'Razorpay':
+                    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+                    payment_data = {
+                        "amount": int(float(grand_total) * 100),
+                        "currency": "INR",
+                        "payment_capture": 1
+                    }
 
-            if payment_type == 'Wallet':
-                user_wallet=Wallet.objects.get(user_id=user)
-                if user_wallet.balance < grand_total:
-                    messages.error(request, 'Insufficient wallet balance to place the order.')
-                    return render(request, 'user/checkout.html', {
-                        'user': user,
-                        'addresses': addresses,
-                        'cart_items': cart_items,
-                        'tax': tax,
-                        'delivery_charge': delivery_charge,
-                        'grand_total': grand_total,
-                    })
+                    try:
+                        razorpay_order = client.order.create(data=payment_data)
+                        request.session['pending_order_details'] = {
+                            "user": user.userid,
+                            "shipping_address": selected_address.id,
+                            "payment_type": payment_type,
+                            "total_price": float(grand_total),
+                            "coupon_code": couponuser.coupon.code if couponuser else 0,
+                            "coupon_amount": int(float(couponuser.coupon.discount_amount)) if couponuser else 0,
+                            "total_offer_discount": float(total_offer_discount) if total_offer_discount else 0,
+                        }
+                        return render(request, 'user/payment.html', {
+                            "razorpay_order_id": razorpay_order['id'],
+                            "razorpay_key_id": settings.RAZORPAY_KEY_ID,
+                            "amount": payment_data["amount"]
+                        })
+                    except razorpay.errors.BadRequestError as e:
+                        messages.error(request, 'Error creating Razorpay order. Please try again.')
+                        return redirect('order:checkout')
+                    except Exception as e:
+                        messages.error(request, 'An unexpected error occurred during payment processing.')
+                        return redirect('order:checkout')
+
+                if payment_type == 'Wallet':
+                    try:
+                        user_wallet = Wallet.objects.get(user_id=user)
+                        if user_wallet.balance < grand_total:
+                            messages.error(request, 'Insufficient wallet balance to place the order.')
+                            return redirect('order:checkout')
+
+                        with transaction.atomic():
+                            user_wallet.balance = Decimal(user_wallet.balance) - Decimal(grand_total)
+                            user_wallet.save()
+
+                            if couponuser:
+                                coupon = couponuser.coupon
+                                coupon.usage_limit -= 1
+                                coupon.save()
+                                couponuser.status = False
+                                couponuser.save()
+
+                            new_order = Order.objects.create(
+                                user=user,
+                                shipping_address=selected_address,
+                                payment_type=payment_type,
+                                payment_status='Success',
+                                total_price=grand_total,
+                                coupon_code=couponuser.coupon.code if couponuser else 0,
+                                coupon_amount=couponuser.coupon.discount_amount if couponuser else 0,
+                                total_offer_discount=total_offer_discount if total_offer_discount else 0
+                            )
+
+                            Transaction.objects.create(
+                                wallet_id=user_wallet,
+                                transaction_type='Debited',
+                                amount=grand_total,
+                                details="Wallet Payment for Order"
+                            )
+
+                            for item in cart_items:
+                                item_total_price = item.quantity * item.variant.product.price
+                                OrderItem.objects.create(
+                                    order=new_order,
+                                    variants=item.variant,
+                                    quantity=item.quantity,
+                                    price=item.variant.product.price,
+                                    subtotal_price=item_total_price
+                                )
+                                item.variant.qty -= item.quantity
+                                item.variant.save()
+
+                            cart_items.delete()
+                            return redirect('order:order_success')
+
+                    except Wallet.DoesNotExist:
+                        messages.error(request, 'Wallet not found. Please try another payment method.')
+                        return redirect('order:checkout')
+                    except DatabaseError as e:
+                        messages.error(request, 'Error processing wallet payment. Please try again.')
+                        return redirect('order:checkout')
+                    except Exception as e:
+                        messages.error(request, 'An unexpected error occurred during wallet payment.')
+                        return redirect('order:checkout')
+
+                if payment_type == 'COD' and grand_total > Decimal('1000.00'):
+                    messages.error(request, 'Cash on Delivery is not available for orders above ₹1000.')
+                    return redirect('order:checkout')
+
+                payment_status = 'Pending' if payment_type == 'COD' else 'Success'
 
                 try:
                     with transaction.atomic():
-                        # Deduct wallet balance
-                        user_wallet.balance = Decimal(user_wallet.balance) - Decimal(grand_total)
-                        user_wallet.save()
-
-                        if couponuser: 
+                        if couponuser:
                             coupon = couponuser.coupon
                             coupon.usage_limit -= 1
-                            coupon.save()  
-                            couponuser.status = False  
-                            couponuser.save() 
+                            coupon.save()
+                            couponuser.status = False
+                            couponuser.save()
 
                         new_order = Order.objects.create(
                             user=user,
                             shipping_address=selected_address,
                             payment_type=payment_type,
-                            payment_status='Success',
+                            payment_status=payment_status,
                             total_price=grand_total,
                             coupon_code=couponuser.coupon.code if couponuser else 0,
                             coupon_amount=couponuser.coupon.discount_amount if couponuser else 0,
                             total_offer_discount=total_offer_discount if total_offer_discount else 0
-                        )
-
-                        Transaction.objects.create(
-                            wallet_id=user_wallet,
-                            transaction_type='Debited',
-                            amount=grand_total,
-                            details="Wallet Payement for Order"
                         )
 
                         for item in cart_items:
@@ -385,81 +418,26 @@ def place_order(request):
                                 price=item.variant.product.price,
                                 subtotal_price=item_total_price
                             )
-                            item.variant.qty -= item.quantity
-                            item.variant.save()
+                            if payment_status == 'Success' or payment_type == 'COD':
+                                item.variant.qty -= item.quantity
+                                item.variant.save()
 
                         cart_items.delete()
-                    
-                    return redirect('order:order_success')
+                        return redirect('order:order_success')
 
+                except DatabaseError as e:
+                    messages.error(request, 'Error creating order. Please try again.')
+                    return redirect('order:checkout')
                 except Exception as e:
-                    messages.error(request, f"Failed to place order: {str(e)}")
-                    return render(request, 'user/checkout.html', {
-                        'user': user,
-                        'addresses': addresses,
-                        'cart_items': cart_items,
-                        'tax': tax,
-                        'delivery_charge': delivery_charge,
-                        'grand_total': grand_total,
-                    })
+                    messages.error(request, 'An unexpected error occurred while placing the order.')
+                    return redirect('order:checkout')
 
-          
-                # Handle Cash on Delivery 
-            if payment_type == 'COD' and grand_total > Decimal('1000.00'):
-                messages.error(request, 'Cash on Delivery is not available for orders above ₹1000.')
-                return render(request, 'user/checkout.html', {
-                    'user': user,
-                    'addresses': addresses,
-                    'cart_items': cart_items,
-                    'tax': tax,
-                    'delivery_charge': delivery_charge,
-                    'grand_total': grand_total,
-                })
-
-            # Set payment status based payment type
-            payment_status = 'Pending' if payment_type == 'COD' else 'Success'
-
-            
-            if couponuser: 
-                coupon = couponuser.coupon
-                coupon.usage_limit -= 1
-                coupon.save()  # Save the coupon 
-                couponuser.status = False  
-                couponuser.save() 
-
-            # Create new order
-            new_order = Order.objects.create(
-                user=user,
-                shipping_address=selected_address,
-                payment_type=payment_type,
-                payment_status=payment_status,
-                total_price=grand_total,
-                coupon_code=couponuser.coupon.code if couponuser else 0,
-                coupon_amount=couponuser.coupon.discount_amount if couponuser else 0,
-                total_offer_discount=total_offer_discount if total_offer_discount else 0
-
-            )
-
-            # Create order items and update stock
-            for item in cart_items:
-                item_total_price = item.quantity * item.variant.product.price
-                OrderItem.objects.create(
-                    order=new_order,
-                    variants=item.variant,
-                    quantity=item.quantity,
-                    price=item.variant.product.price,
-                    subtotal_price=item_total_price
-                )
-
-                # Deduct stock only if payment is successful or COD
-                if payment_status == 'Success' or payment_type == 'COD':
-                    item.variant.qty -= item.quantity
-                    item.variant.save()
-
-            # Empty the cart after the order
-            cart_items.delete()
-
-            return redirect('order:order_success')
+        except DatabaseError as e:
+            messages.error(request, 'Error processing your order. Please try again.')
+            return redirect('cart:viewcart')
+        except Exception as e:
+            messages.error(request, 'An unexpected error occurred. Please contact support.')
+            return redirect('cart:viewcart')
 
     return redirect('accounts:login_user')
 
