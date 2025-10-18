@@ -722,122 +722,135 @@ def manage_orders(request, orderitem_id):
 
 
 def cancel_order(request, orderitem_id):
-    item = get_object_or_404(OrderItem, orderitem_id=orderitem_id)
-    user = item.order.user
-    order = item.order
+    try:
+        item = get_object_or_404(OrderItem, orderitem_id=orderitem_id)
+        user = item.order.user
+        order = item.order
 
-    if order.payment_status == 'Success':
-        total_order_value_before_cancellation = Decimal(order.total_price)
-        total_order_value_after_cancellation = total_order_value_before_cancellation - Decimal(item.subtotal_price)
+        with transaction.atomic():
+            if order.payment_status == 'Success':
+                total_order_value_before_cancellation = Decimal(order.total_price)
+                total_order_value_after_cancellation = total_order_value_before_cancellation - Decimal(item.subtotal_price)
 
-        coupon_applied = None
-        if order.coupon_code:
-            coupon_applied = Coupon.objects.filter(code=order.coupon_code).first()
+                coupon_applied = None
+                if order.coupon_code:
+                    try:
+                        coupon_applied = Coupon.objects.filter(code=order.coupon_code).first()
+                    except Exception as e:
+                        pass
 
-        user_wallet, _ = Wallet.objects.get_or_create(user_id=user)
+                try:
+                    user_wallet, _ = Wallet.objects.get_or_create(user_id=user)
+                except Exception as e:
+                    messages.error(request, 'Error processing refund. Please contact support.')
+                    return redirect('order:view_orders')
 
-        # Detect single product order
-        if order.items.filter(status='Cancelled').count() + 1 == order.items.count():
-            # Single product: Refund full order value
-            full_refund_amount = order.total_price
-            user_wallet.balance = Decimal(user_wallet.balance or 0) + full_refund_amount
-            user_wallet.save()
+                if order.items.filter(status='Cancelled').count() + 1 == order.items.count():
+                    full_refund_amount = order.total_price
+                    user_wallet.balance = Decimal(user_wallet.balance or 0) + full_refund_amount
+                    user_wallet.save()
 
-            Transaction.objects.create(
-                wallet_id=user_wallet,
-                transaction_type='Full Refund',
-                amount=full_refund_amount,
-                details="Order Cancelled: Full Refund including tax and delivery charges"
-            )
+                    try:
+                        Transaction.objects.create(
+                            wallet_id=user_wallet,
+                            transaction_type='Full Refund',
+                            amount=full_refund_amount,
+                            details="Order Cancelled: Full Refund including tax and delivery charges"
+                        )
+                    except Exception as e:
+                        messages.error(request, 'Error recording refund transaction.')
+                        return redirect('order:view_orders')
 
-            # Reset order total_price and coupon
-            order.total_price = Decimal(0)
-            order.coupon_amount = Decimal(0)
-            order.save()
-        else:
-            # Multi-product: Adjust price and refund only the item subtotal
-            if item.subtotal_price > 0:
-                user_wallet.balance = Decimal(user_wallet.balance or 0) + Decimal(item.subtotal_price)
-                user_wallet.save()
+                    order.total_price = Decimal(0)
+                    order.coupon_amount = Decimal(0)
+                    order.save()
+                else:
+                    if item.subtotal_price > 0:
+                        user_wallet.balance = Decimal(user_wallet.balance or 0) + Decimal(item.subtotal_price)
+                        user_wallet.save()
 
-                Transaction.objects.create(
-                    wallet_id=user_wallet,
-                    transaction_type='Item Refund',
-                    amount=Decimal(item.subtotal_price),
-                    details=f"Order Cancelled: {item.variants.product.product_name}, Item Refund"
-                )
+                        try:
+                            Transaction.objects.create(
+                                wallet_id=user_wallet,
+                                transaction_type='Item Refund',
+                                amount=Decimal(item.subtotal_price),
+                                details=f"Order Cancelled: {item.variants.product.product_name}, Item Refund"
+                            )
+                        except Exception as e:
+                            messages.error(request, 'Error recording refund transaction.')
+                            return redirect('order:view_orders')
 
-            # Adjust for coupon violation
-            if coupon_applied and total_order_value_after_cancellation < coupon_applied.min_purchase_amount:
-                # total_order_value_after_cancellation += order.coupon_amount
-                order.coupon_amount = Decimal(0)
+                    if coupon_applied and total_order_value_after_cancellation < coupon_applied.min_purchase_amount:
+                        order.coupon_amount = Decimal(0)
 
-            order.total_price = total_order_value_after_cancellation
-            order.save()
+                    order.total_price = total_order_value_after_cancellation
+                    order.save()
 
-        # Update the product variant quantity
-        if item.variants:
-            item.variants.qty += item.quantity
-            item.variants.save()
+                if item.variants:
+                    item.variants.qty += item.quantity
+                    item.variants.save()
 
-        # Change the item status to 'Cancelled'
-        item.status = 'Cancelled'
-        item.save()
+                item.status = 'Cancelled'
+                item.save()
 
-        if order.items.filter(status='Cancelled').count() == order.items.count():
-            full_refund_amount = order.total_price  
+                if order.items.filter(status='Cancelled').count() == order.items.count():
+                    full_refund_amount = order.total_price
+                    if full_refund_amount > 0:
+                        user_wallet.balance = Decimal(user_wallet.balance or 0) + full_refund_amount
+                        user_wallet.save()
 
-            if full_refund_amount > 0:
-                user_wallet, created = Wallet.objects.get_or_create(user_id=user)
-                user_wallet.balance = Decimal(user_wallet.balance or 0) + full_refund_amount
-                user_wallet.save()
+                        try:
+                            Transaction.objects.create(
+                                wallet_id=user_wallet,
+                                transaction_type='Order cancellation',
+                                amount=full_refund_amount,
+                                details="Order Tax and Delivery charge"
+                            )
+                        except Exception as e:
+                            messages.error(request, 'Error recording refund transaction.')
+                            return redirect('order:view_orders')
 
-                # Record the full refund transaction
-                details_text = f"Order Tax and Delivery charge"
-                Transaction.objects.create(
-                    wallet_id=user_wallet,
-                    transaction_type='Order cancellation',
-                    amount=full_refund_amount,
-                    details=details_text
-                )
+                        order.total_price = Decimal(0)
+                        order.save()
 
-            order.total_price = Decimal(0)  
-            order.save()
+            elif order.payment_status == 'Pending':
+                if item.variants:
+                    item.variants.qty += item.quantity
+                    item.variants.save()
 
-    # if item.variants:
-    #     item.variants.qty += item.quantity
-    #     item.variants.save()
-    
-    # item.status = 'Cancelled'
-    # item.save()
-    
-    # if order.payment_status == 'Failure':
-    #     order.payment_status = 'Pending'
-    #     order.save()
+                item.status = 'Cancelled'
+                item.save()
 
-    elif order.payment_status == 'Pending':
-        if item.variants:
-            item.variants.qty += item.quantity
-            item.variants.save()
-        
-        item.status = 'Cancelled'
-        item.save()
-    else:
-        order.payment_status = 'Pending'
-        order.save()
-        if item.variants:
-            item.variants.qty += item.quantity
-            item.variants.save()
-        
-        item.status = 'Cancelled'
-        item.save()
-    # new
-        if order.items.count() > 1:
-            order.total_price -= item.subtotal_price  
-            order.save()
+                if order.items.count() > 1:
+                    order.total_price -= item.subtotal_price
+                    order.save()
 
-    messages.success(request, 'Your order has been cancelled successfully.')
-    return redirect('order:view_orders')
+            else:
+                order.payment_status = 'Pending'
+                order.save()
+                if item.variants:
+                    item.variants.qty += item.quantity
+                    item.variants.save()
+
+                item.status = 'Cancelled'
+                item.save()
+
+                if order.items.count() > 1:
+                    order.total_price -= item.subtotal_price
+                    order.save()
+
+            messages.success(request, 'Your order has been cancelled successfully.')
+            return redirect('order:view_orders')
+
+    except OrderItem.DoesNotExist:
+        messages.error(request, 'Order item not found.')
+        return redirect('order:view_orders')
+    except DatabaseError as e:
+        messages.error(request, 'Error cancelling order. Please try again.')
+        return redirect('order:view_orders')
+    except Exception as e:
+        messages.error(request, 'An unexpected error occurred while cancelling the order.')
+        return redirect('order:view_orders')
 
 
 
