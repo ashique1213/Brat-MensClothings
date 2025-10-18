@@ -31,120 +31,119 @@ from django.template.loader import render_to_string
 from xhtml2pdf import pisa
 from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-
-
+from django.db import DatabaseError
 
 @never_cache
 def checkout(request):
     if request.user.is_authenticated:
-        grand_total = Decimal('0.0')
-        tax = Decimal('0.0')
-        delivery_charge = Decimal('50.0')
+        try:
+            grand_total = Decimal('0.0')
+            tax = Decimal('0.0')
+            delivery_charge = Decimal('50.0')
 
-        user=request.user
-        addresses=Address.objects.filter(user=user,status=False)
-        cart=get_object_or_404(Cart,user=user)
-        cart_items=CartItem.objects.filter(cart=cart)
+            user = request.user
+            addresses = Address.objects.filter(user=user, status=False)
+            cart = get_object_or_404(Cart, user=user)
+            cart_items = CartItem.objects.filter(cart=cart)
 
-        for cart_item in cart_items:
-            variant = cart_item.variant
-            product = variant.product
+            for cart_item in cart_items:
+                variant = cart_item.variant
+                product = variant.product
 
-            if product.is_deleted or product.brand.is_deleted:
-                messages.error(request, "Please remove Unavailable Products")
-                return redirect('cart:viewcart')  
-        
-            for category in product.category.all():
-                if category.is_deleted:
-                    messages.error(request, "Please remove Unavailable Products ")
+                if product.is_deleted or product.brand.is_deleted:
+                    messages.error(request, "Please remove unavailable products from your cart.")
                     return redirect('cart:viewcart')
 
-            product_offer = Product_Offers.objects.filter(
-                product_id=product,
-                status=True,
-                started_date__lte=timezone.now(),
-                end_date__gte=timezone.now()
-            ).first()
+                for category in product.category.all():
+                    if category.is_deleted:
+                        messages.error(request, "Please remove products from deleted categories.")
+                        return redirect('cart:viewcart')
 
-            brand_offer = Brand_Offers.objects.filter(
-                brand_id=product.brand,
-                status=True,
-                started_date__lte=timezone.now(),
-                end_date__gte=timezone.now()
-            ).first()
+                product_offer = Product_Offers.objects.filter(
+                    product_id=product,
+                    status=True,
+                    started_date__lte=timezone.now(),
+                    end_date__gte=timezone.now()
+                ).first()
 
-            discounted_price = product.price
+                brand_offer = Brand_Offers.objects.filter(
+                    brand_id=product.brand,
+                    status=True,
+                    started_date__lte=timezone.now(),
+                    end_date__gte=timezone.now()
+                ).first()
 
-            if product_offer:
-                discounted_price = product.price - product_offer.offer_price
+                discounted_price = product.price
+                if product_offer:
+                    discounted_price = product.price - product_offer.offer_price
+                if brand_offer:
+                    brand_discounted_price = product.price - brand_offer.offer_price
+                    discounted_price = min(discounted_price, brand_discounted_price)
 
-            if brand_offer:
-                brand_discounted_price = product.price - brand_offer.offer_price
+                cart_item.variant.product.price = discounted_price
 
-                discounted_price = min(discounted_price, brand_discounted_price)
+            total_quantity = sum(items.quantity for items in cart_items)
+            if total_quantity > 10:
+                messages.error(request, 'You have exceeded the limit of 10 items in your cart.')
+                return redirect('cart:viewcart')
 
-            cart_item.variant.product.price = discounted_price
+            for item in cart_items:
+                if item.quantity > item.variant.qty:
+                    messages.error(request, f"'{item.variant.product.product_name}' exceeds available stock.")
+                    return redirect('cart:viewcart')
 
-        total_quantity=sum(items.quantity for items in cart_items )
-        if total_quantity > 10:
-            messages.error(request, 'You have exceeded the limit of 10 items in your cart!!')
+                variant = get_object_or_404(VariantSize, variant_id=item.variant.variant_id)
+                if variant.qty == 0:
+                    messages.error(request, 'Please remove out-of-stock products from your cart.')
+                    return redirect('cart:viewcart')
+
+            coupon_discount = Decimal('0.0')
+            try:
+                couponuser = CouponUser.objects.get(user=user, status=True)
+                coupon_discount = couponuser.coupon.discount_amount
+            except CouponUser.DoesNotExist:
+                pass
+            except Exception as e:
+                messages.error(request, "An error occurred while applying the coupon.")
+                return redirect('cart:viewcart')
+
+            total = sum(item.item_total for item in cart_items)
+            total_after_discount = total - min(total, coupon_discount)
+            tax_rate = Decimal('0.02')
+            tax = total_after_discount * tax_rate
+            grand_total = total_after_discount + tax + delivery_charge
+            limit = Decimal(1000)
+
+            coupons = Coupon.objects.all()
+            try:
+                user_wallet = Wallet.objects.get(user_id=user)
+                wallet_balance = user_wallet.balance
+            except Wallet.DoesNotExist:
+                wallet_balance = Decimal('0.0')
+            except Exception as e:
+                wallet_balance = Decimal('0.0')
+
+            return render(request, 'user/checkout.html', {
+                'user': user,
+                'addresses': addresses,
+                'cart_items': cart_items,
+                'tax': tax,
+                'delivery_charge': delivery_charge,
+                'grand_total': grand_total,
+                'coupons': coupons,
+                'discount': coupon_discount,
+                'limit': limit,
+                'wallet_balance': wallet_balance,
+                'total': total
+            })
+
+        except DatabaseError as e:
+            messages.error(request, "An error occurred while processing your checkout. Please try again.")
             return redirect('cart:viewcart')
-        
-        for item in cart_items:
-            if item.quantity > item.variant.qty:  
-                messages.error(request, f"'{item.variant.product.product_name}' exceeds available stock.")
-                return redirect('cart:viewcart')
+        except Exception as e:
+            messages.error(request, "An unexpected error occurred. Please contact support.")
+            return redirect('cart:viewcart')
 
-        
-        for cart_item in cart_items:
-            variant = get_object_or_404(VariantSize, variant_id=cart_item.variant.variant_id)
-
-            if variant.qty == 0:
-                messages.error(request, 'Please remove out of stock product')
-                return redirect('cart:viewcart')
-
-
-        # total = sum(items.item_total for items in cart_items)
-        # tax_rate = Decimal('0.02')
-        # tax = total * tax_rate
-        # grand_total = total + tax + delivery_charge
-        coupon_discount = Decimal('0.0')
-        try:
-            couponuser = CouponUser.objects.get(user=user,status=True)
-            coupon_discount = couponuser.coupon.discount_amount
-        
-        except CouponUser.DoesNotExist:
-            pass  
-
-        total = sum(item.item_total for item in cart_items)
-        total_after_discount = total - min(total, coupon_discount)
-        tax_rate = Decimal('0.02')
-        tax = total_after_discount * tax_rate
-        grand_total = total_after_discount + tax + delivery_charge
-        limit= Decimal(1000)
-
-        coupons=Coupon.objects.all()
-        try:
-            user_wallet = Wallet.objects.get(user_id=user)
-            wallet_balance = user_wallet.balance
-        except Wallet.DoesNotExist:
-            wallet_balance = 0
-        
-        return render(request,'user/checkout.html',
-                {
-                    'user':user,
-                    'addresses':addresses,
-                    'cart_items':cart_items,
-                    'tax':tax,
-                    'delivery_charge':delivery_charge,
-                    'grand_total':grand_total,
-                    'coupons':coupons,
-                    'discount':coupon_discount,
-                    'limit':limit,
-                    'wallet_balance':wallet_balance,
-                    'total':total
-
-                }) 
     return redirect('accounts:login_user') 
 
 
