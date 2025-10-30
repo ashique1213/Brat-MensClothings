@@ -937,6 +937,77 @@ def order_details(request):
                 if action == 'Delivered':
                     order.order.payment_status = 'Pending'
                     order.order.save()
+                
+                if action == 'Approve Returned':
+                    item = order  # This is the OrderItem being processed
+                    the_order = item.order
+                    user = the_order.user
+
+                    with transaction.atomic():
+                        # Restock variant
+                        if item.variants:
+                            item.variants.qty += item.quantity
+                            item.variants.save()
+
+                        # Wallet
+                        user_wallet, _ = Wallet.objects.get_or_create(user_id=user)
+
+                        # Count remaining items (not cancelled / returned)
+                        remaining_active_items = the_order.items.exclude(status__in=['Cancelled', 'Approve Returned'])
+                        is_last_item = (remaining_active_items.count() == 1 and remaining_active_items.first().orderitem_id == item.orderitem_id)
+
+                        # Safe values
+                        old_total = Decimal(the_order.total_price or 0)
+                        item_subtotal = Decimal(item.subtotal_price or 0)
+                        order_coupon = Decimal(the_order.coupon_amount or 0)
+
+                        if is_last_item:
+                            # FULL REFUND
+                            refund_amount = old_total
+
+                            user_wallet.balance = Decimal(user_wallet.balance or 0) + refund_amount
+                            user_wallet.save()
+
+                            Transaction.objects.create(
+                                wallet_id=user_wallet,
+                                transaction_type='Full Return Refund',
+                                amount=refund_amount,
+                                details=f"Full return approved for order #{the_order.tracking_number}"
+                            )
+
+                            the_order.total_price = Decimal('0.00')
+                            the_order.coupon_amount = Decimal('0.00')
+                            the_order.coupon_code = None
+                            the_order.save()
+
+                        else:
+                            # PARTIAL REFUND BASED ON WHAT USER ACTUALLY PAID
+                            # New total after removing item (but coupon stays applied)
+                            new_total = old_total - item_subtotal
+
+                            # Refund only difference in what user paid
+                            refund_amount = old_total - new_total
+
+                            user_wallet.balance = Decimal(user_wallet.balance or 0) + refund_amount
+                            user_wallet.save()
+
+                            Transaction.objects.create(
+                                wallet_id=user_wallet,
+                                transaction_type='Item Return Refund',
+                                amount=refund_amount,
+                                details=f"Return approved: {item.variants.product.product_name} (x{item.quantity})"
+                            )
+
+                            # Update order total
+                            the_order.total_price = new_total
+                            the_order.save()
+
+                        # Mark item returned
+                        item.status = 'Approve Returned'
+                        item.save()
+
+                        messages.success(request, f"Return approved. ₹{refund_amount} refunded to wallet.")
+
                 order.save() 
                 messages.success(request, f"Order status updated to {action}.")
                 return redirect('order:order_details') 
