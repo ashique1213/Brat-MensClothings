@@ -39,7 +39,7 @@ def checkout(request):
         try:
             grand_total = Decimal('0.0')
             tax = Decimal('0.0')
-            delivery_charge = Decimal('50.0')
+            delivery_charge = getattr(settings, 'DELIVERY_CHARGE', Decimal('50'))
 
             user = request.user
             addresses = Address.objects.filter(user=user, status=False)
@@ -109,10 +109,10 @@ def checkout(request):
 
             total = sum(item.item_total for item in cart_items)
             total_after_discount = total - min(total, coupon_discount)
-            tax_rate = Decimal('0.02')
+            tax_rate = getattr(settings, 'TAX_RATE', Decimal('0.02'))
             tax = total_after_discount * tax_rate
             grand_total = total_after_discount + tax + delivery_charge
-            limit = Decimal(1000)
+            limit = getattr(settings, 'DISCOUNT_LIMIT', Decimal('1000'))
 
             coupons = Coupon.objects.all()
             try:
@@ -153,7 +153,7 @@ def place_order(request):
         try:
             grand_total = Decimal('0.0')
             tax = Decimal('0.0')
-            delivery_charge = Decimal('50.0')
+            delivery_charge = getattr(settings, 'DELIVERY_CHARGE', Decimal('50'))
 
             user = request.user
             addresses = Address.objects.filter(user=user)
@@ -206,7 +206,7 @@ def place_order(request):
             except Exception as e:
                 total_after_discount = total
 
-            tax_rate = Decimal('0.02')
+            tax_rate = getattr(settings, 'TAX_RATE', Decimal('0.02'))
             tax = total_after_discount * tax_rate
             grand_total = total_after_discount + tax + delivery_charge
 
@@ -629,8 +629,8 @@ def manage_orders(request, orderitem_id):
     if request.user.is_authenticated:
         
 
-        tax_rate = Decimal('0.02')
-        delivery_charge = Decimal('50.0')
+        tax_rate = getattr(settings, 'TAX_RATE', Decimal('0.02'))
+        delivery_charge = getattr(settings, 'DELIVERY_CHARGE', Decimal('50'))
 
         try:
             orderitem = OrderItem.objects.get(orderitem_id=orderitem_id)

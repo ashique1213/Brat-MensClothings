@@ -247,4 +247,11 @@ RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET')
 
 client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 
+from decimal import Decimal
+
+TAX_RATE = Decimal('0.02')
+DELIVERY_CHARGE = Decimal('50')
+DISCOUNT_LIMIT = Decimal('1000')
+
+
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
