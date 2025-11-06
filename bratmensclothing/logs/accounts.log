@@ -1,0 +1,6 @@
+DEBUG 2025-11-06 16:56:59,425 accounts.views views.home_user | home_user accessed by muhammed
+INFO 2025-11-06 16:56:59,605 accounts.views views.home_user | Home page loaded with 14 products
+DEBUG 2025-11-06 16:57:18,270 accounts.views views.home_user | home_user accessed by muhammed
+INFO 2025-11-06 16:57:18,349 accounts.views views.home_user | Home page loaded with 14 products
+DEBUG 2025-11-06 16:57:24,898 accounts.views views.home_user | home_user accessed by muhammed
+INFO 2025-11-06 16:57:24,984 accounts.views views.home_user | Home page loaded with 14 products
