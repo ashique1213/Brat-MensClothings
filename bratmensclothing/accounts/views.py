@@ -20,9 +20,10 @@ from offer.models import Brand_Offers,Product_Offers
 from django.db.models import Q
 from decimal import Decimal
 from django.views.decorators.cache import never_cache
-
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
+import logging
+logger = logging.getLogger('accounts.views')
 
 def create_superuser(request):
     User = get_user_model()
@@ -38,11 +39,15 @@ def create_superuser(request):
 
 
 def generate_otp():
-    return random.randint(100000, 999999)
+    otp = random.randint(100000, 999999)
+    logger.debug("Generated OTP: %s", otp)
+    return otp
 
 @never_cache
 def signup_user(request):
+    logger.debug("signup_user called | method=%s | user=%s", request.method, request.user)
     if request.user.is_authenticated:
+        logger.info("Authenticated user %s redirected to home", request.user)
         return redirect('accounts:home_user')
     
     if request.method == 'POST':
@@ -90,6 +95,7 @@ def signup_user(request):
             errors.setdefault('password_error', []).append('Password must contain at least one special character')
 
         if errors:
+            logger.warning("Signup validation failed for email=%s | errors=%s", email, errors)
             return JsonResponse({'status': 'error', 'errors': errors}, status=400)
         
         if pass1 == pass2:
@@ -118,8 +124,10 @@ def signup_user(request):
                     recipient_list=[email],
                     fail_silently=False,
                 )
+                logger.warning("Signup validation failed for email=%s | errors=%s", email, errors)
                 return JsonResponse({'status': 'success', 'redirect_url': reverse('accounts:otp_verify')})
             except Exception as e:
+                logger.error("Failed to send OTP email to %s | error=%s", email, e, exc_info=True)
                 return JsonResponse({'status': 'error', 'errors': {'email': 'Failed to send OTP. Please try again.'}}, status=500)
         else:
             return JsonResponse({'status': 'error', 'errors': {'password': 'Passwords do not match.'}}, status=400)
@@ -128,11 +136,13 @@ def signup_user(request):
 
 
 def otp_verify(request):
+    logger.debug("otp_verify called | method=%s", request.method)
     if request.user.is_authenticated:
+        logger.info("Authenticated user redirected")
         return redirect('accounts:home_user')
     
     if 'otp' not in request.session or 'otp_expiry' not in request.session:
-        # messages.error(request, "You must sign up and request an OTP first!")
+        logger.warning("OTP session missing – redirecting to signup")
         return redirect('signup_user')
 
     if request.method == 'POST':
@@ -143,7 +153,8 @@ def otp_verify(request):
         # Check if OTP matches and not expired
         if entered_otp == str(stored_otp):
             # Check for expiry
-            if datetime.datetime.now().timestamp() > otp_expiry:  
+            if datetime.datetime.now().timestamp() > otp_expiry:
+                logger.info("OTP expired for session")
                 request.session.pop('otp', None)  # Remove expired OTP
                 request.session.pop('otp_expiry', None)  # Remove expiry time
                 return JsonResponse({'status': 'error', 'errors': {'otp': 'OTP has expired. Please request a new one.'}}, status=400)
@@ -155,14 +166,16 @@ def otp_verify(request):
                 phone_number=request.session['phone'],
                 password=make_password(request.session['password'])  # Hash the password
             )
-            user.save()  
+            user.save()
+            logger.info("User created: %s (%s)", user.username, user.email)
 
             authenticated_user = authenticate(request, username=request.session['username'], password=request.session['password'])
             if authenticated_user is not None:
                 login(request, authenticated_user) 
-                request.session.flush()  
+                request.session.flush()
+                logger.info("User %s logged in after OTP verification", user.username)
                 return JsonResponse({'status': 'success', 'redirect_url': reverse('accounts:login_user')})
-
+            logger.error("Authentication failed after user creation: %s", user.username)
             return JsonResponse({'status': 'error', 'errors': {'authentication': 'User authentication failed. Please try again.'}}, status=400)
         else:
             return JsonResponse({'status': 'error', 'errors': {'otp': 'Invalid OTP.'}}, status=400)
@@ -173,6 +186,7 @@ def otp_verify(request):
 
 
 def resend_otp(request):
+    logger.debug("resend_otp called")
     # Initialize resend_otp in session if it doesn't exist
     if 'resend_otp' not in request.session:
         request.session['resend_otp'] = 0  # Set a default value to prevent KeyError
@@ -196,8 +210,10 @@ def resend_otp(request):
                 [email],
                 fail_silently=False,
             )
+            logger.info("Resent OTP %s to %s", otp, email)
             return JsonResponse({'status': 'success', 'message': 'A new OTP has been sent to your email.'})
         except Exception as e:
+            logger.error("Failed to resend OTP to %s: %s", email, e, exc_info=True)
             return JsonResponse({'status': 'error', 'message': 'Failed to resend OTP. Please try again.'})
         
     return JsonResponse({'status': 'error', 'message': 'An error occurred. Please try signing up again.'})
@@ -206,7 +222,9 @@ def resend_otp(request):
 
 @never_cache
 def login_user(request):
+    logger.debug("login_user | method=%s", request.method)
     if request.user.is_authenticated:
+        logger.info("Already logged in – redirecting %s", request.user)
         return redirect('accounts:home_user')
 
     if request.method == 'POST':
@@ -215,14 +233,17 @@ def login_user(request):
 
         errors = {}
         if not email:
+                logger.warning("Login attempt missing email")
                 errors['email'] = 'Email is required.'
         if not password:
+                logger.warning("Login attempt missing password")
                 errors['password'] = 'Password is required.'
         if errors:
             return JsonResponse({'status': 'error', 'errors': errors}, status=400)
         
         email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         if not re.match(email_pattern, email):
+            logger.warning("Invalid email format: %s", email)
             return JsonResponse({'status': 'error', 'errors': {'email': 'Invalid email format.'}}, status=400)
 
         if len(password) < 6:
@@ -232,30 +253,28 @@ def login_user(request):
             user = Users.objects.get(email=email)
 
             if not user.is_active:
+                logger.warning("Blocked user login attempt: %s", email)
                 return JsonResponse({'status': 'error', 'errors': {'account': 'Your account is blocked.'}}, status=403)
             
             authenticated_user = authenticate(request, username=user.username, password=password) 
             if authenticated_user is not None:
                 login(request, authenticated_user) 
                 redirect_url = reverse('accounts:home_user')
+                logger.info("User logged in: %s (%s)", authenticated_user.username, email)
                 return JsonResponse({'status': 'success', 'redirect_url': redirect_url}, status=200)
             else:
+                logger.warning("Invalid password for %s", email)
                 return JsonResponse({'status': 'error', 'errors': {'password': 'Invalid password'}}, status=400)
 
         except Users.DoesNotExist:
+            logger.warning("Login failed – email not found: %s", email)
             return JsonResponse({'status': 'error', 'errors': {'email': 'User does not exist'}}, status=400)
 
     return render(request, 'user/login.html')
 
-
-
-# def reset_password(request):
-
-#     return render(request,'user/reset_password.html')
-
-
 @never_cache
 def home_user(request):
+    logger.debug("home_user accessed by %s", request.user)
     products=(
         ProductDetails.objects.select_related('brand')
         .prefetch_related('category','variants')
@@ -300,11 +319,13 @@ def home_user(request):
 
         product.final_price = final_price
         product.discount_percentage = discount_percentage
+    logger.info("Home page loaded with %d products", products.count())
     return render(request,'user/home.html',{'products':products})
 
 
 @never_cache
 def logout_user(request):
+    logger.info("User logout: %s", request.user)
     request.session.flush()
     logout(request)
     return redirect('accounts:login_user')
@@ -314,7 +335,9 @@ def is_staff(user):
    
 @never_cache
 def admin_login(request):
+    logger.debug("admin_login | method=%s", request.method)
     if request.user.is_authenticated:
+        logger.info("Admin already logged in")
         return redirect('dashboard:admin_dashboard')
     
     
@@ -331,15 +354,18 @@ def admin_login(request):
 
             if admin is not None and admin.is_superuser:
                 login(request, admin)
+                logger.info("Superuser logged in: %s", email)
                 return redirect('dashboard:admin_dashboard')
         
         error_message = "Invalid credentials or not a superuser."
+        logger.warning("Admin login failed: %s", email)
         return render(request, 'admin/admin_login.html', {'error_message': error_message})
 
     return render(request, 'admin/admin_login.html')
 
 @never_cache
 def admin_logout(request):
+    logger.info("Admin logout: %s", request.user)
     request.session.flush()
     logout(request)
     return redirect('accounts:admin_login')
@@ -347,6 +373,7 @@ def admin_logout(request):
 
 @never_cache
 def forgot_password(request):
+    logger.debug("forgot_password | method=%s", request.method)
     if request.user.is_authenticated:
         return redirect('accounts:home_user')
 
@@ -361,6 +388,7 @@ def forgot_password(request):
             errors['email_error'] = 'Email does not exist'
 
         if errors:
+            logger.warning("Forgot password validation failed: %s", errors)
             return JsonResponse({'status': 'error', 'errors': errors}, status=400)
 
         otp = generate_otp()  # Generate OTP
@@ -377,6 +405,7 @@ def forgot_password(request):
             [email],
             fail_silently=False,
         )
+        logger.info("Password reset OTP sent to %s", email)
         return JsonResponse({'status': 'success', 'redirect_url': reverse('accounts:verify_otp'),'otp_expiry_time': otp_expiry.timestamp()})
 
     return render(request, 'user/forgot/forgot_password.html')
@@ -384,6 +413,7 @@ def forgot_password(request):
 
 @never_cache
 def verify_otp(request):
+    logger.debug("verify_otp (forgot) | method=%s", request.method)
     if request.user.is_authenticated:
         return redirect('accounts:home_user')
 
@@ -401,6 +431,7 @@ def verify_otp(request):
         elif entered_otp != str(session_otp):  
             errors['otp_error'] = 'Invalid OTP entered. Please try again.'
         else:
+            logger.info("OTP verified for password reset")
             return JsonResponse({'status': 'success', 'redirect_url': reverse('accounts:reset_new_password')})
 
         if errors:
@@ -410,6 +441,7 @@ def verify_otp(request):
 
 
 def reset_resend_otp(request):
+    logger.debug("reset_resend_otp called")
     email = request.session.get('email')  # Retrieve email from session
 
     if not email:
@@ -428,9 +460,11 @@ def reset_resend_otp(request):
                 [email],
                 fail_silently=False,
             )
+            logger.info("Resent password reset OTP to %s", email)
             return JsonResponse({'status': 'success', 'message': 'A new OTP has been sent to your email.'})
     
         except Exception as e:
+            logger.error("Failed to resend reset OTP: %s", e, exc_info=True)
             return JsonResponse({'status': 'error', 'message': 'Failed to resend OTP. Please try again.'}, status=500)
         
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
@@ -439,6 +473,7 @@ def reset_resend_otp(request):
 
 @never_cache
 def reset_new_password(request):
+    logger.debug("reset_new_password | method=%s", request.method)
     if request.user.is_authenticated:
         return redirect('accounts:home_user')
 
@@ -462,6 +497,7 @@ def reset_new_password(request):
             errors.setdefault('password_error', []).append('Password must contain at least one special character')
 
         if errors:
+            logger.warning("Password reset validation failed: %s", errors)
             return JsonResponse({'status': 'error', 'errors': errors}, status=400)
 
         # Assuming the user is identified by their email session or another means
@@ -469,7 +505,7 @@ def reset_new_password(request):
         user = Users.objects.get(email=email)
         user.set_password(new_password)  # Use Django's built-in method to hash the password
         user.save()
-
+        logger.info("Password reset successful for %s", email)
         del request.session['otp']
         del request.session['otp_expiry']
 
