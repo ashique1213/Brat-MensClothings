@@ -1,6 +1,9 @@
-DEBUG 2025-11-06 16:56:59,425 accounts.views views.home_user | home_user accessed by muhammed
-INFO 2025-11-06 16:56:59,605 accounts.views views.home_user | Home page loaded with 14 products
-DEBUG 2025-11-06 16:57:18,270 accounts.views views.home_user | home_user accessed by muhammed
-INFO 2025-11-06 16:57:18,349 accounts.views views.home_user | Home page loaded with 14 products
-DEBUG 2025-11-06 16:57:24,898 accounts.views views.home_user | home_user accessed by muhammed
-INFO 2025-11-06 16:57:24,984 accounts.views views.home_user | Home page loaded with 14 products
+[2025-11-09 17:25:14,939] INFO accounts.views views.logout_user | User logout: muhammed
+[2025-11-09 17:25:14,999] DEBUG accounts.views views.login_user | login_user | method=GET
+[2025-11-09 17:25:19,688] DEBUG accounts.views views.home_user | home_user accessed by muhammed
+[2025-11-09 17:25:19,789] INFO accounts.views views.home_user | Home page loaded with 14 products
+[2025-11-09 17:26:31,638] INFO accounts.views views.logout_user | User logout: muhammed
+[2025-11-09 17:26:31,700] DEBUG accounts.views views.login_user | login_user | method=GET
+[2025-11-09 17:26:33,392] DEBUG accounts.views views.login_user | login_user | method=GET
+[2025-11-09 17:26:36,224] DEBUG accounts.views views.home_user | home_user accessed by muhammed
+[2025-11-09 17:26:36,321] INFO accounts.views views.home_user | Home page loaded with 14 products

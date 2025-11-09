@@ -264,7 +264,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '{levelname} {asctime} {name} {module}.{funcName} | {message}',
+            'format': '[{asctime}] {levelname} {name} {module}.{funcName} | {message}',
             'style': '{',
         },
         'simple': {
@@ -279,16 +279,148 @@ LOGGING = {
         },
         'file': {
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': LOG_DIR / 'accounts.log',
+            'filename': LOG_DIR / 'app.log',
             'maxBytes': 10 * 1024 * 1024,  # 10 MB
             'backupCount': 5,
             'formatter': 'verbose',
+            'level': 'DEBUG',
+        },
+
+        # --- per-app handlers ---
+        'accounts_file': {
+            'class': 'logging.FileHandler',
+            'filename': LOG_DIR / 'accounts.log',
+            'formatter': 'verbose',
+            'level': 'DEBUG',
+        },
+        'products_file': {
+            'class': 'logging.FileHandler',
+            'filename': LOG_DIR / 'products.log',
+            'formatter': 'verbose',
+            'level': 'DEBUG',
+        },
+        'users_file': {
+            'class': 'logging.FileHandler',
+            'filename': LOG_DIR / 'users.log',
+            'formatter': 'verbose',
+            'level': 'DEBUG',
+        },
+        'dashboard_file': {
+            'class': 'logging.FileHandler',
+            'filename': LOG_DIR / 'dashboard.log',
+            'formatter': 'verbose',
+            'level': 'DEBUG',
+        },
+        'cart_file': {
+            'class': 'logging.FileHandler',
+            'filename': LOG_DIR / 'cart.log',
+            'formatter': 'verbose',
+            'level': 'DEBUG',
+        },
+        'order_file': {
+            'class': 'logging.FileHandler',
+            'filename': LOG_DIR / 'order.log',
+            'formatter': 'verbose',
+            'level': 'DEBUG',
+        },
+        'wishlist_file': {
+            'class': 'logging.FileHandler',
+            'filename': LOG_DIR / 'wishlist.log',
+            'formatter': 'verbose',
+            'level': 'DEBUG',
+        },
+        'coupon_file': {
+            'class': 'logging.FileHandler',
+            'filename': LOG_DIR / 'coupon.log',
+            'formatter': 'verbose',
+            'level': 'DEBUG',
+        },
+        'offer_file': {
+            'class': 'logging.FileHandler',
+            'filename': LOG_DIR / 'offer.log',
+            'formatter': 'verbose',
+            'level': 'DEBUG',
+        },
+        'wallet_file': {
+            'class': 'logging.FileHandler',
+            'filename': LOG_DIR / 'wallet.log',
+            'formatter': 'verbose',
+            'level': 'DEBUG',
+        },
+        'salesreport_file': {
+            'class': 'logging.FileHandler',
+            'filename': LOG_DIR / 'salesreport.log',
+            'formatter': 'verbose',
+            'level': 'DEBUG',
         },
     },
+
+    # ---------- ROOT LOGGER ----------
+    'root': {
+        'handlers': ['console', 'file'],
+        'level': 'INFO',
+    },
+
+    # ---------- DJANGO & APP LOGGERS ----------
     'loggers': {
-        'accounts.views': {
+        'django': {
             'handlers': ['console', 'file'],
-            'level': 'DEBUG',  # Change to INFO in production
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'accounts': {
+            'handlers': ['accounts_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'products': {
+            'handlers': ['products_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'users': {
+            'handlers': ['users_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'dashboard': {
+            'handlers': ['dashboard_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'cart': {
+            'handlers': ['cart_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'order': {
+            'handlers': ['order_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'wishlist': {
+            'handlers': ['wishlist_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'coupon': {
+            'handlers': ['coupon_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'offer': {
+            'handlers': ['offer_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'wallet': {
+            'handlers': ['wallet_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'salesreport': {
+            'handlers': ['salesreport_file', 'console'],
+            'level': 'DEBUG',
             'propagate': False,
         },
     },

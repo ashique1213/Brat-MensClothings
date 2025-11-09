@@ -20,7 +20,7 @@ def view_wallet(request):
 
     try:
         user_wallet = Wallet.objects.get(user_id=user.userid)
-        logger.debug("Wallet found | user_id=%s | wallet_id=%s | balance=%s", user.userid, user_wallet.id, user_wallet.balance)
+        logger.debug("Wallet found | user_id=%s | wallet_id=%s | balance=%s", user.userid, user_wallet.wallet_id, user_wallet.balance)
     except Wallet.DoesNotExist:
         user_wallet = None
         logger.warning("Wallet not found for user | user_id=%s", user.userid)
@@ -30,7 +30,7 @@ def view_wallet(request):
         return render(request, 'user/wallet.html', {'error': 'No wallet found for this user.'})
 
     user_transaction = Transaction.objects.filter(wallet_id=user_wallet).order_by('-created_at')
-    logger.debug("Transactions loaded | wallet_id=%s | count=%d", user_wallet.id, user_transaction.count())
+    logger.debug("Transactions loaded | wallet_id=%s | count=%d", user_wallet.wallet_id, user_transaction.count())
 
     # Pagination
     paginator = Paginator(user_transaction, 2)
