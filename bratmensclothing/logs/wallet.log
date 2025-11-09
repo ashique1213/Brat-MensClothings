@@ -1,0 +1,119 @@
+[2025-11-09 17:24:43,698] DEBUG wallet.views views.view_wallet | view_wallet called | user=muhammed | authenticated=True
+[2025-11-09 17:24:43,851] DEBUG wallet.views views.view_wallet | Page loaded | page=1 | has_next=True | has_previous=False
+[2025-11-09 17:24:43,876] INFO wallet.views views.view_wallet | Wallet page rendered successfully | user_id=133 | transactions_count=35 | current_page=1
+[2025-11-09 17:24:51,329] DEBUG wallet.views views.view_wallet | view_wallet called | user=muhammed | authenticated=True
+[2025-11-09 17:24:51,361] DEBUG wallet.views views.view_wallet | Page loaded | page=1 | has_next=True | has_previous=False
+[2025-11-09 17:24:51,362] INFO wallet.views views.view_wallet | Wallet page rendered successfully | user_id=133 | transactions_count=35 | current_page=1
+[2025-11-09 17:26:19,797] DEBUG wallet.views views.view_wallet | view_wallet called | user=muhammed | authenticated=True
+[2025-11-09 17:26:19,826] DEBUG wallet.views views.view_wallet | Page loaded | page=1 | has_next=True | has_previous=False
+[2025-11-09 17:26:19,826] INFO wallet.views views.view_wallet | Wallet page rendered successfully | user_id=133 | transactions_count=35 | current_page=1
+[2025-11-09 17:26:38,408] DEBUG wallet.views views.view_wallet | view_wallet called | user=muhammed | authenticated=True
+[2025-11-09 17:26:38,437] DEBUG wallet.views views.view_wallet | Page loaded | page=1 | has_next=True | has_previous=False
+[2025-11-09 17:26:38,437] INFO wallet.views views.view_wallet | Wallet page rendered successfully | user_id=133 | transactions_count=36 | current_page=1
+[2025-11-09 17:26:51,463] DEBUG wallet.views views.view_wallet | view_wallet called | user=muhammed | authenticated=True
+[2025-11-09 17:26:51,487] DEBUG wallet.views views.view_wallet | Page loaded | page=1 | has_next=True | has_previous=False
+[2025-11-09 17:26:51,488] INFO wallet.views views.view_wallet | Wallet page rendered successfully | user_id=133 | transactions_count=37 | current_page=1
+[2025-11-09 17:27:13,128] DEBUG wallet.views views.view_wallet | view_wallet called | user=muhammed | authenticated=True
+[2025-11-09 17:27:13,152] DEBUG wallet.views views.view_wallet | Page loaded | page=1 | has_next=True | has_previous=False
+[2025-11-09 17:27:13,153] INFO wallet.views views.view_wallet | Wallet page rendered successfully | user_id=133 | transactions_count=37 | current_page=1
+[2025-11-09 17:28:15,294] DEBUG wallet.views views.view_wallet | view_wallet called | user=muhammed | authenticated=True
+[2025-11-09 17:28:15,329] DEBUG wallet.views views.view_wallet | Page loaded | page=1 | has_next=True | has_previous=False
+[2025-11-09 17:28:15,329] INFO wallet.views views.view_wallet | Wallet page rendered successfully | user_id=133 | transactions_count=37 | current_page=1
+[2025-11-09 17:28:33,887] DEBUG wallet.views views.view_wallet | view_wallet called | user=muhammed | authenticated=True
+[2025-11-09 17:28:33,912] DEBUG wallet.views views.view_wallet | Transactions loaded
+[2025-11-09 17:28:33,917] DEBUG wallet.views views.view_wallet | Page loaded | page=1 | has_next=True | has_previous=False
+[2025-11-09 17:28:33,918] INFO wallet.views views.view_wallet | Wallet page rendered successfully | user_id=133 | transactions_count=37 | current_page=1
+[2025-11-09 17:28:58,760] DEBUG wallet.views views.view_wallet | view_wallet called | user=muhammed | authenticated=True
+[2025-11-09 17:28:58,783] DEBUG wallet.views views.view_wallet | Transactions loaded
+[2025-11-09 17:28:58,788] DEBUG wallet.views views.view_wallet | Page loaded | page=1 | has_next=True | has_previous=False
+[2025-11-09 17:28:58,789] INFO wallet.views views.view_wallet | Wallet page rendered successfully | user_id=133 | transactions_count=37 | current_page=1
+[2025-11-09 17:29:27,527] DEBUG wallet.views views.view_wallet | view_wallet called | user=muhammed | authenticated=True
+[2025-11-09 17:29:27,542] DEBUG wallet.views views.view_wallet | Transactions loaded
+[2025-11-09 17:29:27,545] DEBUG wallet.views views.view_wallet | Page loaded | page=1 | has_next=True | has_previous=False
+[2025-11-09 17:29:27,545] INFO wallet.views views.view_wallet | Wallet page rendered successfully | user_id=133 | transactions_count=37 | current_page=1
+[2025-11-09 17:45:17,463] DEBUG wallet.views views.view_wallet | view_wallet called | user=muhammed | authenticated=True
+[2025-11-09 17:45:17,466] DEBUG wallet.views views.view_wallet | Wallet found | user_id=133 | balance=900.00
+[2025-11-09 17:45:17,468] DEBUG wallet.views views.view_wallet | Transactions loaded | total=37 | user_id=133
+[2025-11-09 17:45:17,469] DEBUG wallet.views views.view_wallet | Pagination successful | user_id=133 | current_page=1 | has_next=True | has_previous=False
+[2025-11-09 17:45:17,469] INFO wallet.views views.view_wallet | Wallet page rendered successfully | user_id=133 | transactions_count=37 | current_page=1
+[2025-11-09 17:45:27,347] DEBUG wallet.views views.view_wallet | view_wallet called | user=muhammed | authenticated=True
+[2025-11-09 17:45:27,349] DEBUG wallet.views views.view_wallet | Wallet found | user_id=133 | balance=900.00
+[2025-11-09 17:45:27,351] DEBUG wallet.views views.view_wallet | Transactions loaded | total=37 | user_id=133
+[2025-11-09 17:45:27,352] DEBUG wallet.views views.view_wallet | Pagination successful | user_id=133 | current_page=1 | has_next=True | has_previous=False
+[2025-11-09 17:45:27,352] INFO wallet.views views.view_wallet | Wallet page rendered successfully | user_id=133 | transactions_count=37 | current_page=1
+[2025-11-09 17:45:29,522] DEBUG wallet.views views.view_wallet | view_wallet called | user=muhammed | authenticated=True
+[2025-11-09 17:45:29,524] DEBUG wallet.views views.view_wallet | Wallet found | user_id=133 | balance=900.00
+[2025-11-09 17:45:29,526] DEBUG wallet.views views.view_wallet | Transactions loaded | total=37 | user_id=133
+[2025-11-09 17:45:29,527] DEBUG wallet.views views.view_wallet | Pagination successful | user_id=133 | current_page=19 | has_next=False | has_previous=True
+[2025-11-09 17:45:29,527] INFO wallet.views views.view_wallet | Wallet page rendered successfully | user_id=133 | transactions_count=37 | current_page=19
+[2025-11-09 17:45:33,775] DEBUG wallet.views views.view_wallet | view_wallet called | user=muhammed | authenticated=True
+[2025-11-09 17:45:33,776] DEBUG wallet.views views.view_wallet | Wallet found | user_id=133 | balance=900.00
+[2025-11-09 17:45:33,778] DEBUG wallet.views views.view_wallet | Transactions loaded | total=37 | user_id=133
+[2025-11-09 17:45:33,780] DEBUG wallet.views views.view_wallet | Pagination successful | user_id=133 | current_page=18 | has_next=True | has_previous=True
+[2025-11-09 17:45:33,780] INFO wallet.views views.view_wallet | Wallet page rendered successfully | user_id=133 | transactions_count=37 | current_page=18
+[2025-11-09 17:45:37,518] DEBUG wallet.views views.view_wallet | view_wallet called | user=muhammed | authenticated=True
+[2025-11-09 17:45:37,520] DEBUG wallet.views views.view_wallet | Wallet found | user_id=133 | balance=900.00
+[2025-11-09 17:45:37,521] DEBUG wallet.views views.view_wallet | Transactions loaded | total=37 | user_id=133
+[2025-11-09 17:45:37,522] DEBUG wallet.views views.view_wallet | Pagination successful | user_id=133 | current_page=19 | has_next=False | has_previous=True
+[2025-11-09 17:45:37,522] INFO wallet.views views.view_wallet | Wallet page rendered successfully | user_id=133 | transactions_count=37 | current_page=19
+[2025-11-09 17:45:40,546] DEBUG wallet.views views.view_wallet | view_wallet called | user=muhammed | authenticated=True
+[2025-11-09 17:45:40,547] DEBUG wallet.views views.view_wallet | Wallet found | user_id=133 | balance=900.00
+[2025-11-09 17:45:40,550] DEBUG wallet.views views.view_wallet | Transactions loaded | total=37 | user_id=133
+[2025-11-09 17:45:40,550] DEBUG wallet.views views.view_wallet | Pagination successful | user_id=133 | current_page=18 | has_next=True | has_previous=True
+[2025-11-09 17:45:40,551] INFO wallet.views views.view_wallet | Wallet page rendered successfully | user_id=133 | transactions_count=37 | current_page=18
+[2025-11-09 17:45:42,325] DEBUG wallet.views views.view_wallet | view_wallet called | user=muhammed | authenticated=True
+[2025-11-09 17:45:42,327] DEBUG wallet.views views.view_wallet | Wallet found | user_id=133 | balance=900.00
+[2025-11-09 17:45:42,330] DEBUG wallet.views views.view_wallet | Transactions loaded | total=37 | user_id=133
+[2025-11-09 17:45:42,330] DEBUG wallet.views views.view_wallet | Pagination successful | user_id=133 | current_page=19 | has_next=False | has_previous=True
+[2025-11-09 17:45:42,330] INFO wallet.views views.view_wallet | Wallet page rendered successfully | user_id=133 | transactions_count=37 | current_page=19
+[2025-11-09 17:45:43,883] DEBUG wallet.views views.view_wallet | view_wallet called | user=muhammed | authenticated=True
+[2025-11-09 17:45:43,885] DEBUG wallet.views views.view_wallet | Wallet found | user_id=133 | balance=900.00
+[2025-11-09 17:45:43,887] DEBUG wallet.views views.view_wallet | Transactions loaded | total=37 | user_id=133
+[2025-11-09 17:45:43,888] DEBUG wallet.views views.view_wallet | Pagination successful | user_id=133 | current_page=1 | has_next=True | has_previous=False
+[2025-11-09 17:45:43,888] INFO wallet.views views.view_wallet | Wallet page rendered successfully | user_id=133 | transactions_count=37 | current_page=1
+[2025-11-09 17:45:46,906] DEBUG wallet.views views.view_wallet | view_wallet called | user=muhammed | authenticated=True
+[2025-11-09 17:45:46,908] DEBUG wallet.views views.view_wallet | Wallet found | user_id=133 | balance=900.00
+[2025-11-09 17:45:46,909] DEBUG wallet.views views.view_wallet | Transactions loaded | total=37 | user_id=133
+[2025-11-09 17:45:46,910] DEBUG wallet.views views.view_wallet | Pagination successful | user_id=133 | current_page=2 | has_next=True | has_previous=True
+[2025-11-09 17:45:46,910] INFO wallet.views views.view_wallet | Wallet page rendered successfully | user_id=133 | transactions_count=37 | current_page=2
+[2025-11-09 17:45:48,566] DEBUG wallet.views views.view_wallet | view_wallet called | user=muhammed | authenticated=True
+[2025-11-09 17:45:48,569] DEBUG wallet.views views.view_wallet | Wallet found | user_id=133 | balance=900.00
+[2025-11-09 17:45:48,571] DEBUG wallet.views views.view_wallet | Transactions loaded | total=37 | user_id=133
+[2025-11-09 17:45:48,572] DEBUG wallet.views views.view_wallet | Pagination successful | user_id=133 | current_page=3 | has_next=True | has_previous=True
+[2025-11-09 17:45:48,572] INFO wallet.views views.view_wallet | Wallet page rendered successfully | user_id=133 | transactions_count=37 | current_page=3
+[2025-11-09 17:45:50,457] DEBUG wallet.views views.view_wallet | view_wallet called | user=muhammed | authenticated=True
+[2025-11-09 17:45:50,459] DEBUG wallet.views views.view_wallet | Wallet found | user_id=133 | balance=900.00
+[2025-11-09 17:45:50,462] DEBUG wallet.views views.view_wallet | Transactions loaded | total=37 | user_id=133
+[2025-11-09 17:45:50,462] DEBUG wallet.views views.view_wallet | Pagination successful | user_id=133 | current_page=4 | has_next=True | has_previous=True
+[2025-11-09 17:45:50,462] INFO wallet.views views.view_wallet | Wallet page rendered successfully | user_id=133 | transactions_count=37 | current_page=4
+[2025-11-09 17:47:16,532] DEBUG wallet.views views.view_wallet | view_wallet called | user=muhammed | authenticated=True
+[2025-11-09 17:48:00,864] DEBUG wallet.views views.view_wallet | view_wallet called | user=muhammed | authenticated=True
+[2025-11-09 17:48:00,866] DEBUG wallet.views views.view_wallet | Wallet found | user_id=133 | wallet_id=45 | balance=900.00
+[2025-11-09 17:48:00,868] DEBUG wallet.views views.view_wallet | Transactions loaded | wallet_id=45 | count=37
+[2025-11-09 17:48:00,869] DEBUG wallet.views views.view_wallet | Page loaded | page=4 | has_next=True | has_previous=True
+[2025-11-09 17:48:00,869] INFO wallet.views views.view_wallet | Wallet page rendered successfully | user_id=133 | transactions_count=37 | current_page=4
+[2025-11-09 17:49:34,858] DEBUG wallet.views views.view_wallet | view_wallet called | user=muhammed | authenticated=True
+[2025-11-09 17:49:34,860] DEBUG wallet.views views.view_wallet | Wallet found | user_id=133 | wallet_id=45 | balance=900.00
+[2025-11-09 17:49:34,862] DEBUG wallet.views views.view_wallet | Transactions loaded | wallet_id=45 | count=37
+[2025-11-09 17:49:34,864] DEBUG wallet.views views.view_wallet | Page loaded | page=4 | has_next=True | has_previous=True
+[2025-11-09 17:49:34,864] INFO wallet.views views.view_wallet | Wallet page rendered successfully | user_id=133 | transactions_count=37 | current_page=4
+[2025-11-09 17:49:35,390] DEBUG wallet.views views.view_wallet | view_wallet called | user=muhammed | authenticated=True
+[2025-11-09 17:49:35,393] DEBUG wallet.views views.view_wallet | Wallet found | user_id=133 | wallet_id=45 | balance=900.00
+[2025-11-09 17:49:35,396] DEBUG wallet.views views.view_wallet | Transactions loaded | wallet_id=45 | count=37
+[2025-11-09 17:49:35,396] DEBUG wallet.views views.view_wallet | Page loaded | page=4 | has_next=True | has_previous=True
+[2025-11-09 17:49:35,397] INFO wallet.views views.view_wallet | Wallet page rendered successfully | user_id=133 | transactions_count=37 | current_page=4
+[2025-11-09 17:49:35,667] DEBUG wallet.views views.view_wallet | view_wallet called | user=muhammed | authenticated=True
+[2025-11-09 17:49:35,668] DEBUG wallet.views views.view_wallet | Wallet found | user_id=133 | wallet_id=45 | balance=900.00
+[2025-11-09 17:49:35,670] DEBUG wallet.views views.view_wallet | Transactions loaded | wallet_id=45 | count=37
+[2025-11-09 17:49:35,671] DEBUG wallet.views views.view_wallet | Page loaded | page=4 | has_next=True | has_previous=True
+[2025-11-09 17:49:35,672] INFO wallet.views views.view_wallet | Wallet page rendered successfully | user_id=133 | transactions_count=37 | current_page=4
+[2025-11-09 17:49:35,831] DEBUG wallet.views views.view_wallet | view_wallet called | user=muhammed | authenticated=True
+[2025-11-09 17:49:35,832] DEBUG wallet.views views.view_wallet | Wallet found | user_id=133 | wallet_id=45 | balance=900.00
+[2025-11-09 17:49:35,834] DEBUG wallet.views views.view_wallet | Transactions loaded | wallet_id=45 | count=37
+[2025-11-09 17:49:35,835] DEBUG wallet.views views.view_wallet | Page loaded | page=4 | has_next=True | has_previous=True
+[2025-11-09 17:49:35,836] INFO wallet.views views.view_wallet | Wallet page rendered successfully | user_id=133 | transactions_count=37 | current_page=4
+[2025-11-09 17:49:35,964] DEBUG wallet.views views.view_wallet | view_wallet called | user=muhammed | authenticated=True
+[2025-11-09 17:49:35,965] DEBUG wallet.views views.view_wallet | Wallet found | user_id=133 | wallet_id=45 | balance=900.00
+[2025-11-09 17:49:35,968] DEBUG wallet.views views.view_wallet | Transactions loaded | wallet_id=45 | count=37
+[2025-11-09 17:49:35,969] DEBUG wallet.views views.view_wallet | Page loaded | page=4 | has_next=True | has_previous=True
+[2025-11-09 17:49:35,969] INFO wallet.views views.view_wallet | Wallet page rendered successfully | user_id=133 | transactions_count=37 | current_page=4

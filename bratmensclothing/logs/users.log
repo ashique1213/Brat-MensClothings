@@ -1,0 +1,25 @@
+[2025-11-09 17:24:35,712] DEBUG users.views views.category_details | category_details called | method=GET
+[2025-11-09 17:24:35,826] INFO users.views views.category_details | Category page rendered | filters=False | sort= | results=9
+[2025-11-09 17:24:42,301] DEBUG users.views views.product_details | product_details called | product_id=13
+[2025-11-09 17:24:42,372] INFO users.views views.product_details | Product page loaded | id=13 | reviews=0 | avg_rating=0.0
+[2025-11-09 17:26:07,739] DEBUG users.views views.category_details | category_details called | method=GET
+[2025-11-09 17:26:07,862] INFO users.views views.category_details | Category page rendered | filters=False | sort= | results=9
+[2025-11-09 17:26:08,695] DEBUG users.views views.category_details | category_details called | method=GET
+[2025-11-09 17:26:08,803] INFO users.views views.category_details | Category page rendered | filters=False | sort= | results=9
+[2025-11-09 17:26:09,454] DEBUG users.views views.product_details | product_details called | product_id=9
+[2025-11-09 17:26:09,515] INFO users.views views.product_details | Product page loaded | id=9 | reviews=1 | avg_rating=3.0
+[2025-11-09 17:26:14,995] DEBUG users.views views.category_details | category_details called | method=GET
+[2025-11-09 17:26:15,145] INFO users.views views.category_details | Category page rendered | filters=False | sort= | results=9
+[2025-11-09 17:26:15,932] DEBUG users.views views.product_details | product_details called | product_id=13
+[2025-11-09 17:26:15,991] INFO users.views views.product_details | Product page loaded | id=13 | reviews=0 | avg_rating=0.0
+[2025-11-09 17:26:21,513] DEBUG users.views views.category_details | category_details called | method=GET
+[2025-11-09 17:26:21,597] INFO users.views views.category_details | Category page rendered | filters=False | sort= | results=9
+[2025-11-09 17:26:42,084] DEBUG users.views views.account_details | Account details viewed | userid=133
+[2025-11-09 17:27:11,083] DEBUG users.views views.category_details | category_details called | method=GET
+[2025-11-09 17:27:11,173] INFO users.views views.category_details | Category page rendered | filters=False | sort= | results=9
+[2025-11-09 17:28:14,145] DEBUG users.views views.category_details | category_details called | method=GET
+[2025-11-09 17:28:14,304] INFO users.views views.category_details | Category page rendered | filters=False | sort= | results=9
+[2025-11-09 17:45:24,239] DEBUG users.views views.category_details | category_details called | method=GET
+[2025-11-09 17:45:24,325] INFO users.views views.category_details | Category page rendered | filters=False | sort= | results=9
+[2025-11-09 17:49:36,671] DEBUG users.views views.category_details | category_details called | method=GET
+[2025-11-09 17:49:36,758] INFO users.views views.category_details | Category page rendered | filters=False | sort= | results=9
