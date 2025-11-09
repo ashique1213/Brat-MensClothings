@@ -2,3 +2,4 @@
 *.pyc
 __pycache__
 ecommerce_env/
+logs/
