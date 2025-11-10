@@ -32,9 +32,13 @@ from xhtml2pdf import pisa
 from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db import DatabaseError
+import logging
+logger = logging.getLogger('order.views')
 
 @never_cache
 def checkout(request):
+    logger.debug("checkout view called | user=%s | authenticated=%s", request.user, request.user.is_authenticated)
+
     if request.user.is_authenticated:
         try:
             grand_total = Decimal('0.0')
@@ -42,20 +46,23 @@ def checkout(request):
             delivery_charge = getattr(settings, 'DELIVERY_CHARGE', Decimal('50'))
 
             user = request.user
+            logger.debug("Checkout processing | user_id=%s", user.userid)
             addresses = Address.objects.filter(user=user, status=False)
             cart = get_object_or_404(Cart, user=user)
             cart_items = CartItem.objects.filter(cart=cart)
-
+            logger.debug("Cart loaded | cart_id=%s | items_count=%d", cart.id, cart_items.count())
             for cart_item in cart_items:
                 variant = cart_item.variant
                 product = variant.product
 
                 if product.is_deleted or product.brand.is_deleted:
+                    logger.warning("Unavailable product in cart | product_id=%s | user_id=%s", product.product_id, user.userid)
                     messages.error(request, "Please remove unavailable products from your cart.")
                     return redirect('cart:viewcart')
 
                 for category in product.category.all():
                     if category.is_deleted:
+                        logger.warning("Product in deleted category | product_id=%s | category_id=%s", product.product_id, category.category_id)
                         messages.error(request, "Please remove products from deleted categories.")
                         return redirect('cart:viewcart')
 
@@ -76,9 +83,11 @@ def checkout(request):
                 discounted_price = product.price
                 if product_offer:
                     discounted_price = product.price - product_offer.offer_price
+                    logger.debug("Product offer applied | product_id=%s | discount=%s", product.product_id, product_offer.offer_price)
                 if brand_offer:
                     brand_discounted_price = product.price - brand_offer.offer_price
                     discounted_price = min(discounted_price, brand_discounted_price)
+                    logger.debug("Brand offer applied | brand_id=%s | discount=%s", product.brand.brand_id, brand_offer.offer_price)
 
                 cart_item.variant.product.price = discounted_price
 
@@ -102,8 +111,10 @@ def checkout(request):
                 couponuser = CouponUser.objects.get(user=user, status=True)
                 coupon_discount = couponuser.coupon.discount_amount
             except CouponUser.DoesNotExist:
+                logger.debug("No active coupon for user | user_id=%s", user.userid)
                 pass
             except Exception as e:
+                logger.error("Error applying coupon | user_id=%s | error=%s", user.userid, e, exc_info=True)
                 messages.error(request, "An error occurred while applying the coupon.")
                 return redirect('cart:viewcart')
 
@@ -118,10 +129,13 @@ def checkout(request):
             try:
                 user_wallet = Wallet.objects.get(user_id=user)
                 wallet_balance = user_wallet.balance
+                logger.debug("Wallet loaded | user_id=%s | balance=%s", user.userid, wallet_balance)
             except Wallet.DoesNotExist:
                 wallet_balance = Decimal('0.0')
+                logger.debug("No wallet found | user_id=%s", user.userid)
             except Exception as e:
                 wallet_balance = Decimal('0.0')
+                logger.error("Error loading wallet | user_id=%s | error=%s", user.userid, e, exc_info=True)
 
             return render(request, 'user/checkout.html', {
                 'user': user,
@@ -138,9 +152,11 @@ def checkout(request):
             })
 
         except DatabaseError as e:
+            logger.error("Database error in checkout | user_id=%s | error=%s", user.userid, e, exc_info=True)
             messages.error(request, "An error occurred while processing your checkout. Please try again.")
             return redirect('cart:viewcart')
         except Exception as e:
+            logger.error("Unexpected error in checkout | user_id=%s | error=%s", user.userid, e, exc_info=True)
             messages.error(request, "An unexpected error occurred. Please contact support.")
             return redirect('cart:viewcart')
 
@@ -149,6 +165,7 @@ def checkout(request):
 
 @never_cache
 def place_order(request):
+    logger.debug("place_order called | user=%s | method=%s", request.user, request.method)
     if request.user.is_authenticated:
         try:
             grand_total = Decimal('0.0')
@@ -161,6 +178,7 @@ def place_order(request):
             cart_items = CartItem.objects.filter(cart=cart)
 
             if not cart_items.exists():
+                logger.warning("Empty cart on place_order | user_id=%s", user.userid)
                 messages.error(request, 'Your cart is empty.')
                 return redirect('cart:viewcart')
 
@@ -205,6 +223,7 @@ def place_order(request):
                 total_after_discount = total
             except Exception as e:
                 total_after_discount = total
+                logger.error("Coupon error in place_order | user_id=%s | error=%s", user.userid, e)
 
             tax_rate = getattr(settings, 'TAX_RATE', Decimal('0.02'))
             tax = total_after_discount * tax_rate
@@ -213,6 +232,7 @@ def place_order(request):
             if request.method == 'POST':
                 selected_address_id = request.POST.get('address')
                 payment_type = request.POST.get('optradio')
+                logger.debug("Order placement | address_id=%s | payment_type=%s", selected_address_id, payment_type)
 
                 if not selected_address_id or not payment_type:
                     messages.error(request, 'Please select an address and payment method.')
@@ -221,6 +241,7 @@ def place_order(request):
                 try:
                     selected_address = Address.objects.get(id=selected_address_id)
                 except Address.DoesNotExist:
+                    logger.warning("Invalid address selected | address_id=%s", selected_address_id)
                     messages.error(request, 'Selected address not found.')
                     return redirect('order:checkout')
 
@@ -243,15 +264,18 @@ def place_order(request):
                             "coupon_amount": int(float(couponuser.coupon.discount_amount)) if couponuser else 0,
                             "total_offer_discount": float(total_offer_discount) if total_offer_discount else 0,
                         }
+                        logger.info("Razorpay order created | razorpay_order_id=%s | amount=%s", razorpay_order['id'], payment_data["amount"])
                         return render(request, 'user/payment.html', {
                             "razorpay_order_id": razorpay_order['id'],
                             "razorpay_key_id": settings.RAZORPAY_KEY_ID,
                             "amount": payment_data["amount"]
                         })
                     except razorpay.errors.BadRequestError as e:
+                        logger.error("Razorpay order creation failed | error=%s", e)
                         messages.error(request, 'Error creating Razorpay order. Please try again.')
                         return redirect('order:checkout')
                     except Exception as e:
+                        logger.error("Unexpected error in Razorpay | error=%s", e)
                         messages.error(request, 'An unexpected error occurred during payment processing.')
                         return redirect('order:checkout')
 
@@ -259,6 +283,7 @@ def place_order(request):
                     try:
                         user_wallet = Wallet.objects.get(user_id=user)
                         if user_wallet.balance < grand_total:
+                            logger.warning("Insufficient wallet balance | user_id=%s | balance=%s | required=%s", user.userid, user_wallet.balance, grand_total)
                             messages.error(request, 'Insufficient wallet balance to place the order.')
                             return redirect('order:checkout')
 
@@ -283,6 +308,7 @@ def place_order(request):
                                 coupon_amount=couponuser.coupon.discount_amount if couponuser else 0,
                                 total_offer_discount=total_offer_discount if total_offer_discount else 0
                             )
+                            logger.info("Wallet order created | order_id=%s | user_id=%s", new_order.order_id, user.userid)
 
                             Transaction.objects.create(
                                 wallet_id=user_wallet,
@@ -304,19 +330,24 @@ def place_order(request):
                                 item.variant.save()
 
                             cart_items.delete()
+                            logger.info("Wallet order completed successfully | order_id=%s", new_order.order_id)
                             return redirect('order:order_success')
 
                     except Wallet.DoesNotExist:
+                        logger.warning("Wallet not found for user | user_id=%s", user.userid)
                         messages.error(request, 'Wallet not found. Please try another payment method.')
                         return redirect('order:checkout')
                     except DatabaseError as e:
+                        logger.error("DB error in wallet payment | error=%s", e)
                         messages.error(request, 'Error processing wallet payment. Please try again.')
                         return redirect('order:checkout')
                     except Exception as e:
+                        logger.error("Unexpected error in wallet payment | error=%s", e)
                         messages.error(request, 'An unexpected error occurred during wallet payment.')
                         return redirect('order:checkout')
 
                 if payment_type == 'COD' and grand_total > Decimal('1000.00'):
+                    logger.warning("COD not allowed for high amount | amount=%s", grand_total)
                     messages.error(request, 'Cash on Delivery is not available for orders above ₹1000.')
                     return redirect('order:checkout')
 
@@ -341,6 +372,7 @@ def place_order(request):
                             coupon_amount=couponuser.coupon.discount_amount if couponuser else 0,
                             total_offer_discount=total_offer_discount if total_offer_discount else 0
                         )
+                        logger.info("Order created | order_id=%s | payment_type=%s | status=%s", new_order.order_id, payment_type, payment_status)
 
                         for item in cart_items:
                             item_total_price = item.quantity * item.variant.product.price
@@ -356,19 +388,24 @@ def place_order(request):
                                 item.variant.save()
 
                         cart_items.delete()
+                        logger.info("Order placement successful | order_id=%s", new_order.order_id)
                         return redirect('order:order_success')
 
                 except DatabaseError as e:
+                    logger.error("DB error creating order | error=%s", e)
                     messages.error(request, 'Error creating order. Please try again.')
                     return redirect('order:checkout')
                 except Exception as e:
+                    logger.error("Unexpected error placing order | error=%s", e)
                     messages.error(request, 'An unexpected error occurred while placing the order.')
                     return redirect('order:checkout')
 
         except DatabaseError as e:
+            logger.error("Database error in place_order | error=%s", e)
             messages.error(request, 'Error processing your order. Please try again.')
             return redirect('cart:viewcart')
         except Exception as e:
+            logger.error("Unexpected error in place_order | error=%s", e)
             messages.error(request, 'An unexpected error occurred. Please contact support.')
             return redirect('cart:viewcart')
 
@@ -378,9 +415,11 @@ def place_order(request):
 @csrf_exempt
 @never_cache
 def verify_payment(request):
+    logger.debug("verify_payment called | method=%s", request.method)
     if request.user.is_authenticated:
         try:
             if request.method != "POST":
+                logger.warning("Invalid method for verify_payment | method=%s", request.method)
                 return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
             razorpay_order_id = request.POST.get('razorpay_order_id')
@@ -388,10 +427,12 @@ def verify_payment(request):
             razorpay_signature = request.POST.get('razorpay_signature')
 
             if not all([razorpay_order_id, razorpay_payment_id, razorpay_signature]):
+                logger.warning("Missing payment details in verify_payment")
                 return JsonResponse({'error': 'Missing payment details.'}, status=400)
 
             order_data = request.session.get('pending_order_details')
             if not order_data:
+                logger.warning("No pending order in session")
                 return JsonResponse({'error': 'Order details not found in session.'}, status=400)
 
             user_id = order_data.get("user")
@@ -405,6 +446,7 @@ def verify_payment(request):
                 user = get_object_or_404(Users, userid=user_id)
                 shipping_address = get_object_or_404(Address, id=shipping_address_id)
             except Exception as e:
+                logger.error("Invalid user or address in session | error=%s", e)
                 return JsonResponse({'error': 'Invalid user or address.'}, status=400)
 
             client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
@@ -418,7 +460,9 @@ def verify_payment(request):
             try:
                 client.utility.verify_payment_signature(params_dict)
                 payment_status = 'Success'
+                logger.info("Razorpay signature verified | payment_id=%s", razorpay_payment_id)
             except razorpay.errors.SignatureVerificationError as e:
+                logger.warning("Razorpay signature verification failed | payment_id=%s", razorpay_payment_id)
                 payment_status = 'Failure'
 
             couponuser = None
@@ -431,7 +475,9 @@ def verify_payment(request):
                         coupon.save()
                         couponuser.status = False
                         couponuser.save()
+                        logger.info("Coupon invalidated after payment | code=%s", coupon_code)
                 except Exception as e:
+                    logger.error("Error invalidating coupon | error=%s", e)
                     messages.error(request, 'Error applying coupon during payment verification.')
 
             try:
@@ -446,6 +492,7 @@ def verify_payment(request):
                         coupon_amount=coupon_amount,
                         total_offer_discount=total_offer_discount
                     )
+                    logger.info("Order created from Razorpay | order_id=%s | status=%s", new_order.order_id, payment_status)
 
                     cart = get_object_or_404(Cart, user=user)
                     cart_items = CartItem.objects.filter(cart=cart)
@@ -490,15 +537,20 @@ def verify_payment(request):
                     cart_items.delete()
                     if 'pending_order_details' in request.session:
                         del request.session['pending_order_details']
-
+                        logger.debug("Session cleared after order")
+                
+                logger.info("Razorpay order processed successfully | order_id=%s", new_order.order_id)
                 return redirect('order:order_success')
 
             except DatabaseError as e:
+                logger.error("DB error in verify_payment | error=%s", e)
                 return JsonResponse({'error': 'Error processing order. Please try again.'}, status=500)
             except Exception as e:
+                logger.error("Unexpected error in verify_payment | error=%s", e)
                 return JsonResponse({'error': 'An unexpected error occurred during payment processing.'}, status=500)
 
         except Exception as e:
+            logger.error("Critical error in verify_payment | error=%s", e)
             return JsonResponse({'error': 'An unexpected error occurred.'}, status=500)
 
     return redirect('accounts:login_user')
@@ -506,6 +558,7 @@ def verify_payment(request):
 
 @never_cache
 def retry_payment(request, order_id):
+    logger.debug("retry_payment called | order_id=%s", order_id)
     if request.user.is_authenticated:
         order = get_object_or_404(Order, order_id=order_id)
         
@@ -517,6 +570,7 @@ def retry_payment(request, order_id):
             "currency": "INR",
             "payment_capture": "1"  
         })
+        logger.info("Retry Razorpay order created | order_id=%s | razorpay_order_id=%s", order_id, razorpay_order['id'])
         
         
         context = {
@@ -533,6 +587,7 @@ def retry_payment(request, order_id):
 
 @never_cache
 def verify_retry_payment(request):
+    logger.debug("verify_retry_payment called | method=%s", request.method)
     if request.user.is_authenticated:
         if request.method == 'POST':
             user=request.user
@@ -568,13 +623,11 @@ def verify_retry_payment(request):
                     item.status="Order confirmed"
                     item.save()
                 
-                # messages.success(request, 'Payment successfully completed.')
-                # return render(request, 'user/order_details.html', {'order': order,'order_items':order_items,'orders':orders})
+                logger.info("Retry payment successful | order_id=%s | payment_id=%s", order_id, razorpay_payment_id)
                 return redirect('order:order_success')
 
             except razorpay.errors.SignatureVerificationError:
-                # If signature verification fails, display error
-                # return render(request, 'user/payment_failure.html', {'order': order})
+                logger.warning("Retry payment failed | order_id=%s | payment_id=%s", order_id, razorpay_payment_id)
                 messages.success(request, 'Payment again failed')
                 return render(request, 'user/order_details.html', {'order': order,'order_items':order_items,'orders':orders})
 
@@ -587,6 +640,7 @@ def verify_retry_payment(request):
 
 @never_cache
 def order_success(request):
+    logger.debug("order_success page accessed | user=%s", request.user)
     if request.user.is_authenticated:
         return render(request,'user/ordersuccessfull.html')
     return redirect('accounts:login_user')
@@ -594,6 +648,7 @@ def order_success(request):
 
 @never_cache
 def view_orders(request):
+    logger.debug("view_orders called | user=%s", request.user)
     if request.user.is_authenticated:
         user=request.user
         orders=Order.objects.filter(user=user)
@@ -612,6 +667,7 @@ def view_orders(request):
         except EmptyPage:
             page_obj = paginator.get_page(paginator.num_pages)
 
+        logger.info("Orders page rendered | user_id=%s | orders_count=%d", user.userid, orders.count())
         return render(request,'user/order_details.html',
                       {
                         'orders':orders,
@@ -626,6 +682,7 @@ def view_orders(request):
 
 @never_cache
 def manage_orders(request, orderitem_id):
+    logger.debug("manage_orders called | orderitem_id=%s", orderitem_id)
     if request.user.is_authenticated:
         
 
@@ -642,6 +699,7 @@ def manage_orders(request, orderitem_id):
             item_quantity = Decimal(orderitem.quantity)  
             item_tax = item_price * tax_rate * item_quantity 
 
+            logger.info("Manage order page rendered | orderitem_id=%s", orderitem_id)
             return render(request, 'user/manageorder.html', 
                           {'orderitem': orderitem,
                            'tax':item_tax,
@@ -649,12 +707,14 @@ def manage_orders(request, orderitem_id):
                            })
         
         except OrderItem.DoesNotExist:
+            logger.warning("Order item not found | orderitem_id=%s", orderitem_id)
             return render(request, 'user/manageorder.html', {'error': 'Order item not found.'})
 
     return redirect('accounts:login_user')
 
 
 def cancel_order(request, orderitem_id):
+    logger.debug("cancel_order called | orderitem_id=%s", orderitem_id)
     try:
         item = get_object_or_404(OrderItem, orderitem_id=orderitem_id)
         user = item.order.user
@@ -675,6 +735,7 @@ def cancel_order(request, orderitem_id):
                 try:
                     user_wallet, _ = Wallet.objects.get_or_create(user_id=user)
                 except Exception as e:
+                    logger.error("Wallet error in cancel | error=%s", e)
                     messages.error(request, 'Error processing refund. Please contact support.')
                     return redirect('order:view_orders')
 
@@ -690,6 +751,7 @@ def cancel_order(request, orderitem_id):
                             amount=full_refund_amount,
                             details="Order Cancelled: Full Refund including tax and delivery charges"
                         )
+                        logger.info("Full refund issued | order_id=%s | amount=%s", order.order_id, full_refund_amount)
                     except Exception as e:
                         messages.error(request, 'Error recording refund transaction.')
                         return redirect('order:view_orders')
@@ -709,6 +771,7 @@ def cancel_order(request, orderitem_id):
                                 amount=Decimal(item.subtotal_price),
                                 details=f"Order Cancelled: {item.variants.product.product_name}, Item Refund"
                             )
+                            logger.info("Item refund | orderitem_id=%s | amount=%s", orderitem_id, item.subtotal_price)
                         except Exception as e:
                             messages.error(request, 'Error recording refund transaction.')
                             return redirect('order:view_orders')
@@ -740,6 +803,7 @@ def cancel_order(request, orderitem_id):
                                 details="Order Tax and Delivery charge"
                             )
                         except Exception as e:
+                            logger.info("Order item cancelled | orderitem_id=%s", orderitem_id)
                             messages.error(request, 'Error recording refund transaction.')
                             return redirect('order:view_orders')
 
@@ -776,12 +840,15 @@ def cancel_order(request, orderitem_id):
             return redirect('order:view_orders')
 
     except OrderItem.DoesNotExist:
+        logger.warning("Order item not found in cancel | orderitem_id=%s", orderitem_id)
         messages.error(request, 'Order item not found.')
         return redirect('order:view_orders')
     except DatabaseError as e:
+        logger.error("DB error in cancel_order | error=%s", e)
         messages.error(request, 'Error cancelling order. Please try again.')
         return redirect('order:view_orders')
     except Exception as e:
+        logger.error("Unexpected error in cancel_order | error=%s", e)
         messages.error(request, 'An unexpected error occurred while cancelling the order.')
         return redirect('order:view_orders')
 
@@ -795,6 +862,7 @@ def is_staff(user):
 @never_cache
 @user_passes_test(is_staff, login_url='accounts:admin_login')
 def order_details(request):
+    logger.debug("admin order_details called | admin=%s", request.user)
     search_query=request.GET.get('search','') 
 
     if search_query:
@@ -802,12 +870,15 @@ def order_details(request):
             Q(order__tracking_number__icontains=search_query) | 
             Q(order__user__userid__icontains=search_query)
         ).order_by('-orderitem_id')
+        logger.info("Admin order search | query='%s' | results=%d", search_query, orders.count())
     else:
         orders = OrderItem.objects.all().order_by('-orderitem_id')
+        logger.debug("All admin orders loaded | count=%d", orders.count())
     
     paginator = Paginator(orders, 4)  
     page_number = request.GET.get('page') 
     orders = paginator.get_page(page_number)  
+    logger.debug("Admin orders paginated | page=%s | total_pages=%d", orders.number, paginator.num_pages)
 
     if request.method == 'POST':
         ALLOWED_TRANSITIONS = {
@@ -823,19 +894,25 @@ def order_details(request):
         }
         order_id = request.POST.get('order_id')  
         action = request.POST.get('status')
+        logger.debug("Admin POST status update | orderitem_id=%s | action=%s", order_id, action)
 
         if order_id and action:
             order = get_object_or_404(OrderItem, orderitem_id=order_id)  
             current_status = order.status
+            logger.debug("Current status check | orderitem_id=%s | current=%s", order_id, current_status)
+
             if action in ALLOWED_TRANSITIONS.get(current_status, []):
                 order.status = action 
+                logger.info("Admin status update | orderitem_id=%s | from=%s | to=%s", order_id, current_status, action)
 
                 if action == 'Cancelled':
+                    logger.info("Admin initiated cancellation | orderitem_id=%s", order_id)
                     item = get_object_or_404(OrderItem, orderitem_id=order_id)
                     user = item.order.user
                     order = item.order
 
                     if order.payment_status == 'Success':
+                        logger.debug("Processing refund for paid order | order_id=%s", order.order_id)
                         total_order_value_before_cancellation = Decimal(order.total_price)
                         total_order_value_after_cancellation = total_order_value_before_cancellation - Decimal(item.subtotal_price)
 
@@ -844,6 +921,7 @@ def order_details(request):
                             coupon_applied = Coupon.objects.filter(code=order.coupon_code).first()
 
                         user_wallet, _ = Wallet.objects.get_or_create(user_id=user)
+                        logger.debug("Wallet ready | user_id=%s | current_balance=%s", user.userid, user_wallet.balance)
 
                         # Detect single product order
                         if order.items.filter(status='Cancelled').count() + 1 == order.items.count():
@@ -858,6 +936,7 @@ def order_details(request):
                                 amount=full_refund_amount,
                                 details="Order Cancelled: Full Refund including tax and delivery charges"
                             )
+                            logger.info("Full refund processed | order_id=%s | amount=%s", order.order_id, full_refund_amount)
 
                             # Reset order total_price and coupon
                             order.total_price = Decimal(0)
@@ -875,12 +954,13 @@ def order_details(request):
                                     amount=Decimal(item.subtotal_price),
                                     details=f"Order Cancelled: {item.variants.product.product_name}, Item Refund"
                                 )
+                                logger.info("Item refund processed | orderitem_id=%s | amount=%s", item.orderitem_id, item.subtotal_price)
 
                             # Adjust for coupon violation
                             if coupon_applied and total_order_value_after_cancellation < coupon_applied.min_purchase_amount:
                                 # total_order_value_after_cancellation += order.coupon_amount
                                 order.coupon_amount = Decimal(0)
-
+                                logger.info("Coupon invalidated due to min purchase violation | new_total=%s | min_required=%s", total_order_value_after_cancellation, coupon_applied.min_purchase_amount)                                    
                             order.total_price = total_order_value_after_cancellation
                             order.save()
 
@@ -888,6 +968,7 @@ def order_details(request):
                         if item.variants:
                             item.variants.qty += item.quantity
                             item.variants.save()
+                            logger.debug("Stock restored | variant_id=%s | qty_added=%s", item.variants.variant_id, item.quantity)
 
                         # Change the item status to 'Cancelled'
                         item.status = 'Cancelled'
@@ -909,6 +990,7 @@ def order_details(request):
                                     amount=full_refund_amount,
                                     details=details_text
                                 )
+                                logger.info("Final tax+delivery refund | order_id=%s | amount=%s", order.order_id)
 
                             order.total_price = Decimal(0)  
                             order.save()
@@ -917,10 +999,12 @@ def order_details(request):
                         if item.variants:
                             item.variants.qty += item.quantity
                             item.variants.save()
+                            logger.debug("Stock restored (pending) | variant_id=%s", item.variants.variant_id)
                         
                         item.status = 'Cancelled'
                         item.save()
                     else:
+                        logger.debug("Non-success payment status | current=%s", order.payment_status)
                         order.payment_status = 'Pending'
                         order.save()
                         if item.variants:
@@ -935,10 +1019,13 @@ def order_details(request):
                             order.save()
 
                 if action == 'Delivered':
+                    logger.info("Order marked as Delivered | orderitem_id=%s", order_id)
                     order.order.payment_status = 'Pending'
                     order.order.save()
+                    logger.debug("Payment status set to Pending on delivery")
                 
                 if action == 'Approve Returned':
+                    logger.info("Admin approved return | orderitem_id=%s", order_id)
                     item = order  # This is the OrderItem being processed
                     the_order = item.order
                     user = the_order.user
@@ -951,6 +1038,7 @@ def order_details(request):
 
                         # Wallet
                         user_wallet, _ = Wallet.objects.get_or_create(user_id=user)
+                        logger.debug("Wallet accessed for return | user_id=%s | balance=%s", user.userid, user_wallet.balance)
 
                         # Count remaining items (not cancelled / returned)
                         remaining_active_items = the_order.items.exclude(status__in=['Cancelled', 'Approve Returned'])
@@ -974,6 +1062,7 @@ def order_details(request):
                                 amount=refund_amount,
                                 details=f"Full return approved for order #{the_order.tracking_number}"
                             )
+                            logger.info("Full return refund | order_id=%s | amount=%s", the_order.order_id, refund_amount)
 
                             the_order.total_price = Decimal('0.00')
                             the_order.coupon_amount = Decimal('0.00')
@@ -997,7 +1086,7 @@ def order_details(request):
                                 amount=refund_amount,
                                 details=f"Return approved: {item.variants.product.product_name} (x{item.quantity})"
                             )
-
+                            logger.info("Partial return refund | orderitem_id=%s | amount=%s", item.orderitem_id, refund_amount)
                             # Update order total
                             the_order.total_price = new_total
                             the_order.save()
@@ -1010,21 +1099,23 @@ def order_details(request):
 
                 order.save() 
                 messages.success(request, f"Order status updated to {action}.")
+                logger.info("Status update completed successfully | orderitem_id=%s | new_status=%s", order_id, action)
                 return redirect('order:order_details') 
             else:
+                logger.warning("Invalid status transition | from=%s | to=%s", current_status, action)
                 messages.error(request, f"Invalid status transition from {current_status} to {action}.")
 
             return redirect('order:order_details')
-
     return render(request, 'admin/orders.html', {'orders': orders,'search_query':search_query}) 
 
 
 
 def return_order(request, orderitem_id):
+    logger.debug("return_order called | orderitem_id=%s", orderitem_id)
     item = get_object_or_404(OrderItem, orderitem_id=orderitem_id) 
     item.status = 'Requested Return'
     item.save()
-    
+    logger.info("Return requested | orderitem_id=%s", orderitem_id)
     messages.success(request, 'Your order has been returned successfully.')
     return redirect('order:view_orders')
 
@@ -1034,7 +1125,7 @@ def return_order(request, orderitem_id):
 @never_cache
 @user_passes_test(is_staff, login_url='accounts:admin_login')
 def single_order(request,orderitem_id):
-
+    logger.debug("single_order admin view | orderitem_id=%s", orderitem_id)
     order=OrderItem.objects.get(orderitem_id=orderitem_id)
 
     return render(request,'admin/single_order.html',{'order':order})
@@ -1042,6 +1133,7 @@ def single_order(request,orderitem_id):
 
 @never_cache
 def download_invoice(request, orderitem_id):
+    logger.debug("download_invoice called | orderitem_id=%s", orderitem_id)
     try:
         order_item = get_object_or_404(OrderItem, orderitem_id=orderitem_id)
         order = order_item.order
@@ -1058,15 +1150,20 @@ def download_invoice(request, orderitem_id):
         try:
             pisa_status = pisa.CreatePDF(html_content, dest=response)
             if pisa_status.err:
+                logger.error("PDF generation failed | order_id=%s", order.order_id)
                 return HttpResponse('Error generating PDF', status=500)
+            logger.info("Invoice PDF generated | order_id=%s", order.order_id)
         except Exception as e:
+            logger.error("PDF generation error | error=%s", e)
             return HttpResponse('Error generating PDF', status=500)
 
         return response
 
     except OrderItem.DoesNotExist:
+        logger.warning("Order item not found for invoice | orderitem_id=%s", orderitem_id)
         messages.error(request, 'Order item not found.')
         return redirect('order:view_orders')
     except Exception as e:
+        logger.error("Unexpected error in download_invoice | error=%s", e)
         messages.error(request, 'An unexpected error occurred while generating the invoice.')
         return redirect('order:view_orders')
