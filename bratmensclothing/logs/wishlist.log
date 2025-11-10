@@ -1,2 +1,0 @@
-[2025-11-09 17:24:51,732] DEBUG wishlist.views views.view_wishlist | view_wishlist called | user=muhammed | authenticated=True
-[2025-11-09 17:24:51,736] INFO wishlist.views views.view_wishlist | Wishlist loaded | user_id=133 | items_count=0
